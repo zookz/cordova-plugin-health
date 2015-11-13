@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-@import HealthKit;
+#import <HealthKit/HealthKit.h>
 
 #import "HealthKit.h"
 
@@ -99,7 +99,32 @@
             XCTFail(@"Expectation Failed with error: %@", error);
         }
     }];
+}
 
+-(void)testSumQTY {
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Sum is Succeed"];
+    
+    HealthKit *hk = [HealthKit new];
+    [hk pluginInitialize];
+    
+    NSDictionary *params = @{@"startDate": @([NSDate new].timeIntervalSince1970-500), @"endDate": @([NSDate new].timeIntervalSince1970), @"sampleType": @"HKQuantityTypeIdentifierStepCount"};
+    
+    [hk sumQuantityTypeWithCallbackId:@"fake"
+                             withArgs:params.mutableCopy
+                        andCompletion:^(CDVPluginResult *result, NSString *callbackId) {
+                            
+                            NSLog(@"%@", result.message);
+                            NSAssert(result.status.integerValue == CDVCommandStatus_OK, @"sumQTY failed");
+                            [expectation fulfill];
+                        }];
+
+    [self waitForExpectationsWithTimeout:15.0 handler:^(NSError *error) {
+        if(error)
+        {
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
 }
 
 - (void)testPerformanceExample {

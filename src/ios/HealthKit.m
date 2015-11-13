@@ -464,38 +464,48 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 };
 
 - (void) sumQuantityType:(CDVInvokedUrlCommand*)command {
-  NSMutableDictionary *args = [command.arguments objectAtIndex:0];
-  
-  NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:[[args objectForKey:HKPluginKeyStartDate] longValue]];
-  NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:[[args objectForKey:HKPluginKeyEndDate] longValue]];
-  NSString *sampleTypeString = [args objectForKey:HKPluginKeySampleType];
-  NSString *unitString = [args objectForKey:HKPluginKeyUnit];
-  HKQuantityType *type = [HKObjectType quantityTypeForIdentifier:sampleTypeString];
-  
-  
-  if (type==nil) {
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"sampleType was invalid"];
-    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-    return;
-  }
-  
-  NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
-  HKStatisticsOptions sumOptions = HKStatisticsOptionCumulativeSum;
-  HKStatisticsQuery *query;
-  HKUnit *unit = unitString!=nil ? [HKUnit unitFromString:unitString] : [HKUnit countUnit];
-  query = [[HKStatisticsQuery alloc] initWithQuantityType:type
-                                  quantitySamplePredicate:predicate
-                                                  options:sumOptions
-                                        completionHandler:^(HKStatisticsQuery *query,
-                                                            HKStatistics *result,
-                                                            NSError *error)
-           {
-             HKQuantity *sum = [result sumQuantity];
-             CDVPluginResult* response = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:[sum doubleValueForUnit:unit]];
-             [self.commandDelegate sendPluginResult:response callbackId:command.callbackId];
-           }];
-  
-  [self.healthStore executeQuery:query];
+    NSMutableDictionary *args = [command.arguments objectAtIndex:0];
+    
+    [self sumQuantityTypeWithCallbackId:command.callbackId
+                               withArgs:args
+                          andCompletion:^(CDVPluginResult *result, NSString *callbackId) {
+                              [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+                          }];
+}
+
+-(void)sumQuantityTypeWithCallbackId:(NSString*)callbackId
+                            withArgs:(NSMutableDictionary*)arguments
+                       andCompletion:(void(^)(CDVPluginResult* result, NSString *callbackId ))completion {
+    
+    NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:[[arguments objectForKey:HKPluginKeyStartDate] longValue]];
+    NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:[[arguments objectForKey:HKPluginKeyEndDate] longValue]];
+    NSString *sampleTypeString = [arguments objectForKey:HKPluginKeySampleType];
+    NSString *unitString = [arguments objectForKey:HKPluginKeyUnit];
+    HKQuantityType *type = [HKObjectType quantityTypeForIdentifier:sampleTypeString];
+    
+    if (type==nil) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"sampleType was invalid"];
+        completion(result, callbackId);
+        return;
+    }
+    
+    NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
+    HKStatisticsOptions sumOptions = HKStatisticsOptionCumulativeSum;
+    HKStatisticsQuery *query;
+    HKUnit *unit = unitString!=nil ? [HKUnit unitFromString:unitString] : [HKUnit countUnit];
+    query = [[HKStatisticsQuery alloc] initWithQuantityType:type
+                                    quantitySamplePredicate:predicate
+                                                    options:sumOptions
+                                          completionHandler:^(HKStatisticsQuery *query,
+                                                              HKStatistics *result,
+                                                              NSError *error)
+             {
+                 HKQuantity *sum = [result sumQuantity];
+                 CDVPluginResult* response = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:[sum doubleValueForUnit:unit]];
+                 completion(response, callbackId);
+                 
+             }];
+    [self.healthStore executeQuery:query];
 }
 
 - (void) querySampleType:(CDVInvokedUrlCommand*)command {
@@ -593,8 +603,8 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                                             HKQuantitySample *qsample = (HKQuantitySample *)sample;
                                             [entry setValue:[NSNumber numberWithDouble:[qsample.quantity doubleValueForUnit:unit]] forKey:@"quantity"];
                                             [entry setValue:qsample.UUID.UUIDString forKey:HKPluginKeyUUID];
-                                            [entry setValue:qsample.source.name forKey:HKPluginKeySourceName];
-                                            [entry setValue:qsample.source.bundleIdentifier forKey:HKPluginKeySourceBundleId];
+                                            [entry setValue:source.name forKey:HKPluginKeySourceName];
+                                            [entry setValue:source.bundleIdentifier forKey:HKPluginKeySourceBundleId];
                                             [entry setValue:[df stringFromDate:qsample.startDate] forKey:HKPluginKeyStartDate];
                                             [entry setValue:[df stringFromDate:qsample.endDate] forKey:HKPluginKeyEndDate];
                                             if (qsample.metadata == nil || ![NSJSONSerialization isValidJSONObject:qsample.metadata]) {

@@ -16,6 +16,9 @@
 -(void)findWorkoutsWithCallbackId:(NSString*)callbackId
                      forPredicate:(NSPredicate*)workoutPredicate
                     andCompletion:(void(^)(CDVPluginResult* result, NSString *callbackId ))completion;
+-(void)sumQuantityTypeWithCallbackId:(NSString*)callbackId
+                            withArgs:(NSMutableDictionary*)arguments
+                       andCompletion:(void(^)(CDVPluginResult* result, NSString *callbackId ))completion;
 #pragma mark -
 
 - (void) readGender:(CDVInvokedUrlCommand*)command;

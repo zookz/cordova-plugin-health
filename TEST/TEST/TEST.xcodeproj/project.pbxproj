@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F82BCDA81BF65E53003FEAC9 /* HealthKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F82BCDA31BF65E53003FEAC9 /* HealthKit.m */; };
+		F82BCDA91BF65E53003FEAC9 /* HKHealthStore+AAPLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F82BCDA51BF65E53003FEAC9 /* HKHealthStore+AAPLExtensions.m */; };
+		F82BCDAA1BF65E53003FEAC9 /* WorkoutActivityConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = F82BCDA71BF65E53003FEAC9 /* WorkoutActivityConversion.m */; };
+		F82BCDAD1BF660AB003FEAC9 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F82BCDAC1BF660AB003FEAC9 /* HealthKit.framework */; };
+		F82BCDAE1BF660C2003FEAC9 /* HealthKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F82BCDA31BF65E53003FEAC9 /* HealthKit.m */; };
+		F82BCDAF1BF660C5003FEAC9 /* HKHealthStore+AAPLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F82BCDA51BF65E53003FEAC9 /* HKHealthStore+AAPLExtensions.m */; };
+		F82BCDB01BF660C7003FEAC9 /* WorkoutActivityConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = F82BCDA71BF65E53003FEAC9 /* WorkoutActivityConversion.m */; };
 		F89555D11BF52C49002F898B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F89555D01BF52C49002F898B /* main.m */; };
 		F89555D41BF52C49002F898B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F89555D31BF52C49002F898B /* AppDelegate.m */; };
 		F89555D71BF52C49002F898B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F89555D61BF52C49002F898B /* ViewController.m */; };
@@ -15,11 +22,7 @@
 		F89555DF1BF52C49002F898B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F89555DD1BF52C49002F898B /* LaunchScreen.storyboard */; };
 		F89555EA1BF52C49002F898B /* TESTTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F89555E91BF52C49002F898B /* TESTTests.m */; };
 		F89555F51BF52C49002F898B /* TESTUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = F89555F41BF52C49002F898B /* TESTUITests.m */; };
-		F89556081BF52C61002F898B /* HealthKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F89556031BF52C61002F898B /* HealthKit.m */; };
-		F89556091BF52C61002F898B /* HKHealthStore+AAPLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F89556051BF52C61002F898B /* HKHealthStore+AAPLExtensions.m */; };
-		F895560A1BF52C61002F898B /* WorkoutActivityConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = F89556071BF52C61002F898B /* WorkoutActivityConversion.m */; };
 		F89556141BF52D03002F898B /* libCordova.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F89556131BF52CF6002F898B /* libCordova.a */; };
-		F895561B1BF535FC002F898B /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F895561A1BF535FC002F898B /* HealthKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +57,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F82BCDA21BF65E53003FEAC9 /* HealthKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HealthKit.h; path = ../../../src/ios/HealthKit.h; sourceTree = "<group>"; };
+		F82BCDA31BF65E53003FEAC9 /* HealthKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HealthKit.m; path = ../../../src/ios/HealthKit.m; sourceTree = "<group>"; };
+		F82BCDA41BF65E53003FEAC9 /* HKHealthStore+AAPLExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "HKHealthStore+AAPLExtensions.h"; path = "../../../src/ios/HKHealthStore+AAPLExtensions.h"; sourceTree = "<group>"; };
+		F82BCDA51BF65E53003FEAC9 /* HKHealthStore+AAPLExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "HKHealthStore+AAPLExtensions.m"; path = "../../../src/ios/HKHealthStore+AAPLExtensions.m"; sourceTree = "<group>"; };
+		F82BCDA61BF65E53003FEAC9 /* WorkoutActivityConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WorkoutActivityConversion.h; path = ../../../src/ios/WorkoutActivityConversion.h; sourceTree = "<group>"; };
+		F82BCDA71BF65E53003FEAC9 /* WorkoutActivityConversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WorkoutActivityConversion.m; path = ../../../src/ios/WorkoutActivityConversion.m; sourceTree = "<group>"; };
+		F82BCDAC1BF660AB003FEAC9 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		F89555CC1BF52C49002F898B /* TEST.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TEST.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F89555D01BF52C49002F898B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F89555D21BF52C49002F898B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -70,15 +80,8 @@
 		F89555F01BF52C49002F898B /* TESTUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TESTUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F89555F41BF52C49002F898B /* TESTUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TESTUITests.m; sourceTree = "<group>"; };
 		F89555F61BF52C49002F898B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F89556021BF52C61002F898B /* HealthKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HealthKit.h; path = ../../../src/ios/HealthKit.h; sourceTree = "<group>"; };
-		F89556031BF52C61002F898B /* HealthKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HealthKit.m; path = ../../../src/ios/HealthKit.m; sourceTree = "<group>"; };
-		F89556041BF52C61002F898B /* HKHealthStore+AAPLExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "HKHealthStore+AAPLExtensions.h"; path = "../../../src/ios/HKHealthStore+AAPLExtensions.h"; sourceTree = "<group>"; };
-		F89556051BF52C61002F898B /* HKHealthStore+AAPLExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "HKHealthStore+AAPLExtensions.m"; path = "../../../src/ios/HKHealthStore+AAPLExtensions.m"; sourceTree = "<group>"; };
-		F89556061BF52C61002F898B /* WorkoutActivityConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WorkoutActivityConversion.h; path = ../../../src/ios/WorkoutActivityConversion.h; sourceTree = "<group>"; };
-		F89556071BF52C61002F898B /* WorkoutActivityConversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WorkoutActivityConversion.m; path = ../../../src/ios/WorkoutActivityConversion.m; sourceTree = "<group>"; };
 		F895560E1BF52CF6002F898B /* CordovaLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CordovaLib.xcodeproj; path = ../CordovaLib/CordovaLib.xcodeproj; sourceTree = "<group>"; };
 		F89556191BF535FC002F898B /* TEST.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = TEST.entitlements; sourceTree = "<group>"; };
-		F895561A1BF535FC002F898B /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,8 +89,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F82BCDAD1BF660AB003FEAC9 /* HealthKit.framework in Frameworks */,
 				F89556141BF52D03002F898B /* libCordova.a in Frameworks */,
-				F895561B1BF535FC002F898B /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,7 +114,7 @@
 		F89555C31BF52C49002F898B = {
 			isa = PBXGroup;
 			children = (
-				F895561A1BF535FC002F898B /* HealthKit.framework */,
+				F82BCDAC1BF660AB003FEAC9 /* HealthKit.framework */,
 				F89555CE1BF52C49002F898B /* TEST */,
 				F89555E81BF52C49002F898B /* TESTTests */,
 				F89555F31BF52C49002F898B /* TESTUITests */,
@@ -134,12 +137,12 @@
 			isa = PBXGroup;
 			children = (
 				F89556191BF535FC002F898B /* TEST.entitlements */,
-				F89556021BF52C61002F898B /* HealthKit.h */,
-				F89556031BF52C61002F898B /* HealthKit.m */,
-				F89556041BF52C61002F898B /* HKHealthStore+AAPLExtensions.h */,
-				F89556051BF52C61002F898B /* HKHealthStore+AAPLExtensions.m */,
-				F89556061BF52C61002F898B /* WorkoutActivityConversion.h */,
-				F89556071BF52C61002F898B /* WorkoutActivityConversion.m */,
+				F82BCDA21BF65E53003FEAC9 /* HealthKit.h */,
+				F82BCDA31BF65E53003FEAC9 /* HealthKit.m */,
+				F82BCDA41BF65E53003FEAC9 /* HKHealthStore+AAPLExtensions.h */,
+				F82BCDA51BF65E53003FEAC9 /* HKHealthStore+AAPLExtensions.m */,
+				F82BCDA61BF65E53003FEAC9 /* WorkoutActivityConversion.h */,
+				F82BCDA71BF65E53003FEAC9 /* WorkoutActivityConversion.m */,
 				F89555D21BF52C49002F898B /* AppDelegate.h */,
 				F89555D31BF52C49002F898B /* AppDelegate.m */,
 				F89555D51BF52C49002F898B /* ViewController.h */,
@@ -340,11 +343,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F89556091BF52C61002F898B /* HKHealthStore+AAPLExtensions.m in Sources */,
-				F89556081BF52C61002F898B /* HealthKit.m in Sources */,
+				F82BCDA91BF65E53003FEAC9 /* HKHealthStore+AAPLExtensions.m in Sources */,
+				F82BCDA81BF65E53003FEAC9 /* HealthKit.m in Sources */,
 				F89555D71BF52C49002F898B /* ViewController.m in Sources */,
 				F89555D41BF52C49002F898B /* AppDelegate.m in Sources */,
-				F895560A1BF52C61002F898B /* WorkoutActivityConversion.m in Sources */,
+				F82BCDAA1BF65E53003FEAC9 /* WorkoutActivityConversion.m in Sources */,
 				F89555D11BF52C49002F898B /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -353,6 +356,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F82BCDB01BF660C7003FEAC9 /* WorkoutActivityConversion.m in Sources */,
+				F82BCDAE1BF660C2003FEAC9 /* HealthKit.m in Sources */,
+				F82BCDAF1BF660C5003FEAC9 /* HKHealthStore+AAPLExtensions.m in Sources */,
 				F89555EA1BF52C49002F898B /* TESTTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -475,6 +481,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -497,6 +504,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = TEST/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = christamper.TEST;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -512,6 +520,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = TEST/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = christamper.TEST;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -527,6 +536,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = christamper.TESTTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TEST.app/TEST";
 			};
 			name = Debug;
@@ -539,6 +549,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = christamper.TESTTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TEST.app/TEST";
 			};
 			name = Release;
@@ -586,6 +597,7 @@
 				F89555FB1BF52C49002F898B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F89555FC1BF52C49002F898B /* Build configuration list for PBXNativeTarget "TESTTests" */ = {
 			isa = XCConfigurationList;
@@ -594,6 +606,7 @@
 				F89555FE1BF52C49002F898B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F89555FF1BF52C49002F898B /* Build configuration list for PBXNativeTarget "TESTUITests" */ = {
 			isa = XCConfigurationList;
@@ -602,6 +615,7 @@
 				F89556011BF52C49002F898B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
