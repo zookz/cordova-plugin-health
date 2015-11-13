@@ -79,7 +79,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     }];
 }
 
-- (void)checkAuthStatus:(CDVInvokedUrlCommand*)command {
+-(void)checkAuthStatus:(CDVInvokedUrlCommand*)command {
     // Note for doc, if status = denied, prompt user to go to settings or the Health app
     NSMutableDictionary *args = [command.arguments objectAtIndex:0];
     NSString *checkType = [args objectForKey:HKPluginKeyType];
@@ -161,6 +161,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                     for (HKWorkout *workout in results) {
                         NSString *workoutActivity = [WorkoutActivityConversion convertHKWorkoutActivityTypeToString:workout.workoutActivityType];
                         
+                        // iOS 9 moves the source property to a collection of revisions
                         HKSource *source = nil;
                         if([workout respondsToSelector:@selector(sourceRevision)]) {
                             source = workout.sourceRevision.source;
@@ -168,19 +169,20 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                             source = workout.source;
                         }
                         
-                        double distance = [workout.totalDistance doubleValueForUnit:[HKUnit mileUnit]];
-                        NSString *miles = [NSString stringWithFormat:@"%ld", (long)distance];
+                        // TODO: use a float value, or switch to metric
+                        double miles = [workout.totalDistance doubleValueForUnit:[HKUnit mileUnit]];
+                        NSString *milesString = [NSString stringWithFormat:@"%ld", (long)miles];
                         
                         NSEnergyFormatter *energyFormatter = [NSEnergyFormatter new];
                         energyFormatter.forFoodEnergyUse = NO;
-                        double energy = [workout.totalEnergyBurned doubleValueForUnit:[HKUnit jouleUnit]];
-                        NSString *calories = [energyFormatter stringFromJoules:energy]; // formats as calories
+                        double joules = [workout.totalEnergyBurned doubleValueForUnit:[HKUnit jouleUnit]];
+                        NSString *calories = [energyFormatter stringFromJoules:joules];
                         
                         NSMutableDictionary *entry = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                                       [NSNumber numberWithDouble:workout.duration], @"duration",
                                                       [df stringFromDate:workout.startDate], HKPluginKeyStartDate,
                                                       [df stringFromDate:workout.endDate], HKPluginKeyEndDate,
-                                                      miles, @"miles",
+                                                      milesString, @"miles",
                                                       calories, @"calories",
                                                       source.bundleIdentifier, HKPluginKeySourceBundleId,
                                                       workoutActivity, @"activityType",
