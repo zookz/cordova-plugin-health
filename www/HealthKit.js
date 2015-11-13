@@ -75,7 +75,6 @@ var define = function(methodName, params, fn) {
 };
 
 define('available', {noArgs: true});
-define('checkAuthStatus');
 define('requestAuthorization');
 define('readDateOfBirth', {noArgs: true});
 define('readGender', {noArgs: true});
@@ -84,37 +83,10 @@ define('readWeight');
 define('readHeight');
 define('readBloodType', {noArgs: true});
 
-define('saveWeight', function(options) {
-  if (options.date == null) options.date = new Date();
-  if (typeof options.date === 'object') rounds(options, 'date');
-});
-
-define('saveHeight', function(options) {
-  if (options.date == null) options.date = new Date();
-  if (typeof options.date === 'object') rounds(options, 'date');
-});
-
-define('saveWorkout', {required: 'startDate'}, function(options) {
-  var hasEnd = matches(options.endDate, Date);
-  var hasDuration = options.duration && options.duration > 0;
-  rounds(options, 'startDate');
-
-  if (!hasEnd && !hasDuration) {
-    throw new TypeError("endDate must be JavaScript Date Object, or the duration must be set");
-  }
-  if (hasEnd) rounds(options, 'endDate');
-});
-
 define('monitorSampleType', {required: 'sampleType'});
 define('querySampleType', {required: 'sampleType'}, hasValidDates);
 
 define('queryCorrelationType', {required: 'correlationType'}, hasValidDates);
-define('saveQuantitySample', {required: 'sampleType'}, hasValidDates);
-
-define('saveCorrelation', {required: ['correlationType', 'samples']}, function(options) {
-  hasValidDates(options);
-  options.objects = options.samples.map(hasValidDates);
-});
 
 define('sumQuantityType', {required: ['sampleType']}, hasValidDates);
 
