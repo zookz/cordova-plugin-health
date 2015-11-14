@@ -169,9 +169,8 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                             source = workout.source;
                         }
                         
-                        // TODO: use a float value, or switch to metric
-                        double miles = [workout.totalDistance doubleValueForUnit:[HKUnit mileUnit]];
-                        NSString *milesString = [NSString stringWithFormat:@"%ld", (long)miles];
+                        double meters = [workout.totalDistance doubleValueForUnit:[HKUnit meterUnit]];
+                        NSString *metersString = [NSString stringWithFormat:@"%ld", (long)meters];
                         
                         NSEnergyFormatter *energyFormatter = [NSEnergyFormatter new];
                         energyFormatter.forFoodEnergyUse = NO;
@@ -182,9 +181,10 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                                                       [NSNumber numberWithDouble:workout.duration], @"duration",
                                                       [df stringFromDate:workout.startDate], HKPluginKeyStartDate,
                                                       [df stringFromDate:workout.endDate], HKPluginKeyEndDate,
-                                                      milesString, @"miles",
+                                                      metersString, @"meters",
                                                       calories, @"calories",
                                                       source.bundleIdentifier, HKPluginKeySourceBundleId,
+                                                       source.name, @"sourceName",
                                                       workoutActivity, @"activityType",
                                                       nil
                                                       ];
