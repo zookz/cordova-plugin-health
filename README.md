@@ -2,29 +2,34 @@
 
 A plugin that abstracts fitness and health repositories like Apple HealthKit or Google Fit
 
-## data types
+## Warning
 
+This plugin stores health data in Google Fit, practice that is discouraged by Google.
+
+
+## Supported data types
+
+As HealthKit does not allow adding custom data types, only a subset of data types supported by HealthKit has been chosen.
+Gogole Fit is limited to fitness data and, when needed, custom data types are defined witht he suffix of the package name of your project.
 
 | data type      |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
 |----------------|---------------------------------------------------------|------------------------------------------|
 | steps          | HKQuantityTypeIdentifierStepCount (count)               |  TYPE_STEP_COUNT_DELTA                   |
 | distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (meters) |  TYPE_DISTANCE_DELTA                     |
 | calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       |  TYPE_CALORIES_EXPENDED                  |
-|----------------|---------------------------------------------------------|------------------------------------------|
 | height         | HKQuantityTypeIdentifierHeight (m)                      |  TYPE_HEIGHT                             |
 | weight         | HKQuantityTypeIdentifierBodyMass (kg)                   |  TYPE_WEIGHT                             |
 | heart_rate     | HKQuantityTypeIdentifierHeartRate (bpm)                 |  TYPE_HEART_RATE_BPM                     |
 | fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (percent)     |  TYPE_BODY_FAT_PERCENTAGE                |
-|----------------|---------------------------------------------------------|------------------------------------------|
 | gender         | HKCharacteristicTypeIdentifierBiologicalSex             |  custom (YOUR_PACKAGE_NAME.gender)       |
 | date_of_birth  | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
-|----------------|---------------------------------------------------------|------------------------------------------|
 
 
+Note: unit of measurements are fixed !
 
-Note: unit of measurement are fixed
+## Methods
 
-## query
+### query()
 
 ```
 query({
@@ -41,7 +46,6 @@ query({
 - errorCallback
 
 
-
 Examples of data returned by query
 
 | data type      | returns                                                                                                |
@@ -49,23 +53,20 @@ Examples of data returned by query
 | steps          | array of: { startDate: Date, endDate: Date, value: 120, unit: 'count', source: "myapp" }               |
 | distance       | array of: { startDate: Date, endDate: Date, value: 11.4, unit: 'm', source: "myapp" }                  |
 | calories       | array of: { startDate: Date, endDate: Date, value: 221.1, unit: 'kcal', source: "myapp" }              |
-|----------------|--------------------------------------------------------------------------------------------------------|
 | height         | array of: { startDate: Date, endDate: Date, value: 182.2, unit: 'm', source: "myapp" }                 |
 | weight         | array of: { startDate: Date, endDate: Date, value: 83.2, unit: 'kg', source: "myapp" }                 |
 | heart_rate     | array of: { startDate: Date, endDate: Date, value: 72, unit: 'bpm', source: "myapp" }                  |
 | fat_percentage | array of: { startDate: Date, endDate: Date, value: 23.2, unit: 'percent', source: "myapp" }            |
-|----------------|--------------------------------------------------------------------------------------------------------|
 | gender         | array of: { startDate: Date, endDate: Date, value: "male", source: "myapp" }                           |
 | date_of_birth  | array of: { startDate: Date, endDate: Date, value: { day:3, month: 12, year: 1978 }, source: "myapp" } |
-|----------------|--------------------------------------------------------------------------------------------------------|
 
 
-### quirks of query()
+Quirks of query()
 
 - calories in Android is returned as sum within the specified time window
 
 
-## store
+### store()
 
 ```
 store({ 
@@ -87,40 +88,37 @@ store({
 
 Examples of value per data type:
 
-
 | data type      | value                             |
 |----------------|-----------------------------------|
 | steps          | 34                                |
 | distance       | 101.2                             |
 | calories       | 245.3                             |
-|----------------|-----------------------------------|
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
 | fat_percentage | 31.2                              |
-|----------------|-----------------------------------|
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
 
 
-### Resources
+## Resources
 
 * The official Apple documentation for [HealthKit can be found here](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Framework/index.html#//apple_ref/doc/uid/TP40014707).
 
 * For functions that require the `unit` attribute, you can find the [comprehensive list of possible units from the Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
 
 
-### Tips for iOS apps
+## Tips for iOS apps
 
 * Make sure your app id has the 'HealthKit' entitlement when this plugin is installed (see iOS dev center).
 * Also, make sure your app and AppStore description complies with these Apple review guidelines: https://developer.apple.com/app-store/review/guidelines/#healthkit
 
-### Tips for Android apps
+## Tips for Android apps
 
 Be sure to give your app access to the Google API, see https://developers.google.com/fit/android/get-started
 
 
-# Roadmap
+## Roadmap
 
 short term
 
