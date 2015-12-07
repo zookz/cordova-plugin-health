@@ -1,35 +1,107 @@
-# Cordova HealthKit Plugin
+# Cordova Health Plugin
 
-<img src="img/healthkit-hero_2x.png" width="128px" height="128px"/>
-<table width="100%">
-  <tr>
-    <td width="100"><a href="http://plugins.telerik.com/plugin/healthkit"><img src="http://www.x-services.nl/github-images/telerik-verified-plugins-marketplace.png" width="97px" height="71px" alt="Marketplace logo"/></a></td>
-    <td>For a quick demo app and easy code samples, check out the plugin page at the Verified Plugins Marketplace: http://plugins.telerik.com/plugin/healthkit</td>
-  </tr>
-</table>
+A plugin that abstracts fitness and health repositories like Apple HealthKit or Google Fit
 
-### Supported functions
+## data types
 
-[See the example](demo/index.html) for how to use these functions.
 
-* `available`: check if HealthKit is supported (iOS8+, not on iPad)
-* `checkAuthStatus`: pass in a type and get back on of undetermined | denied | authorized
-* `requestAuthorization`: ask some or all permissions up front
-* `readDateOfBirth`: formatted as yyyy-MM-dd
-* `readGender`: output = male|female|unknown
-* `readBloodType`: output = A+|A-|B+|B-|AB+|AB-|O+|O-|unknown
-* `readWeight`: pass in unit (g=gram, kg=kilogram, oz=ounce, lb=pound, st=stone)
-* `saveWeight`: pass in unit (g=gram, kg=kilogram, oz=ounce, lb=pound, st=stone) and amount
-* `readHeight`: pass in unit (mm=millimeter, cm=centimeter, m=meter, in=inch, ft=foot)
-* `saveHeight`: pass in unit (mm=millimeter, cm=centimeter, m=meter, in=inch, ft=foot) and amount
-* `saveWorkout`
-* `findWorkouts`: no params yet, so this will return all workouts ever of any type
-* `querySampleType`
-* `sumQuantityType`
-* `monitorSampleType`
-* `saveQuantitySample`
-* `saveCorrelation`
-* `queryCorrelationType`
+| data type      |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
+|----------------|---------------------------------------------------------|------------------------------------------|
+| steps          | HKQuantityTypeIdentifierStepCount (count)               |  TYPE_STEP_COUNT_DELTA                   |
+| distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (meters) |  TYPE_DISTANCE_DELTA                     |
+| calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       |  TYPE_CALORIES_EXPENDED                  |
+|----------------|---------------------------------------------------------|------------------------------------------|
+| height         | HKQuantityTypeIdentifierHeight (m)                      |  TYPE_HEIGHT                             |
+| weight         | HKQuantityTypeIdentifierBodyMass (kg)                   |  TYPE_WEIGHT                             |
+| heart_rate     | HKQuantityTypeIdentifierHeartRate (bpm)                 |  TYPE_HEART_RATE_BPM                     |
+| fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (percent)     |  TYPE_BODY_FAT_PERCENTAGE                |
+|----------------|---------------------------------------------------------|------------------------------------------|
+| gender         | HKCharacteristicTypeIdentifierBiologicalSex             |  custom (YOUR_PACKAGE_NAME.gender)       |
+| date_of_birth  | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
+|----------------|---------------------------------------------------------|------------------------------------------|
+
+
+
+Note: unit of measurement are fixed
+
+## query
+
+```
+query({
+        'startDate': new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
+        'endDate': new Date(), // now
+        'dataType': 'height'
+        }, successCallback, errorCallback)
+```
+
+- startDate: {type: Date}, start date from which to get data
+- endDate: {type: Date}, end data to which to get the data
+- dataType: {type: String}, the data type to be queried (see above)
+- successCallback
+- errorCallback
+
+
+
+Examples of data returned by query
+
+| data type      | returns                                                                                                |
+|----------------|--------------------------------------------------------------------------------------------------------|
+| steps          | array of: { startDate: Date, endDate: Date, value: 120, unit: 'count', source: "myapp" }               |
+| distance       | array of: { startDate: Date, endDate: Date, value: 11.4, unit: 'm', source: "myapp" }                  |
+| calories       | array of: { startDate: Date, endDate: Date, value: 221.1, unit: 'kcal', source: "myapp" }              |
+|----------------|--------------------------------------------------------------------------------------------------------|
+| height         | array of: { startDate: Date, endDate: Date, value: 182.2, unit: 'm', source: "myapp" }                 |
+| weight         | array of: { startDate: Date, endDate: Date, value: 83.2, unit: 'kg', source: "myapp" }                 |
+| heart_rate     | array of: { startDate: Date, endDate: Date, value: 72, unit: 'bpm', source: "myapp" }                  |
+| fat_percentage | array of: { startDate: Date, endDate: Date, value: 23.2, unit: 'percent', source: "myapp" }            |
+|----------------|--------------------------------------------------------------------------------------------------------|
+| gender         | array of: { startDate: Date, endDate: Date, value: "male", source: "myapp" }                           |
+| date_of_birth  | array of: { startDate: Date, endDate: Date, value: { day:3, month: 12, year: 1978 }, source: "myapp" } |
+|----------------|--------------------------------------------------------------------------------------------------------|
+
+
+### quirks of query()
+
+- calories in Android is returned as sum within the specified time window
+
+
+## store
+
+```
+store({ 
+	startDate:  new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
+	endDate: new Date(),
+	dataType: 'height',
+	value: 180,
+	source: 'my app'}, successCallback, errorCallback)
+```
+
+- startDate: {type: Date}, start date from which to get data
+- endDate: {type: Date}, end data to which to get teh data
+- dataType: {type: a String}, the data type
+- value: {type: a number or an Object}, depending on the actual data type
+- source: {type: String}, the source that produced this data
+- successCallback:
+- errorCallback:
+
+
+Examples of value per data type:
+
+
+| data type      | value                             |
+|----------------|-----------------------------------|
+| steps          | 34                                |
+| distance       | 101.2                             |
+| calories       | 245.3                             |
+|----------------|-----------------------------------|
+| height         | 185.9                             |
+| weight         | 83.3                              |
+| heart_rate     | 66                                |
+| fat_percentage | 31.2                              |
+|----------------|-----------------------------------|
+| gender         | "male"                            |
+| date_of_birth  | { day: 3, month: 12, year: 1978 } |
+
 
 ### Resources
 
@@ -37,20 +109,31 @@
 
 * For functions that require the `unit` attribute, you can find the [comprehensive list of possible units from the Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
 
-### Tips
+
+### Tips for iOS apps
+
 * Make sure your app id has the 'HealthKit' entitlement when this plugin is installed (see iOS dev center).
 * Also, make sure your app and AppStore description complies with these Apple review guidelines: https://developer.apple.com/app-store/review/guidelines/#healthkit
 
-### Installation
+### Tips for Android apps
 
-Using the Cordova CLI?
+Be sure to give your app access to the Google API, see https://developers.google.com/fit/android/get-started
 
-```
-cordova plugin add com.telerik.plugins.healthkit
-```
 
-Using PGB?
+# Roadmap
 
-```xml
-<gap:plugin name="com.telerik.plugins.healthkit" source="npm" />
-```
+short term
+
+- add registration to updates
+- add search for workouts
+- extend the datatypes
+-- food, HKCorrelationTypeIdentifierFood but customised, TYPE_NUTRITION
+-- blood pressure, HKCorrelationTypeIdentifierBloodPressure, custom data type
+-- location, ??, TYPE_LOCATION
+
+
+long term
+
+- store vital signs on an encrypted DB in the case of Android
+- add also Samsung Health as a health record for Android
+

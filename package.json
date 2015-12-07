@@ -1,25 +1,22 @@
 {
-  "version": "0.3.8",
-  "name": "com.telerik.plugins.healthkit",
-  "cordova_name": "HealthKit",
-  "description": "Interact with the iOS HealthKit SDK.",
+  "version": "0.0.1",
+  "name": "cordova-plugin-health",
+  "cordova_name": "Health",
+  "description": "A plugin that abstracts fitness and health repositories like Apple HealthKit or Google Fit",
   "license": "MIT",
-  "author": "Telerik / Eddy Verbruggen <eddyverbruggen@gmail.com> (https://github.com/EddyVerbruggen)",
-  "repo": "https://github.com/Telerik-Verified-Plugins/HealthKit.git",
-  "issue": "https://github.com/Telerik-Verified-Plugins/HealthKit/issues",
+  "author": "Dario Salvi, based on code by Eddy Verbruggen / Telerik and Carmelo Velardo",
+  "repo": "https://github.com/dariosalvi78/cordova-plugin-health.git",
+  "issue": "https://github.com/dariosalvi78/cordova-plugin-health/issues",
   "keywords": [
     "Health",
     "HealthKit",
     "Fit",
     "Fitness",
-    "Birthdate",
-    "Gender",
-    "Height",
-    "Weight",
-    "Workout"
+    "Google Fit"
   ],
   "platforms": [
-    "ios"
+    "ios",
+	"android"
   ],
   "engines": [
     {
