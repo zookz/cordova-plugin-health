@@ -1,11 +1,11 @@
 var exec = require("cordova/exec");
 
 var Health = function () {
-  this.name = "Health";
+  this.name = "health";
 };
 
 Health.prototype.requestAuthorization = function (datatypes, onSuccess, onError) {
-  exec(onSuccess, onError, "Health", "requestAuthorization", [datatypes]);
+  exec(onSuccess, onError, "health", "requestAuthorization", [datatypes]);
 };
 
 Health.prototype.query = function (opts, onSuccess, onError) {
@@ -19,7 +19,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       data[i].endDate = new Date(data[i].endDate);
     }
     onSuccess(data);
-  }, onError, "Health", "query", [opts]);
+  }, onError, "health", "query", [opts]);
 };
 
 Health.prototype.store = function (data, onSuccess, onError) {
@@ -27,7 +27,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
   data.startDate = data.startDate.getTime();
   if(data.endDate)
   data.endDate = data.endDate.getTime();
-  exec(onSuccess, onError, "Health", "store", [data]);
+  exec(onSuccess, onError, "health", "store", [data]);
 };
 
-window.health = new Health();
+navigator.health = new Health();

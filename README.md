@@ -50,7 +50,7 @@ Requests read and write access to a set of data types.
 This function should be called first in your application.
 
 ```
-window.health.requestAuthorization(datatypes, successCallback, errorCallback)
+navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 ```
 
 - datatypes: {type: Array of String}, a list of data types you want to be granted access to
@@ -63,7 +63,7 @@ Gets all the records of a certain data type within a certain time window.
 Warning: it can generate long arrays!
 
 ```
-query({
+navigator.health.query({
         'startDate': new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
         'endDate': new Date(), // now
         'dataType': 'height'
@@ -87,7 +87,7 @@ Quirks of query()
 Stores a data point of a certain data type.
 
 ```
-store({ 
+navigator.health.store({ 
 	startDate:  new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
 	endDate: new Date(),
 	dataType: 'height',
