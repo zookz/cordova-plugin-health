@@ -64,7 +64,7 @@
         </config-file>
 
         <config-file target="res/xml/config.xml" parent="/*">
-          <feature name="Health">
+          <feature name="health">
               <param name="android-package" value="org.apache.cordova.health.HealthPlugin" />
           </feature>
 		  <access origin="https://accounts.google.com/*" />
