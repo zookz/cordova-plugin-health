@@ -19,14 +19,13 @@ Gogole Fit is limited to fitness data and, when needed, custom data types are de
 | calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       |  TYPE_CALORIES_EXPENDED                  |
 | height         | HKQuantityTypeIdentifierHeight (m)                      |  TYPE_HEIGHT                             |
 | weight         | HKQuantityTypeIdentifierBodyMass (kg)                   |  TYPE_WEIGHT                             |
-| heart_rate     | HKQuantityTypeIdentifierHeartRate (bpm)                 |  TYPE_HEART_RATE_BPM                     |
-| fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (percent)     |  TYPE_BODY_FAT_PERCENTAGE                |
+| heart_rate     | HKQuantityTypeIdentifierHeartRate (count/min            |  TYPE_HEART_RATE_BPM                     |
+| fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (%)           |  TYPE_BODY_FAT_PERCENTAGE                |
 | gender         | HKCharacteristicTypeIdentifierBiologicalSex             |  custom (YOUR_PACKAGE_NAME.gender)       |
 | date_of_birth  | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
 
 
-Note:
-* unit of measurements are fixed !
+Note: unit of measurements are fixed !
 
 Data types can be of different types, see examples below:
 
@@ -65,9 +64,9 @@ Warning: it can generate long arrays!
 
 ```
 navigator.health.query({
-        startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
-        endDate: new Date(), // now
-        dataType: 'height'
+        'startDate': new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
+        'endDate': new Date(), // now
+        'dataType': 'height'
         }, successCallback, errorCallback)
 ```
 

@@ -12,8 +12,6 @@ dataTypes['height'] = 'HKQuantityTypeIdentifierHeight';
 dataTypes['weight'] = 'HKQuantityTypeIdentifierBodyMass';
 dataTypes['heart_rate'] = 'HKQuantityTypeIdentifierHeartRate';
 dataTypes['fat_percentage'] = 'HKQuantityTypeIdentifierBodyFatPercentage';
-dataTypes['gender'] = 'HKCharacteristicTypeIdentifierBiologicalSex';
-dataTypes['date_of_birth'] = 'HKCharacteristicTypeIdentifierDateOfBirth';
 
 
 var units = [];
@@ -22,20 +20,20 @@ units['distance'] = 'm';
 units['calories'] = 'kcal';
 units['height'] = 'm';
 units['weight'] = 'kg';
-units['heart_rate'] = 'bpm';
-units['fat_percentage'] = 'percent';
-units['gender'] = undefined;
-units['date_of_birth'] = undefined;
+units['heart_rate'] = 'count/min';
+units['fat_percentage'] = '%';
 
 
 Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
   var HKdatatypes = [];
   for(var i=0; i<dts.length; i++){
-    if(dataTypes[ dts[i] ]){
-      HKdatatypes.push(dataTypes[dts[i]]);
-    } else {
-      onError('unknown data type '+dts[i]);
-      return;
+    if((dts[i] != 'gender') && (dts[i] != 'date_of_birth')){//ignore gender and dob
+      if(dataTypes[ dts[i] ]){
+        HKdatatypes.push(dataTypes[dts[i]]);
+      } else {
+        onError('unknown data type '+dts[i]);
+        return;
+      }
     }
   }
   if(HKdatatypes.length){
@@ -47,36 +45,108 @@ Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
 };
 
 Health.prototype.query = function (opts, onSuccess, onError) {
-  if(dataTypes[ opts.dataType ]){
-    var opts = {
-      'startDate': opts.startDate.getTime(),
-      'endDate': opts.endDate.getTime(),
-      'sampleType': dataTypes[ opts.dataType ]
-    };
+
+  //from http://stackoverflow.com/questions/6704325/how-to-convert-date-in-format-yyyy-mm-dd-hhmmss-to-unix-timestamp
+  var convertDate = function(d){
+    var match = d.match(/^(\d+)-(\d+)-(\d+) (\d+)\:(\d+)\:(\d+)$/)
+    return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6]);
+  };
+
+  if(opts.dataType== 'gender'){
+    window.plugins.healthkit.readGender(function(data){
+      var res = [];
+      res[0]= {
+        startDate: opts.startDate,
+        endDate: opts.endDate,
+        value: data,
+        source: "com.apple.Health"
+      };
+      onSuccess(res);
+    }, onError);
+  } else if(opts.dataType== 'date_of_birth'){
+    window.plugins.healthkit.readDateOfBirth(function(data){
+      data.startDate = opts.startDate;
+      data.endDate = opts.endDate;
+      var res = [];
+      var date = new Date(data);
+      res[0]= {
+        startDate: opts.startDate,
+        endDate: opts.endDate,
+        value: { day: date.getDate(), month: date.getMonth()+1, year: date.getFullYear()},
+        source: "Health"
+      };
+      onSuccess(res);
+    }, onError);
+  } else if(dataTypes[ opts.dataType ]){
+    opts.sampleType = dataTypes[ opts.dataType ];
     if(units[ opts.dataType ]){
       opts.unit = units[ opts.dataType ];
     }
     window.plugins.healthkit.querySampleType(opts, function(data){
-      var result = [];
-      for(var i=0; i<data.length; i++){
-        var res = {};
-        res.startDate = new Date(data[i].startDate);
-        res.endDate = new Date(data[i].endDate);
-        res.value = data[i].quantity;
-        res.unit = data[i].unit;
-        res.source = data[i].sourceBundleId +'.'+ data[i].sourceName;
-        result.push(res);
+      if((opts.dataType== 'weight') && (data.length == 0)){
+        //let's try to get it from the health ID
+        window.plugins.healthkit.readWeight({ unit: 'kg' }, function(data){
+          var res = [];
+          res[0]= {
+            startDate: convertDate(data.date),
+            endDate: convertDate(data.date),
+            value: data.value,
+            unit: data.unit,
+            source: "Health"
+          };
+          onSuccess(res);
+        }, onError);
+      } else if((opts.dataType== 'height') && (data.length == 0)){
+        //let's try to get it from the health ID
+        window.plugins.healthkit.readHeight({ unit: 'm' }, function(data){
+          var res = [];
+          res[0]= {
+            startDate: convertDate(data.date),
+            endDate: convertDate(data.date),
+            value: data.value,
+            unit: data.unit,
+            source: "Health"
+          };
+          onSuccess(res);
+        }, onError);
+      } else {
+        var result = [];
+        for(var i=0; i<data.length; i++) {
+          var res = {};
+          res.startDate = convertDate(data[i].startDate);
+          res.endDate = convertDate(data[i].endDate);
+          res.value = data[i].quantity;
+          if(data[i].unit) res.unit = data[i].unit;
+          if(opts.unit) res.unit = opts.unit;
+          res.source = data[i].sourceName;
+          result.push(res);
+        }
+        onSuccess(result);
       }
-      onSuccess(result)
     },onError);
   } else {
     onError('unknown data type '+dts[i]);
-    return;
   }
 };
 
 Health.prototype.store = function (data, onSuccess, onError) {
-  //TBD
+  if(data.dataType== 'gender'){
+    onError('Gender is not writeable');
+  } else if(data.dataType== 'date_of_birth'){
+    onError('Date of birth is not writeable');
+  } else if(dataTypes[ data.dataType ]){
+    data.sampleType = dataTypes[ data.dataType ];
+    data.amount = data.value;
+    if(units[ data.dataType ]){
+      data.unit = units[ data.dataType ];
+    }
+    window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
+  } else {
+    onError('unknown data type '+dts[i]);
+  }
 };
 
-navigator.health = new Health();
+cordova.addConstructor(function(){
+  navigator.health = new Health();
+  return navigator.health;
+});
