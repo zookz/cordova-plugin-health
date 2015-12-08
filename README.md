@@ -15,7 +15,7 @@ Gogole Fit is limited to fitness data and, when needed, custom data types are de
 | data type      |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
 |----------------|---------------------------------------------------------|------------------------------------------|
 | steps          | HKQuantityTypeIdentifierStepCount (count)               |  TYPE_STEP_COUNT_DELTA                   |
-| distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (meters) |  TYPE_DISTANCE_DELTA                     |
+| distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (m)      |  TYPE_DISTANCE_DELTA                     |
 | calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       |  TYPE_CALORIES_EXPENDED                  |
 | height         | HKQuantityTypeIdentifierHeight (m)                      |  TYPE_HEIGHT                             |
 | weight         | HKQuantityTypeIdentifierBodyMass (kg)                   |  TYPE_WEIGHT                             |
@@ -87,7 +87,7 @@ Quirks of query()
 Stores a data point of a certain data type.
 
 ```
-navigator.health.store({ 
+navigator.health.store({
 	startDate:  new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
 	endDate: new Date(),
 	dataType: 'height',
@@ -137,4 +137,3 @@ long term
 
 - store vital signs on an encrypted DB in the case of Android
 - add also Samsung Health as a health record for Android
-

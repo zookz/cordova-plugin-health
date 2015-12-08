@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="cordova-plugin-health"
-        version="0.0.1">
+  id="cordova-plugin-health"
+  version="0.0.1">
 
   <name>Cordova Health</name>
 
@@ -28,9 +28,12 @@
   <platform name="ios">
 
     <js-module src="www/ios/HealthKit.js" name="HealthKit">
-		<clobbers target="window.plugins.healthkit" />
-	</js-module>
-  
+      <clobbers target="window.plugins.healthkit" />
+    </js-module>
+    <js-module src="www/ios/health.js" name="health">
+      <clobbers target="navigator.health" />
+    </js-module>
+
     <config-file target="config.xml" parent="/*">
       <feature name="HealthKit">
         <param name="ios-package" value="HealthKit"/>
@@ -52,29 +55,29 @@
 
     <framework src="HealthKit.framework" weak="true" />
   </platform>
-  
-    <!-- android -->
-    <platform name="android">
-		<framework src="com.google.android.gms:play-services:8.3.0+" />
-	
-		<config-file target="AndroidManifest.xml" parent="/*">
-            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />		
-			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-			<uses-permission android:name="android.permission.BODY_SENSORS" />
-        </config-file>
 
-        <config-file target="res/xml/config.xml" parent="/*">
-          <feature name="health">
-              <param name="android-package" value="org.apache.cordova.health.HealthPlugin" />
-          </feature>
-		  <access origin="https://accounts.google.com/*" />
-        </config-file>
+  <!-- android -->
+  <platform name="android">
+    <framework src="com.google.android.gms:play-services:8.3.0+" />
 
-        <source-file src="src/android/HealthPlugin.java" target-dir="src/org/apache/cordova/health/" />
+    <config-file target="AndroidManifest.xml" parent="/*">
+      <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+      <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+      <uses-permission android:name="android.permission.BODY_SENSORS" />
+    </config-file>
 
-        <js-module src="www/android/health.js" name="health">
-            <clobbers target="window.health" />
-        </js-module>
-	</platform>
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="health">
+        <param name="android-package" value="org.apache.cordova.health.HealthPlugin" />
+      </feature>
+      <access origin="https://accounts.google.com/*" />
+    </config-file>
+
+    <source-file src="src/android/HealthPlugin.java" target-dir="src/org/apache/cordova/health/" />
+
+    <js-module src="www/android/health.js" name="health">
+      <clobbers target="navigator.health" />
+    </js-module>
+  </platform>
 
 </plugin>
