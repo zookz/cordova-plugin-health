@@ -679,7 +679,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
   NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:[[args objectForKey:HKPluginKeyEndDate] longValue]];
   NSString *sampleTypeString = [args objectForKey:HKPluginKeySampleType];
   NSString *unitString = [args objectForKey:HKPluginKeyUnit];
-  int limit = [args objectForKey:@"limit"] != nil ? [[args objectForKey:@"limit"] intValue] : 100;
+  int limit = [args objectForKey:@"limit"] != nil ? [[args objectForKey:@"limit"] intValue] : 1000;
   BOOL ascending = [args objectForKey:@"ascending"] != nil ? [[args objectForKey:@"ascending"] boolValue] : NO;
   
   HKSampleType *type = [self getHKSampleType:sampleTypeString];
