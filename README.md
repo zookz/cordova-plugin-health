@@ -1,6 +1,8 @@
 # Cordova Health Plugin
 
-A plugin that abstracts fitness and health repositories like Apple HealthKit or Google Fit
+A plugin that abstracts fitness and health repositories like Apple HealthKit or Google Fit.
+
+This work is based on [cordova plugin googlefit](https://github.com/2dvisio/cordova-plugin-googlefit) and on [cordova healthkit plugin](https://github.com/Telerik-Verified-Plugins/HealthKit)
 
 ## Warning
 
@@ -60,13 +62,14 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 ### query()
 
 Gets all the records of a certain data type within a certain time window.
+
 Warning: it can generate long arrays!
 
 ```
 navigator.health.query({
-        'startDate': new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
-        'endDate': new Date(), // now
-        'dataType': 'height'
+        startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
+        endDate: new Date(), // now
+        dataType: 'height'
         }, successCallback, errorCallback)
 ```
 
@@ -84,31 +87,39 @@ Quirks of query()
 
 ### store()
 
-Stores a data point of a certain data type.
+Stores a data point.
 
 ```
 navigator.health.store({
-	startDate:  new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
+	startDate:  new Date(new Date().getTime() - 3 * 60 * 1000), // three minutes ago
 	endDate: new Date(),
-	dataType: 'height',
+	dataType: 'steps',
 	value: 180,
-	source: 'my app'}, successCallback, errorCallback)
+	source: 'my_app'}, successCallback, errorCallback)
 ```
 
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get teh data
 - dataType: {type: a String}, the data type
 - value: {type: a number or an Object}, depending on the actual data type
-- source: {type: String}, the source that produced this data
+- source: {type: String}, the source that produced this data. In iOS this ignored and set automatically to the name of your app.
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 
-## Resources
+## Differences between HealthKit and Google Fit
+
+* HealthKit includes medical data (eg blood glucose), Google Fit is currently only related to fitness data
+* HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types
+* HealthKit automatically counts steps and distance when you carry your phone with you, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
+* HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also
+
+
+## External Resources
 
 * The official Apple documentation for [HealthKit can be found here](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Framework/index.html#//apple_ref/doc/uid/TP40014707).
-
 * For functions that require the `unit` attribute, you can find the [comprehensive list of possible units from the Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
+* Google Fit [supported data types](https://developers.google.com/fit/android/data-types)
 
 
 ## Tips for iOS apps
@@ -118,22 +129,27 @@ navigator.health.store({
 
 ## Tips for Android apps
 
-Be sure to give your app access to the Google API, see https://developers.google.com/fit/android/get-started
+* You need to ahve the Google Services API downloaded in your SDK
+* Be sure to give your app access to the Google Fitness API, see https://developers.google.com/fit/android/get-started
+
+some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
 
 
 ## Roadmap
 
 short term
 
-- add registration to updates
+- add aggregated query
 - add search for workouts
 - extend the datatypes
--- food, HKCorrelationTypeIdentifierFood but customised, TYPE_NUTRITION
--- blood pressure, HKCorrelationTypeIdentifierBloodPressure, custom data type
--- location, ??, TYPE_LOCATION
+ - blood glucose
+ - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
+ - food (HKCorrelationTypeIdentifierFood, TYPE_NUTRITION)
+ - location (not supported in iOS, TYPE_LOCATION)
 
 
 long term
 
+- add registration to updates (in Android, use sensors API of Google Fit)
 - store vital signs on an encrypted DB in the case of Android
 - add also Samsung Health as a health record for Android
