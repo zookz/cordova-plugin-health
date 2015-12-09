@@ -260,6 +260,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                                           [df stringFromDate:workout.startDate], HKPluginKeyStartDate,
                                           [df stringFromDate:workout.endDate], HKPluginKeyEndDate,
                                           workout.source.bundleIdentifier, HKPluginKeySourceBundleId,
+                                          workout.source.name, HKPluginKeySourceName,
                                           workoutActivity, @"activityType",
                                           nil
                                           ];
