@@ -111,15 +111,9 @@ navigator.health.store({
 
 * HealthKit includes medical data (eg blood glucose), Google Fit is currently only related to fitness data
 * HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types
+* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when quiered, Google Fit stores data with a fixed unit of measurent
 * HealthKit automatically counts steps and distance when you carry your phone with you, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
 * HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also
-
-
-## External Resources
-
-* The official Apple documentation for [HealthKit can be found here](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Framework/index.html#//apple_ref/doc/uid/TP40014707).
-* For functions that require the `unit` attribute, you can find the [comprehensive list of possible units from the Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
-* Google Fit [supported data types](https://developers.google.com/fit/android/data-types)
 
 
 ## Tips for iOS apps
@@ -134,6 +128,11 @@ navigator.health.store({
 
 some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
 
+## External Resources
+
+* The official Apple documentation for [HealthKit can be found here](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Framework/index.html#//apple_ref/doc/uid/TP40014707).
+* For functions that require the `unit` attribute, you can find the [comprehensive list of possible units from the Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
+* Google Fit [supported data types](https://developers.google.com/fit/android/data-types)
 
 ## Roadmap
 
@@ -153,3 +152,10 @@ long term
 - add registration to updates (in Android, use sensors API of Google Fit)
 - store vital signs on an encrypted DB in the case of Android
 - add also Samsung Health as a health record for Android
+
+## Contributions
+
+Any help is more than welcome!
+I cannot program in iOS, so I would particularly appreciate someone who can give me a hand.
+Just send me an email to my_username at gmail
+
