@@ -77,24 +77,25 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       };
       onSuccess(res);
     }, onError);
-  }  else if(opts.dataType== 'activity'){
-    window.plugins.healthkit.findWorkouts(opts,//opts is not really used, the plugin just returns ALL workouts !!!
-      function(data){
-        var result = [];
-        for(var i=0; i<data.length; i++) {
-          var res = {};
-          res.startDate = convertDate(data[i].startDate);
-          res.endDate = convertDate(data[i].endDate);
-          if((res.startDate >= opts.startDate) && (res.endDate <=opts.endDate)){
-            res.value = fromHKActivity(data[i].activityType);
-            res.unit = 'activityType';
-            res.source = data[i].sourceName;
-            result.push(res);
-          }
+  }  else if(opts.dataType== 'activity') {
+    //opts is not really used, the plugin just returns ALL workouts !!!
+    window.plugins.healthkit.findWorkouts(opts, function(data){
+      var result = [];
+      for(var i=0; i<data.length; i++) {
+        var res = {};
+        res.startDate = convertDate(data[i].startDate);
+        res.endDate = convertDate(data[i].endDate);
+        //filter the results based on the dates
+        if((res.startDate >= opts.startDate) && (res.endDate <=opts.endDate)) {
+          res.value = fromHKActivity(data[i].activityType);
+          res.unit = 'activityType';
+          res.source = data[i].sourceName;
+          result.push(res);
         }
-        //TODO: add sleep analysis
-        onSuccess(result);
-      },onError);
+      }
+      //TODO: add sleep analysis
+      onSuccess(result);
+    }, onError);
   } else if(dataTypes[ opts.dataType ]){
     opts.sampleType = dataTypes[ opts.dataType ];
     if(units[ opts.dataType ]){
@@ -400,7 +401,7 @@ Health.prototype.fromHKActivity = function(act){
     case 'HKWorkoutActivityTypeYoga': return 'yoga';
     default: return 'other';
   }
-}
+};
 
 cordova.addConstructor(function(){
   navigator.health = new Health();
