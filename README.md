@@ -12,7 +12,7 @@ This plugin stores health data in Google Fit, practice that is discouraged by Go
 ## Supported data types
 
 As HealthKit does not allow adding custom data types, only a subset of data types supported by HealthKit has been chosen.
-Gogole Fit is limited to fitness data and, when needed, custom data types are defined witht he suffix of the package name of your project.
+Google Fit is limited to fitness data and, for health, custom data types are defined with the suffix of the package name of your project.
 
 | data type      |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
 |----------------|---------------------------------------------------------|------------------------------------------|
@@ -79,8 +79,7 @@ navigator.health.query({
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: String}, the data type to be queried (see above)
-- successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', source: "xxx" }   
-- errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
+- successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', source: "xxx" }   - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 
 Quirks of query()
@@ -134,15 +133,17 @@ some more detailed instructions are provided [here](https://github.com/2dvisio/c
 ## External Resources
 
 * The official Apple documentation for [HealthKit can be found here](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Framework/index.html#//apple_ref/doc/uid/TP40014707).
-* For functions that require the `unit` attribute, you can find the [comprehensive list of possible units from the Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
+* For functions that require the `unit` attribute, you can find the comprehensive list of possible units from the [Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
+* [HealthKit constants](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Constants/index.html), used throughout the code
 * Google Fit [supported data types](https://developers.google.com/fit/android/data-types)
 
 ## Roadmap
 
 short term
 
-- add aggregated query
-- add search for workouts
+- add support for sleep analysis in iOS (under activity)
+- add calories and distance in activities
+- add aggregated queries (sum the whole lot, or aggregate per activity)
 - extend the datatypes
  - blood glucose
  - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
