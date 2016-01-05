@@ -28,7 +28,7 @@ Gogole Fit is limited to fitness data and, when needed, custom data types are de
 | activity       | HKWorkoutActivityType and HKCategoryValueSleepAnalysis  | TYPE_ACTIVITY_SEGMENT                    |
 
 
-Note: unit of measurements are fixed !
+Note: units of measurements are fixed !
 
 Data types can be of different types, see examples below:
 
