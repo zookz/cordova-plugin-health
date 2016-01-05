@@ -16,15 +16,16 @@ Gogole Fit is limited to fitness data and, when needed, custom data types are de
 
 | data type      |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
 |----------------|---------------------------------------------------------|------------------------------------------|
-| steps          | HKQuantityTypeIdentifierStepCount (count)               |  TYPE_STEP_COUNT_DELTA                   |
-| distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (m)      |  TYPE_DISTANCE_DELTA                     |
-| calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       |  TYPE_CALORIES_EXPENDED                  |
-| height         | HKQuantityTypeIdentifierHeight (m)                      |  TYPE_HEIGHT                             |
-| weight         | HKQuantityTypeIdentifierBodyMass (kg)                   |  TYPE_WEIGHT                             |
-| heart_rate     | HKQuantityTypeIdentifierHeartRate (count/min            |  TYPE_HEART_RATE_BPM                     |
-| fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (%)           |  TYPE_BODY_FAT_PERCENTAGE                |
-| gender         | HKCharacteristicTypeIdentifierBiologicalSex             |  custom (YOUR_PACKAGE_NAME.gender)       |
+| steps          | HKQuantityTypeIdentifierStepCount (count)               | TYPE_STEP_COUNT_DELTA                    |
+| distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (m)      | TYPE_DISTANCE_DELTA                      |
+| calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       | TYPE_CALORIES_EXPENDED                   |
+| height         | HKQuantityTypeIdentifierHeight (m)                      | TYPE_HEIGHT                              |
+| weight         | HKQuantityTypeIdentifierBodyMass (kg)                   | TYPE_WEIGHT                              |
+| heart_rate     | HKQuantityTypeIdentifierHeartRate (count/min)           | TYPE_HEART_RATE_BPM                      |
+| fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (%)           | TYPE_BODY_FAT_PERCENTAGE                 |
+| gender         | HKCharacteristicTypeIdentifierBiologicalSex             | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth  | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
+| activity       |                                                         | TYPE_ACTIVITY_SEGMENT                    |
 
 
 Note: unit of measurements are fixed !
@@ -42,7 +43,9 @@ Data types can be of different types, see examples below:
 | fat_percentage | 31.2                              |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
+| activity       | "walking"                         |
 
+Recognised activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md).
 
 ## Methods
 
@@ -158,4 +161,3 @@ long term
 Any help is more than welcome!
 I cannot program in iOS, so I would particularly appreciate someone who can give me a hand.
 Just send me an email to my_username at gmail
-

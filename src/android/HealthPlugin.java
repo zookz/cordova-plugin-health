@@ -15,6 +15,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
+import com.google.android.gms.fitness.FitnessActivities;
 import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataSource;
@@ -39,7 +40,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by engs1397 on 27/11/2015.
+ * Health plugin Android code.
+ * MIT licensed.
  */
 public class HealthPlugin extends CordovaPlugin {
     //logger tag
@@ -59,6 +61,7 @@ public class HealthPlugin extends CordovaPlugin {
     static {
         activitydatatypes.put("steps", DataType.TYPE_STEP_COUNT_DELTA);
         activitydatatypes.put("calories", DataType.TYPE_CALORIES_EXPENDED);
+        activitydatatypes.put("activity", DataType.TYPE_ACTIVITY_SEGMENT);
     }
 
     //Scope for read/write access to biometric data types in Google Fit. These include heart rate, height, and weight.
@@ -76,7 +79,7 @@ public class HealthPlugin extends CordovaPlugin {
 
     static {
         locationdatatypes.put("distance", DataType.TYPE_DISTANCE_DELTA);
-        locationdatatypes.put("location", DataType.TYPE_LOCATION_SAMPLE);
+        //locationdatatypes.put("location", DataType.TYPE_LOCATION_SAMPLE);
     }
 
     //Scope for read/write access to nutrition data types in Google Fit.
@@ -285,10 +288,12 @@ public class HealthPlugin extends CordovaPlugin {
                 }
                 DataReadRequest readRequest =  new DataReadRequest.Builder()
                         //.aggregate(dt, DataType.AGGREGATE_STEP_COUNT_DELTA)
-                        //.bucketByActivityType(1, TimeUnit.HOURS)
+                        //.bucketByTime(1, TimeUnit.HOURS)
+                        //.bucketByActivitySegment(1, TimeUnit.HOURS)
                         .setTimeRange(st, et, TimeUnit.MILLISECONDS)
                         .read(dt)
                         .build();
+
 
                 DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
@@ -333,6 +338,10 @@ public class HealthPlugin extends CordovaPlugin {
                                 float weight = datapoint.getValue(Field.FIELD_PERCENTAGE).asFloat();
                                 obj.put("value", weight);
                                 obj.put("unit", "percent");
+                            } else if (DT.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
+                                String activity = datapoint.getValue(Field.FIELD_ACTIVITY).asActivity();
+                                obj.put("value", activity);
+                                obj.put("unit", "activityType");
                             } else if (DT.equals(customdatatypes.get("gender"))) {
                                 String gender = datapoint.getValue(genderField).asString();
                                 obj.put("value", gender);
@@ -445,6 +454,9 @@ public class HealthPlugin extends CordovaPlugin {
                     String value = args.getJSONObject(0).getString("value");
                     float perc = Float.parseFloat(value);
                     datapoint.getValue(Field.FIELD_PERCENTAGE).setFloat(perc);
+                }  else if (dt.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
+                    String value = args.getJSONObject(0).getString("value");
+                    datapoint.getValue(Field.FIELD_ACTIVITY).setActivity(value);
                 } else if (dt.equals(customdatatypes.get("gender"))) {
                     String value = args.getJSONObject(0).getString("value");
                     datapoint.getValue(genderField).setString(value);
