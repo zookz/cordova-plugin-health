@@ -174,4 +174,7 @@ Health.prototype.toFitActivity = function(act){
   }
 };
 
-navigator.health = new Health();
+cordova.addConstructor(function(){
+  navigator.health = new Health();
+  return navigator.health;
+});
