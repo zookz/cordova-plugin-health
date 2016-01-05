@@ -25,7 +25,7 @@ Gogole Fit is limited to fitness data and, when needed, custom data types are de
 | fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (%)           | TYPE_BODY_FAT_PERCENTAGE                 |
 | gender         | HKCharacteristicTypeIdentifierBiologicalSex             | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth  | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
-| activity       |                                                         | TYPE_ACTIVITY_SEGMENT                    |
+| activity       | HKWorkoutActivityType and HKCategoryValueSleepAnalysis  | TYPE_ACTIVITY_SEGMENT                    |
 
 
 Note: unit of measurements are fixed !
