@@ -28,15 +28,12 @@ Health.prototype.store = function (data, onSuccess, onError) {
   if(data.endDate)
   data.endDate = data.endDate.getTime();
   if(data.dataType =='activity'){
-    data.value = Health.ToFitActivity(data.value);
+    data.value = Health.toFitActivity(data.value);
   }
   exec(onSuccess, onError, "health", "store", [data]);
 };
 
-navigator.health = new Health();
-
-
-Health.prototype.ToFitActivity = function(act){
+Health.prototype.toFitActivity = function(act){
   switch(act){
     case 'aerobics': return 'aerobics';
     case 'archery': return 'other';
@@ -175,4 +172,6 @@ Health.prototype.ToFitActivity = function(act){
     case 'zumba': return 'zumba';
     default: return 'other';
   }
-}
+};
+
+navigator.health = new Health();
