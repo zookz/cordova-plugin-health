@@ -28,7 +28,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
   if(data.endDate)
   data.endDate = data.endDate.getTime();
   if(data.dataType =='activity'){
-    data.value = Health.toFitActivity(data.value);
+    data.value = navigator.health.toFitActivity(data.value);
   }
   exec(onSuccess, onError, "health", "store", [data]);
 };
