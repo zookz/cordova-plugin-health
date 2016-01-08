@@ -17,7 +17,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | data type      |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
 |----------------|---------------------------------------------------------|------------------------------------------|
 | steps          | HKQuantityTypeIdentifierStepCount (count)               | TYPE_STEP_COUNT_DELTA                    |
-| distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (m)      | TYPE_DISTANCE_DELTA                      |
+| distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (m) + HKQuantityTypeIdentifierDistanceCycling (m) | TYPE_DISTANCE_DELTA |
 | calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       | TYPE_CALORIES_EXPENDED                   |
 | height         | HKQuantityTypeIdentifierHeight (m)                      | TYPE_HEIGHT                              |
 | weight         | HKQuantityTypeIdentifierBodyMass (kg)                   | TYPE_WEIGHT                              |
@@ -25,7 +25,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (%)           | TYPE_BODY_FAT_PERCENTAGE                 |
 | gender         | HKCharacteristicTypeIdentifierBiologicalSex             | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth  | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
-| activity       | HKWorkoutActivityType and HKCategoryValueSleepAnalysis  | TYPE_ACTIVITY_SEGMENT                    |
+| activity       | HKWorkoutTypeIdentifier and HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT           |
 
 
 Note: units of measurements are fixed !
@@ -97,7 +97,6 @@ Quirks of query()
 
 - calories in Android is returned as sum within the specified time window
 
-
 ### store()
 
 Stores a data point.
@@ -112,19 +111,22 @@ navigator.health.store({
 ```
 
 - startDate: {type: Date}, start date from which to get data
-- endDate: {type: Date}, end data to which to get teh data
+- endDate: {type: Date}, end data to which to get the data
 - dataType: {type: a String}, the data type
 - value: {type: a number or an Object}, depending on the actual data type
 - source: {type: String}, the source that produced this data. In iOS this ignored and set automatically to the name of your app.
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
+Quirks of store()
+
+- in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `
 
 ## Differences between HealthKit and Google Fit
 
 * HealthKit includes medical data (eg blood glucose), Google Fit is currently only related to fitness data
 * HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types
-* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when quiered, Google Fit stores data with a fixed unit of measurent
+* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when quiered, Google Fit stores data with a fixed unit of measurement
 * HealthKit automatically counts steps and distance when you carry your phone with you, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
 * HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also
 
@@ -152,14 +154,14 @@ some more detailed instructions are provided [here](https://github.com/2dvisio/c
 
 short term
 
-- add support for sleep analysis in iOS (under activity)
-- add calories and distance in activities
 - add aggregated queries (sum the whole lot, or aggregate per activity)
+- add calories and distance in activities
+- add support for HKCategory samples in HealthKit
 - extend the datatypes
  - blood glucose
  - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
  - food (HKCorrelationTypeIdentifierFood, TYPE_NUTRITION)
- - location (not supported in iOS, TYPE_LOCATION)
+ - location (NA, TYPE_LOCATION)
 
 
 long term
@@ -172,4 +174,4 @@ long term
 
 Any help is more than welcome!
 I cannot program in iOS, so I would particularly appreciate someone who can give me a hand.
-Just send me an email to my_username at gmail
+Just send me an email to my_username at gmail.com
