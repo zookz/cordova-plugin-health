@@ -5,7 +5,7 @@ var Health = function () {
 };
 
 Health.prototype.isAvailable = function (onSuccess, onError) {
-  exec(onSuccess, onError, "health", "isAvailable");
+  exec(onSuccess, onError, "health", "isAvailable", []);
 };
 
 Health.prototype.requestAuthorization = function (datatypes, onSuccess, onError) {

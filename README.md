@@ -49,6 +49,17 @@ Recognised activities and their mapping to Fit / HealthKit equivalents are liste
 
 ## Methods
 
+### isAvailable()
+
+Tells if either Google Fit or HealthKit are available.
+
+```
+navigator.health.isAvailable(successCallback, errorCallback)
+```
+
+- successCallback: {type: function}, if available a true is passed as argument, false otherwise
+- errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
+
 ### requestAuthorization()
 
 Requests read and write access to a set of data types.
