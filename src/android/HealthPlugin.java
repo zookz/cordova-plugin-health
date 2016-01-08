@@ -172,7 +172,16 @@ public class HealthPlugin extends CordovaPlugin {
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
 
-        if ("requestAuthorization".equals(action)) {
+      if("isAvailable".equals(action)){
+        PackageManager pm = getPackageManager();
+    try {
+       pm.getPackageInfo(com.google.android.apps.fitness, PackageManager.GET_ACTIVITIES);
+       callbackContext.success(true);
+    } catch (PackageManager.NameNotFoundException e) {
+       callbackContext.success(false);
+    }
+    return;
+      } else  if ("requestAuthorization".equals(action)) {
             this.cordova.setActivityResultCallback(this);
             authReqCallbackCtx = callbackContext;
 

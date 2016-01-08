@@ -24,6 +24,7 @@ units['weight'] = 'kg';
 units['heart_rate'] = 'count/min';
 units['fat_percentage'] = '%';
 
+Health.prototype.isAvailable = window.plugins.healthkit.available;
 
 Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
   var HKdatatypes = [];

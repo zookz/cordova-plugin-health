@@ -4,6 +4,10 @@ var Health = function () {
   this.name = "health";
 };
 
+Health.prototype.isAvailable = function (onSuccess, onError) {
+  exec(onSuccess, onError, "health", "isAvailable");
+};
+
 Health.prototype.requestAuthorization = function (datatypes, onSuccess, onError) {
   exec(onSuccess, onError, "health", "requestAuthorization", [datatypes]);
 };
