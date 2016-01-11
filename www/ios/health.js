@@ -96,10 +96,11 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         res.startDate = convertDate(data[i].startDate);
         res.endDate = convertDate(data[i].endDate);
         //filter the results based on the dates
-        //TODO: add calories and distance ?
         if((res.startDate >= opts.startDate) && (res.endDate <=opts.endDate)) {
           res.value = data[i].activityType;
           res.unit = 'activityType';
+          res.calories = data[i].energy;
+          res.distance = data[i].distance;
           res.source = data[i].sourceName;
           result.push(res);
         }
@@ -186,6 +187,53 @@ Health.prototype.query = function (opts, onSuccess, onError) {
     }, onError);//first call to querySampleType
   } else {
     onError('unknown data type '+dts[i]);
+  }
+};
+
+
+Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
+  if((opts.dataType == 'steps') || (opts.dataType == 'distance') || (opts.dataType == 'calories')){
+    opts.sampleType = dataTypes[ opts.dataType ];
+    if(units[ opts.dataType ]) opts.unit = units[ opts.dataType ];
+    window.plugins.healthkit.sumQuantityType(opts, function(value) {
+      var unit;
+      if(opts.dataType == 'steps') unit = 'count';
+      if(opts.dataType == 'distance') unit = 'm';
+      if(opts.dataType == 'calories') unit = 'kcal';
+      onSuccess({
+        startDate: opts.startDate,
+        endDate: opts.endDate,
+        value: value,
+        unit: unit
+      });
+    }, onError);
+  } else if(opts.dataType == 'activity'){
+    var res = {
+      startDate: opts.startDate,
+      endDate: opts.endDate,
+      value: {},
+      unit: 'activitySummary'
+    };
+    navigator.health.query(opts, function(data){
+      //aggregate by activity
+      for(var i=0; i<data.length; i++){
+        var dur = (data[i].endDate - data[i].startDate)/1000;
+        var dist = data[i].distance;
+        var cals = data[i].calories;
+        if(res.value[data.value]){
+          res.value[data.value].duration += dur;
+          res.value[data.value].distance += dist;
+          res.value[data.value].calories += cals;
+        } else res.value[data.value] = {
+          duration: dur,
+          distance: dist,
+          calories: cals
+        };
+      }
+      onSuccess(res);
+    }, onError);
+  } else {
+    onError('Datatype '+opts.dataType+' not supported in queryAggregated');
   }
 };
 
