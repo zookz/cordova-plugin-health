@@ -19,13 +19,13 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | steps          | HKQuantityTypeIdentifierStepCount (count)               | TYPE_STEP_COUNT_DELTA                    |
 | distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (m) + HKQuantityTypeIdentifierDistanceCycling (m) | TYPE_DISTANCE_DELTA |
 | calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       | TYPE_CALORIES_EXPENDED                   |
+| activity       | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT            |
 | height         | HKQuantityTypeIdentifierHeight (m)                      | TYPE_HEIGHT                              |
 | weight         | HKQuantityTypeIdentifierBodyMass (kg)                   | TYPE_WEIGHT                              |
 | heart_rate     | HKQuantityTypeIdentifierHeartRate (count/min)           | TYPE_HEART_RATE_BPM                      |
 | fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (%)           | TYPE_BODY_FAT_PERCENTAGE                 |
 | gender         | HKCharacteristicTypeIdentifierBiologicalSex             | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth  | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
-| activity       | HKWorkoutTypeIdentifier and HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT           |
 
 
 Note: units of measurements are fixed !
@@ -96,6 +96,38 @@ navigator.health.query({
 Quirks of query()
 
 - calories in Android is returned as sum within the specified time window
+
+### queryAggregated()
+
+Gets aggregated data in a certain time window.
+
+```
+navigator.health.queryAggregated({
+        startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
+        endDate: new Date(), // now
+        dataType: 'height'
+        }, successCallback, errorCallback)
+```
+
+- startDate: {type: Date}, start date from which to get data
+- endDate: {type: Date}, end data to which to get the data
+- dataType: {type: String}, the data type to be queried (see below for supported data types)
+- successCallback: {type: function(data) }, called if all OK, data contains the result of the query, see below for returned data types
+- errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
+
+Not all data types are supported for aggregated queries.
+The following table shows what data are available and examples of aggregated data:
+
+| data type      | example of returned object |
+|----------------|----------------------------|
+| steps          | { startDate: Date, endDate: Date, value: 5780, unit: 'count' } |
+| distance       | { startDate: Date, endDate: Date, value: 12500.0, unit: 'm' } |
+| calories       | { startDate: Date, endDate: Date, value: 13146.1, unit: 'count' } |
+| activity       | { startDate: Date, endDate: Date, value: { still: { duration: 500, calories: 30 }, walking: { duration: 200, calories: 20 }}, unit: 'activitySummary' } (duration is expressed in seconds and calories in kcal) |
+
+Quirks of queryAggregated()
+
+- when querying for activities, in Google Fit calories are not provided
 
 ### store()
 

@@ -9,7 +9,7 @@ Health.prototype.isAvailable = function (onSuccess, onError) {
 };
 
 Health.prototype.requestAuthorization = function (datatypes, onSuccess, onError) {
-  exec(onSuccess, onError, "health", "requestAuthorization", [datatypes]);
+  exec(onSuccess, onError, "health", "requestAuthorization", datatypes);
 };
 
 Health.prototype.query = function (opts, onSuccess, onError) {
