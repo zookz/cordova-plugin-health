@@ -37,13 +37,13 @@ Data types can be of different types, see examples below:
 | steps          | 34                                |
 | distance       | 101.2                             |
 | calories       | 245.3                             |
+| activity       | "walking"                         |
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
 | fat_percentage | 31.2                              |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
-| activity       | "walking"                         |
 
 Recognised activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md).
 
@@ -186,13 +186,11 @@ some more detailed instructions are provided [here](https://github.com/2dvisio/c
 
 short term
 
-- add aggregated queries (sum the whole lot, or aggregate per activity)
-- add calories and distance in activities
 - add support for HKCategory samples in HealthKit
 - extend the datatypes
- - blood glucose
  - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
  - food (HKCorrelationTypeIdentifierFood, TYPE_NUTRITION)
+ - blood glucose
  - location (NA, TYPE_LOCATION)
 
 
