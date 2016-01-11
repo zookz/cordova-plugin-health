@@ -200,12 +200,25 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
       if(opts.dataType == 'steps') unit = 'count';
       if(opts.dataType == 'distance') unit = 'm';
       if(opts.dataType == 'calories') unit = 'kcal';
-      onSuccess({
-        startDate: opts.startDate,
-        endDate: opts.endDate,
-        value: value,
-        unit: unit
-      });
+      if(opts.dataType == 'distance'){
+        //add HKQuantityTypeIdentifierDistanceCycling to distance
+        var dist = value;
+        window.plugins.healthkit.sumQuantityType(opts, function(value) {
+          onSuccess({
+            startDate: opts.startDate,
+            endDate: opts.endDate,
+            value: value + dist,
+            unit: unit
+          });
+        }, onError);
+      } else {
+        onSuccess({
+          startDate: opts.startDate,
+          endDate: opts.endDate,
+          value: value,
+          unit: unit
+        });  
+      }
     }, onError);
   } else if(opts.dataType == 'activity'){
     var res = {
@@ -220,11 +233,11 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
         var dur = (data[i].endDate - data[i].startDate)/1000;
         var dist = data[i].distance;
         var cals = data[i].calories;
-        if(res.value[data.value]){
-          res.value[data.value].duration += dur;
-          res.value[data.value].distance += dist;
-          res.value[data.value].calories += cals;
-        } else res.value[data.value] = {
+        if(res.value[data[i].value]){
+          res.value[data[i].value].duration += dur;
+          res.value[data[i].value].distance += dist;
+          res.value[data[i].value].calories += cals;
+        } else res.value[data[i].value] = {
           duration: dur,
           distance: dist,
           calories: cals
