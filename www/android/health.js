@@ -26,6 +26,20 @@ Health.prototype.query = function (opts, onSuccess, onError) {
   }, onError, "health", "query", [opts]);
 };
 
+Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
+  if(opts.startDate)
+    opts.startDate = opts.startDate.getTime();
+  if(opts.endDate)
+    opts.endDate = opts.endDate.getTime();
+  exec(function(data){
+    for(var i=0; i<data.length; i++){
+      data[i].startDate = new Date(data[i].startDate);
+      data[i].endDate = new Date(data[i].endDate);
+    }
+    onSuccess(data);
+  }, onError, "health", "queryAggregated", [opts]);
+};
+
 Health.prototype.store = function (data, onSuccess, onError) {
   if(data.startDate)
   data.startDate = data.startDate.getTime();
