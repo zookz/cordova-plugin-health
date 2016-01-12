@@ -8,6 +8,13 @@ This work is based on [cordova plugin googlefit](https://github.com/2dvisio/cord
 
 This plugin stores health data in Google Fit, practice that is discouraged by Google.
 
+## Installation
+
+Just execute this line in your project's folder:
+
+```
+cordova plugin add cordova-plugin-health
+```
 
 ## Supported data types
 
