@@ -128,7 +128,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
     }
     window.plugins.healthkit.querySampleType(opts, function(data){
       var result = [];
-      //fallback scenarios for weight
+      //fallback scenario for weight
       if((opts.dataType== 'weight') && (data.length == 0)){
         //let's try to get it from the health ID
         window.plugins.healthkit.readWeight({ unit: 'kg' }, function(data){
@@ -192,6 +192,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
 
 
 Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
+  var startD = opts.startDate;
+  var endD = opts.endDate;
   if((opts.dataType == 'steps') || (opts.dataType == 'distance') || (opts.dataType == 'calories')){
     opts.sampleType = dataTypes[ opts.dataType ];
     if(units[ opts.dataType ]) opts.unit = units[ opts.dataType ];
@@ -203,10 +205,12 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
       if(opts.dataType == 'distance'){
         //add HKQuantityTypeIdentifierDistanceCycling to distance
         var dist = value;
+        opts.startDate = startD;
+        opts.endDate = endD;
         window.plugins.healthkit.sumQuantityType(opts, function(value) {
           onSuccess({
-            startDate: opts.startDate,
-            endDate: opts.endDate,
+            startDate: startD,
+            endDate: endD,
             value: value + dist,
             unit: unit
           });
@@ -217,13 +221,13 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
           endDate: opts.endDate,
           value: value,
           unit: unit
-        });  
+        });
       }
     }, onError);
   } else if(opts.dataType == 'activity'){
     var res = {
-      startDate: opts.startDate,
-      endDate: opts.endDate,
+      startDate: startD,
+      endDate: endD,
       value: {},
       unit: 'activitySummary'
     };
