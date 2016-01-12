@@ -128,7 +128,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
     }
     window.plugins.healthkit.querySampleType(opts, function(data){
       var result = [];
-      //fallback scenarios for weight
+      //fallback scenario for weight
       if((opts.dataType== 'weight') && (data.length == 0)){
         //let's try to get it from the health ID
         window.plugins.healthkit.readWeight({ unit: 'kg' }, function(data){
@@ -217,7 +217,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
           endDate: opts.endDate,
           value: value,
           unit: unit
-        });  
+        });
       }
     }, onError);
   } else if(opts.dataType == 'activity'){

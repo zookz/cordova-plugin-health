@@ -57,7 +57,7 @@ Tells if either Google Fit or HealthKit are available.
 navigator.health.isAvailable(successCallback, errorCallback)
 ```
 
-- successCallback: {type: function}, if available a true is passed as argument, false otherwise
+- successCallback: {type: function(available)}, if available a true is passed as argument, false otherwise
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 ### requestAuthorization()
@@ -96,6 +96,7 @@ navigator.health.query({
 Quirks of query()
 
 - calories in Android is returned as sum within the specified time window
+- when querying for activities, Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 
 ### queryAggregated()
 
@@ -116,7 +117,7 @@ navigator.health.queryAggregated({
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 Not all data types are supported for aggregated queries.
-The following table shows what data are available and examples of aggregated data:
+The following table shows what types are supported and examples of aggregated data:
 
 | data type      | example of returned object |
 |----------------|----------------------------|
@@ -146,13 +147,14 @@ navigator.health.store({
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: a String}, the data type
 - value: {type: a number or an Object}, depending on the actual data type
-- source: {type: String}, the source that produced this data. In iOS this ignored and set automatically to the name of your app.
+- source: {type: String}, the source that produced this data. In iOS this is ignored and set automatically to the name of your app.
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 Quirks of store()
 
 - in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `
+- in iOS, storing the sleep activities is not supported at the moment
 
 ## Differences between HealthKit and Google Fit
 
@@ -170,7 +172,7 @@ Quirks of store()
 
 ## Tips for Android apps
 
-* You need to ahve the Google Services API downloaded in your SDK
+* You need to have the Google Services API downloaded in your SDK
 * Be sure to give your app access to the Google Fitness API, see https://developers.google.com/fit/android/get-started
 
 some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
