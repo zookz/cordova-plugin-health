@@ -19,7 +19,8 @@ dataTypes['activity'] = 'HKWorkoutTypeIdentifier'; //and HKCategoryTypeIdentifie
 var units = [];
 units['steps'] = 'count';
 units['distance'] = 'm';
-units['calories'] = 'kcal';
+units['calories.active'] = 'kcal';
+units['calories.basal'] = 'kcal';
 units['height'] = 'm';
 units['weight'] = 'kg';
 units['heart_rate'] = 'count/min';
@@ -195,14 +196,10 @@ Health.prototype.query = function (opts, onSuccess, onError) {
 Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   var startD = opts.startDate;
   var endD = opts.endDate;
-  if((opts.dataType == 'steps') || (opts.dataType == 'distance') || (opts.dataType == 'calories')){
+  if((opts.dataType == 'steps') || (opts.dataType == 'distance') || (opts.dataType == 'calories.active') || (opts.dataType == 'calories.basal')){
     opts.sampleType = dataTypes[ opts.dataType ];
     if(units[ opts.dataType ]) opts.unit = units[ opts.dataType ];
     window.plugins.healthkit.sumQuantityType(opts, function(value) {
-      var unit;
-      if(opts.dataType == 'steps') unit = 'count';
-      if(opts.dataType == 'distance') unit = 'm';
-      if(opts.dataType == 'calories') unit = 'kcal';
       if(opts.dataType == 'distance'){
         //add HKQuantityTypeIdentifierDistanceCycling to distance
         var dist = value;
@@ -213,15 +210,15 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
             startDate: startD,
             endDate: endD,
             value: value + dist,
-            unit: unit
+            unit: opts.unit
           });
         }, onError);
       } else {
         onSuccess({
-          startDate: opts.startDate,
-          endDate: opts.endDate,
+          startDate: startD,
+          endDate: endD,
           value: value,
-          unit: unit
+          unit: opts.unit
         });
       }
     }, onError);
