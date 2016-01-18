@@ -14,33 +14,66 @@ Health.prototype.requestAuthorization = function (datatypes, onSuccess, onError)
 
 Health.prototype.query = function (opts, onSuccess, onError) {
   navigator.health.requestAuthorization([opts.dataType], function(){
-    if(opts.startDate)
-    opts.startDate = opts.startDate.getTime();
-    if(opts.endDate)
-    opts.endDate = opts.endDate.getTime();
-    exec(function(data){
-      for(var i=0; i<data.length; i++){
-        data[i].startDate = new Date(data[i].startDate);
-        data[i].endDate = new Date(data[i].endDate);
-      }
-      onSuccess(data);
-    }, onError, "health", "query", [opts]);
+    //calories.active is done by asking all calories and subtracting the basal
+    if(opts.dataType =='calories.active'){
+      //get basal average in the time window
+      opts.dataType ='calories.basal';
+      navigator.health.queryAggregated(opts, function(data){
+        var basal_ms = data.value / (data.endDate.getTime() - data.startDate.getTime());
+        //now get the total
+        opts.dataType ='calories';
+        navigator.health.query(opts, function(data){
+          //and subtract the basal
+          for(var i=0; i<data.length; i++){
+            data[i].value -= basal_ms * (data[i].endDate.getTime() - data[i].startDate.getTime());
+            if(data[i].value <0)
+            data[i].value = 0;
+          }
+          onSuccess(data);
+        }, onError);
+      }, onError);
+    } else {
+      if(opts.startDate && (typeof opts.startDate == 'object'))
+      opts.startDate = opts.startDate.getTime();
+      if(opts.endDate && (typeof opts.endDate == 'object'))
+      opts.endDate = opts.endDate.getTime();
+      exec(function(data){
+        for(var i=0; i<data.length; i++){
+          data[i].startDate = new Date(data[i].startDate);
+          data[i].endDate = new Date(data[i].endDate);
+        }
+        onSuccess(data);
+      }, onError, "health", "query", [opts]);
+    }
   }, onError);
 };
 
 Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   navigator.health.requestAuthorization([opts.dataType], function(){
-    if(opts.startDate)
-    opts.startDate = opts.startDate.getTime();
-    if(opts.endDate)
-    opts.endDate = opts.endDate.getTime();
-    exec(function(data){
-      for(var i=0; i<data.length; i++){
-        data[i].startDate = new Date(data[i].startDate);
-        data[i].endDate = new Date(data[i].endDate);
-      }
-      onSuccess(data);
-    }, onError, "health", "queryAggregated", [opts]);
+    if(opts.dataType =='calories.active'){
+      //get basal average in the time window
+      opts.dataType ='calories.basal';
+      navigator.health.queryAggregated(opts, function(data){
+        var basal_ms = data.value / (data.endDate.getTime() - data.startDate.getTime());
+        //now get the total
+        opts.dataType ='calories';
+        navigator.health.queryAggregated(opts, function(data){
+          data.value -= basal_ms * (data.endDate.getTime() - data.startDate.getTime());
+          onSuccess(data);
+        }, onError);
+      }, onError);
+    } else {
+      if(opts.startDate && (typeof opts.startDate == 'object'))
+      opts.startDate = opts.startDate.getTime();
+      if(opts.endDate && (typeof opts.endDate == 'object'))
+      opts.endDate = opts.endDate.getTime();
+      exec(function(data){
+        //reconvert the dates back to Date objects
+        data.startDate = new Date(data.startDate);
+        data.endDate = new Date(data.endDate);
+        onSuccess(data);
+      }, onError, "health", "queryAggregated", [opts]);
+    }
   }, onError);
 };
 

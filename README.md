@@ -21,18 +21,19 @@ cordova plugin add cordova-plugin-health
 As HealthKit does not allow adding custom data types, only a subset of data types supported by HealthKit has been chosen.
 Google Fit is limited to fitness data and, for health, custom data types are defined with the suffix of the package name of your project.
 
-| data type      |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
-|----------------|---------------------------------------------------------|------------------------------------------|
-| steps          | HKQuantityTypeIdentifierStepCount (count)               | TYPE_STEP_COUNT_DELTA                    |
-| distance       | HKQuantityTypeIdentifierDistanceWalkingRunning (m) + HKQuantityTypeIdentifierDistanceCycling (m) | TYPE_DISTANCE_DELTA |
-| calories       | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       | TYPE_CALORIES_EXPENDED                   |
-| activity       | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT            |
-| height         | HKQuantityTypeIdentifierHeight (m)                      | TYPE_HEIGHT                              |
-| weight         | HKQuantityTypeIdentifierBodyMass (kg)                   | TYPE_WEIGHT                              |
-| heart_rate     | HKQuantityTypeIdentifierHeartRate (count/min)           | TYPE_HEART_RATE_BPM                      |
-| fat_percentage | HKQuantityTypeIdentifierBodyFatPercentage (%)           | TYPE_BODY_FAT_PERCENTAGE                 |
-| gender         | HKCharacteristicTypeIdentifierBiologicalSex             | custom (YOUR_PACKAGE_NAME.gender)        |
-| date_of_birth  | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
+| data type       |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
+|-----------------|---------------------------------------------------------|------------------------------------------|
+| steps           | HKQuantityTypeIdentifierStepCount (count)               | TYPE_STEP_COUNT_DELTA                    |
+| distance        | HKQuantityTypeIdentifierDistanceWalkingRunning (m) + HKQuantityTypeIdentifierDistanceCycling (m) | TYPE_DISTANCE_DELTA |
+| calories.active | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
+| calories.basal  | HKQuantityTypeIdentifierBasalEnergyBurned (kcal)        | TYPE_BASAL_METABOLIC_RATE * time window  |
+| activity        | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT            |
+| height          | HKQuantityTypeIdentifierHeight (m)                      | TYPE_HEIGHT                              |
+| weight          | HKQuantityTypeIdentifierBodyMass (kg)                   | TYPE_WEIGHT                              |
+| heart_rate      | HKQuantityTypeIdentifierHeartRate (count/min)           | TYPE_HEART_RATE_BPM                      |
+| fat_percentage  | HKQuantityTypeIdentifierBodyFatPercentage (%)           | TYPE_BODY_FAT_PERCENTAGE                 |
+| gender          | HKCharacteristicTypeIdentifierBiologicalSex             | custom (YOUR_PACKAGE_NAME.gender)        |
+| date_of_birth   | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
 
 
 Note: units of measurements are fixed !
@@ -102,7 +103,7 @@ navigator.health.query({
 
 Quirks of query()
 
-- calories in Android is returned as sum within the specified time window
+- calories.basal in Android is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 2 or 3 days)
 - when querying for activities, Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 
 ### queryAggregated()
@@ -126,16 +127,18 @@ navigator.health.queryAggregated({
 Not all data types are supported for aggregated queries.
 The following table shows what types are supported and examples of aggregated data:
 
-| data type      | example of returned object |
-|----------------|----------------------------|
-| steps          | { startDate: Date, endDate: Date, value: 5780, unit: 'count' } |
-| distance       | { startDate: Date, endDate: Date, value: 12500.0, unit: 'm' } |
-| calories       | { startDate: Date, endDate: Date, value: 13146.1, unit: 'count' } |
-| activity       | { startDate: Date, endDate: Date, value: { still: { duration: 500, calories: 30, distance: 0 }, walking: { duration: 200, calories: 20, distance: 15 }}, unit: 'activitySummary' } (duration is expressed in seconds, distance in meters and calories in kcal) |
+| data type       | example of returned object |
+|-----------------|----------------------------|
+| steps           | { startDate: Date, endDate: Date, value: 5780, unit: 'count' } |
+| distance        | { startDate: Date, endDate: Date, value: 12500.0, unit: 'm' } |
+| calories.active | { startDate: Date, endDate: Date, value: 13146.1, unit: 'count' } |
+| calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'count' } |
+| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 500, calories: 30, distance: 0 }, walking: { duration: 200, calories: 20, distance: 15 }}, unit: 'activitySummary' } (duration is expressed in seconds, distance in meters and calories in kcal) |
 
 Quirks of queryAggregated()
 
 - when querying for activities, in Google Fit calories and distance are not provided
+- calories.basal in Android may be not available in time windows smaller than 2 or 3 days (due to Google Fit's implementation), as calories.active is computed by subtracting the basal from the total, when the basal is not available because of the time window being too small, a second try is done
 
 ### store()
 

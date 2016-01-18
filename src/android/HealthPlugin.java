@@ -37,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,7 @@ public class HealthPlugin extends CordovaPlugin {
     static {
         activitydatatypes.put("steps", DataType.TYPE_STEP_COUNT_DELTA);
         activitydatatypes.put("calories", DataType.TYPE_CALORIES_EXPENDED);
+        activitydatatypes.put("calories.basal", DataType.TYPE_BASAL_METABOLIC_RATE);
         activitydatatypes.put("activity", DataType.TYPE_ACTIVITY_SEGMENT);
     }
 
@@ -358,6 +360,10 @@ public class HealthPlugin extends CordovaPlugin {
                         float calories = datapoint.getValue(Field.FIELD_CALORIES).asFloat();
                         obj.put("value", calories);
                         obj.put("unit", "kcal");
+                    } else if (DT.equals(DataType.TYPE_BASAL_METABOLIC_RATE)) {
+                        float calories = datapoint.getValue(Field.FIELD_CALORIES).asFloat();
+                        obj.put("value", calories);
+                        obj.put("unit", "kcal");
                     } else if (DT.equals(DataType.TYPE_HEIGHT)) {
                         float height = datapoint.getValue(Field.FIELD_HEIGHT).asFloat();
                         obj.put("value", height);
@@ -427,17 +433,24 @@ public class HealthPlugin extends CordovaPlugin {
 
         if(datatype.equalsIgnoreCase("steps")){
             builder.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA);
+            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         } else if(datatype.equalsIgnoreCase("distance")){
             builder.aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA);
+            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         } else if(datatype.equalsIgnoreCase("calories")){
             builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
+            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+        } else if(datatype.equalsIgnoreCase("calories.basal")){
+            builder.read(DataType.TYPE_BASAL_METABOLIC_RATE);
+            //we could use the aggregated AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY but it does not work, there's a bug in Google Fit!
         } else if(datatype.equalsIgnoreCase("activity")){
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
+            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         } else {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
         }
-        builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+
         DataReadRequest readRequest = builder.build();
 
         DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
@@ -513,6 +526,28 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                     }
                 }
+            }
+
+            if (datatype.equalsIgnoreCase("calories.basal")) {
+                //array used for ageraging values of BMR
+                ArrayList<Float> BMRs = new ArrayList<Float>();
+                obj.put("startDate", st);
+                obj.put("endDate", et);
+                obj.put("unit", "kcal");
+                //here we expect the data not to be bucketed
+                for(DataSet ds : dataReadResult.getDataSets()){
+                    for(DataPoint dp: ds.getDataPoints()){
+                        float basal = dp.getValue(Field.FIELD_CALORIES).asFloat();
+                        BMRs.add(basal);
+                    }
+                }
+                //compute avg
+                double avg = 0;
+                for(Float v: BMRs) avg += v;
+                avg /= BMRs.size();
+                //in the specified time window
+                double val = (avg / (24*60*60*1000)) * (et-st);
+                obj.put("value", val);
             }
             callbackContext.success(obj);
         } else {
