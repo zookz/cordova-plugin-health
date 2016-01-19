@@ -1,5 +1,6 @@
 # Cordova Health Plugin
 
+
 A plugin that abstracts fitness and health repositories like Apple HealthKit or Google Fit.
 
 This work is based on [cordova plugin googlefit](https://github.com/2dvisio/cordova-plugin-googlefit) and on [cordova healthkit plugin](https://github.com/Telerik-Verified-Plugins/HealthKit)
@@ -45,7 +46,7 @@ Data types can be of different types, see examples below:
 | steps          | 34                                |
 | distance       | 101.2                             |
 | calories       | 245.3                             |
-| activity       | "walking"                         |
+| activity       | "walking"  (note: recognised activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md)) |
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
@@ -53,7 +54,6 @@ Data types can be of different types, see examples below:
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
 
-Recognised activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md).
 
 ## Methods
 
@@ -104,6 +104,7 @@ navigator.health.query({
 Quirks of query()
 
 - calories.basal in Android is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 2 or 3 days)
+- calories.active is computed by subtracting the basal from the total, when the basal is not available because of the time window being too small, the answer may be undefined
 - when querying for activities, Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 
 ### queryAggregated()
@@ -114,7 +115,7 @@ Gets aggregated data in a certain time window.
 navigator.health.queryAggregated({
         startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
         endDate: new Date(), // now
-        dataType: 'height'
+        dataType: 'steps'
         }, successCallback, errorCallback)
 ```
 
@@ -131,14 +132,14 @@ The following table shows what types are supported and examples of aggregated da
 |-----------------|----------------------------|
 | steps           | { startDate: Date, endDate: Date, value: 5780, unit: 'count' } |
 | distance        | { startDate: Date, endDate: Date, value: 12500.0, unit: 'm' } |
-| calories.active | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
+| calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
-| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 500, calories: 30, distance: 0 }, walking: { duration: 200, calories: 20, distance: 15 }}, unit: 'activitySummary' } (duration is expressed in seconds, distance in meters and calories in kcal) |
+| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 500, calories: 30, distance: 0 }, walking: { duration: 200, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in seconds, distance in meters and calories in kcal) |
 
 Quirks of queryAggregated()
 
-- when querying for activities, in Google Fit calories and distance are not provided
-- calories.basal in Android may be not available in time windows smaller than 2 or 3 days (due to Google Fit's implementation), as calories.active is computed by subtracting the basal from the total, when the basal is not available because of the time window being too small, a second try is done
+- when querying for activities, calories and distance are provided when available in HealthKit and never in Google Fit
+- calories.basal in Android may be not available in time windows smaller than 2 or 3 days (due to Google Fit's implementation), as calories.active is computed by subtracting the basal from the total, when the basal is not available because of the time window being too small, the answer may be undefined
 
 ### store()
 
@@ -199,6 +200,7 @@ some more detailed instructions are provided [here](https://github.com/2dvisio/c
 short term
 
 - add support for HKCategory samples in HealthKit
+- refactor HealthKit.js to make it more understandable
 - extend the datatypes
  - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
  - food (HKCorrelationTypeIdentifierFood, TYPE_NUTRITION)
