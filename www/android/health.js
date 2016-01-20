@@ -26,8 +26,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           //and subtract the basal
           for(var i=0; i<data.length; i++){
             data[i].value -= basal_ms * (data[i].endDate.getTime() - data[i].startDate.getTime());
-            if(data[i].value <0)
-            data[i].value = 0;
+            if(data[i].value <0) data[i].value = 0; //negative values don't make sense
           }
           onSuccess(data);
         }, onError);
@@ -79,18 +78,22 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
 
 Health.prototype.store = function (data, onSuccess, onError) {
   navigator.health.requestAuthorization([data.dataType], function(){
-    if(data.startDate)
+    if(data.startDate && (typeof opts.startDate == 'object'))
     data.startDate = data.startDate.getTime();
-    if(data.endDate)
+    if(data.endDate && (typeof opts.endDate == 'object'))
     data.endDate = data.endDate.getTime();
     if(data.dataType =='activity'){
       data.value = navigator.health.toFitActivity(data.value);
+    }
+    if(opts.dataType =='calories.active'){
+      opts.dataType =='calories'; //TODO: should add basal calories before storing
     }
     exec(onSuccess, onError, "health", "store", [data]);
   }, onError);
 };
 
 Health.prototype.toFitActivity = function(act){
+  //unsupported activities are mapped to 'other'
   if((act == 'archery') ||
   (act == 'bowling') ||
   (act == 'fishing') ||
