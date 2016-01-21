@@ -349,7 +349,7 @@ public class HealthPlugin extends CordovaPlugin {
 
                     //reference for fields: https://developers.google.com/android/reference/com/google/android/gms/fitness/data/Field.html
                     if (DT.equals(DataType.TYPE_STEP_COUNT_DELTA)) {
-                        float steps = datapoint.getValue(Field.FIELD_STEPS).asFloat();
+                        int steps = datapoint.getValue(Field.FIELD_STEPS).asInt();
                         obj.put("value", steps);
                         obj.put("unit", "count");
                     } else if (DT.equals(DataType.TYPE_DISTANCE_DELTA)) {
