@@ -538,7 +538,6 @@ public class HealthPlugin extends CordovaPlugin {
                             }
                             JSONObject summary;
                             int ndur = datapoint.getValue(Field.FIELD_DURATION).asInt();
-                            ndur /= 1000; // comes in nanoseconds, better using seconds
                             if(actobj.has(activity)){
                                 summary = actobj.getJSONObject(activity);
                                 int odur = summary.getInt("duration");

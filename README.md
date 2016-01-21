@@ -135,7 +135,7 @@ The following table shows what types are supported and examples of aggregated da
 | distance        | { startDate: Date, endDate: Date, value: 12500.0, unit: 'm' } |
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
-| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 500, calories: 30, distance: 0 }, walking: { duration: 200, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in seconds, distance in meters and calories in kcal) |
+| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in meters and calories in kcal) |
 
 Quirks of queryAggregated()
 

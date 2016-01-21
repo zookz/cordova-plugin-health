@@ -232,7 +232,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
     navigator.health.query(opts, function(data){
       //aggregate by activity
       for(var i=0; i<data.length; i++){
-        var dur = (data[i].endDate - data[i].startDate)/1000;
+        var dur = (data[i].endDate - data[i].startDate);
         var dist = data[i].distance;
         var cals = data[i].calories;
         if(res.value[data[i].value]){
