@@ -103,9 +103,10 @@ navigator.health.query({
 
 Quirks of query()
 
-- calories.basal in Android is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 2 or 3 days)
-- calories.active is computed by subtracting the basal from the total, when the basal is not available because of the time window being too small, the answer may be undefined
+- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 2 or 3 days)
+- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the 5 days before endDate is taken
 - when querying for activities, Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
+- while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
 
 ### queryAggregated()
 
@@ -139,7 +140,6 @@ The following table shows what types are supported and examples of aggregated da
 Quirks of queryAggregated()
 
 - when querying for activities, calories and distance are provided when available in HealthKit and never in Google Fit
-- calories.basal in Android may be not available in time windows smaller than 2 or 3 days (due to Google Fit's implementation), as calories.active is computed by subtracting the basal from the total, when the basal is not available because of the time window being too small, the answer may be undefined
 
 ### store()
 
@@ -166,6 +166,7 @@ Quirks of store()
 
 - in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `
 - in iOS, storing the sleep activities is not supported at the moment
+-in Android, calories.active are stored as the total at the moment, this is a bug that should be fixed
 
 ## Differences between HealthKit and Google Fit
 

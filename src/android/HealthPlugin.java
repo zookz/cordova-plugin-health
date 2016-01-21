@@ -248,7 +248,7 @@ public class HealthPlugin extends CordovaPlugin {
                     public void onConnectionFailed(ConnectionResult result) {
                         Log.i(TAG, "Connection failed. Cause: " + result.toString());
                         if (!result.hasResolution()) {
-                            Log.e(TAG, "Connection failure has no resolution: "+result.getErrorMessage());
+                            Log.e(TAG, "Connection failure has no resolution: " + result.getErrorMessage());
                             callbackContext.error(result.getErrorMessage());
                             return;
                         }
@@ -290,6 +290,24 @@ public class HealthPlugin extends CordovaPlugin {
         mClient.blockingConnect();
     }
 
+    private boolean lightConnect(){
+        this.cordova.setActivityResultCallback(this);
+
+        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this.cordova.getActivity().getApplicationContext());
+        builder.addApi(Fitness.HISTORY_API);
+        builder.addApi(Fitness.CONFIG_API);
+        builder.addApi(Fitness.SESSIONS_API);
+
+        mClient = builder.build();
+        mClient.blockingConnect();
+        if(mClient.isConnected()){
+            Log.i(TAG, "Google Fit Connected!!!!!!!");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void query(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if(!args.getJSONObject(0).has("startDate")){
             callbackContext.error("Missing argument startDate");
@@ -318,15 +336,19 @@ public class HealthPlugin extends CordovaPlugin {
             dt = nutritiondatatypes.get(datatype);
         if (customdatatypes.get(datatype) != null)
             dt = customdatatypes.get(datatype);
-        if(dt == null) {
+        if (dt == null) {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
         }
         final DataType DT = dt;
 
-        if (!mClient.isConnected()) {
-            mClient.blockingConnect();
+        if ((mClient == null) || (!mClient.isConnected())){
+            if(!lightConnect()){
+                callbackContext.error("Cannot connect to Google Fit");
+                return;
+            }
         }
+
         DataReadRequest readRequest =  new DataReadRequest.Builder()
                 .setTimeRange(st, et, TimeUnit.MILLISECONDS)
                 .read(dt)
@@ -408,9 +430,6 @@ public class HealthPlugin extends CordovaPlugin {
     }
 
     private void queryAggregated(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-        if (!mClient.isConnected()) {
-            mClient.blockingConnect();
-        }
         if(!args.getJSONObject(0).has("startDate")){
             callbackContext.error("Missing argument startDate");
             return;
@@ -426,6 +445,13 @@ public class HealthPlugin extends CordovaPlugin {
             return;
         }
         String datatype = args.getJSONObject(0).getString("dataType");
+
+        if ((mClient == null) || (!mClient.isConnected())){
+            if(!lightConnect()){
+                callbackContext.error("Cannot connect to Google Fit");
+                return;
+            }
+        }
 
         DataReadRequest.Builder builder = new DataReadRequest.Builder();
         builder.setTimeRange(st, et, TimeUnit.MILLISECONDS);
@@ -527,7 +553,7 @@ public class HealthPlugin extends CordovaPlugin {
                     }
                 }
             }
-
+            //just for the case of basal calories, since the aggregated query does not work, we'll need to sum manually
             if (datatype.equalsIgnoreCase("calories.basal")) {
                 //array used for ageraging values of BMR
                 ArrayList<Float> BMRs = new ArrayList<Float>();
@@ -598,8 +624,11 @@ public class HealthPlugin extends CordovaPlugin {
             return;
         }
 
-        if (!mClient.isConnected()) {
-            mClient.blockingConnect();
+        if ((mClient == null) || (!mClient.isConnected())){
+            if(!lightConnect()){
+                callbackContext.error("Cannot connect to Google Fit");
+                return;
+            }
         }
 
         String packageName = cordova.getActivity().getApplicationContext().getPackageName();
