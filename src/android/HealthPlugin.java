@@ -566,12 +566,16 @@ public class HealthPlugin extends CordovaPlugin {
                         BMRs.add(basal);
                     }
                 }
+                //return value
+                double val = 0;
                 //compute avg
-                double avg = 0;
-                for(Float v: BMRs) avg += v;
-                avg /= BMRs.size();
-                //in the specified time window
-                double val = (avg / (24*60*60*1000)) * (et-st);
+                if(BMRs.size() > 0){
+                    double avg = 0;
+                    for(Float v: BMRs) avg += v;
+                    avg /= BMRs.size();
+                    //in the specified time window
+                    val = (avg / (24*60*60*1000)) * (et-st);
+                }
                 obj.put("value", val);
             }
             callbackContext.success(obj);
