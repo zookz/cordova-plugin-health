@@ -166,7 +166,6 @@ Quirks of store()
 
 - in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `
 - in iOS, storing the sleep activities is not supported at the moment
--in Android, calories.active are stored as the total at the moment, this is a bug that should be fixed
 
 ## Differences between HealthKit and Google Fit
 
