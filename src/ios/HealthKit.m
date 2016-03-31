@@ -25,12 +25,8 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 
 @implementation HealthKit
 
-- (CDVPlugin*) initWithWebView:(UIWebView*)theWebView {
-    self = (HealthKit*)[super initWithWebView:theWebView];
-    if (self) {
-        _healthStore = [HKHealthStore new];
-    }
-    return self;
+- (void) pluginInitialize {
+    _healthStore = [HKHealthStore new];
 }
 
 - (void) available:(CDVInvokedUrlCommand*)command {
