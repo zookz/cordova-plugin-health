@@ -103,8 +103,8 @@ navigator.health.query({
 
 Quirks of query()
 
-- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 2 or 3 days)
-- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the 5 days before endDate is taken
+- in Google Fit calories.basal is computed by taking an average over the last 100 days. There is an aggregated query for basal calories, but it doesn't work (see [this bug report](https://plus.google.com/+DarioSalviWork/posts/7bKkUBrdAYV). The reason for this time window to be so big is because basal data points are very scarce and we need a large window to be sure to get at least one samples. If no data points are found even in the 100 days window, an error is raised.
+- in Google Fit calories.active is computed by subtracting the basal from the total
 - when querying for activities, Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 - while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
 
@@ -184,9 +184,11 @@ Quirks of store()
 ## Tips for Android apps
 
 * You need to have the Google Services API downloaded in your SDK
-* Be sure to give your app access to the Google Fitness API, see https://developers.google.com/fit/android/get-started
+* Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-started) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin)
+* If you are wondering what key your compiled app is using, you can type `keytool -list -printcert -jarfile yourapp.apk`
+* At the moment, the plugin is not compatible with the Android 6 permissions model, so it's better to set `android-targetSdkVersion` to 22 
 
-some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
+Some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
 
 ## External Resources
 
@@ -199,6 +201,8 @@ some more detailed instructions are provided [here](https://github.com/2dvisio/c
 
 short term
 
+- get steps from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
+- make the plugin compatible with the new Android 6 way of managing permissions (as in [cordova 5.0](https://cordova.apache.org/docs/en/latest/guide/platforms/android/plugin.html))
 - add support for HKCategory samples in HealthKit
 - refactor HealthKit.js to make it more understandable
 - extend the datatypes
@@ -207,11 +211,10 @@ short term
  - blood glucose
  - location (NA, TYPE_LOCATION)
 
-
 long term
 
-- add registration to updates (in Android, use sensors API of Google Fit)
-- store vital signs on an encrypted DB in the case of Android
+- add registration to updates
+- store vital signs on an encrypted DB in the case of Android (possible choice: [sqlcipher](https://www.zetetic.net/sqlcipher/sqlcipher-for-android/))
 - add also Samsung Health as a health record for Android
 
 ## Contributions

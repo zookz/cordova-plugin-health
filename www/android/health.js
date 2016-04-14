@@ -69,7 +69,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
       startDate: new Date(opts.endDate.getTime() - navigator.health.BASAL_CALORIES_QUERY_PERIOD)
     }, function(data){
       if(data.value == 0){
-        //the time window is probably too small, let's give an error, although a better approach would just increasing the time window further
+        //the time window is probably too small, let's give an error, although a better approach would be increasing the time window further or just provide some sort of average
         onError('No basal metabolic energy expenditure found');
         return;
       }
@@ -83,14 +83,28 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
       }, onError);
     }, onError);
   } else {
-    if(opts.startDate && (typeof opts.startDate == 'object'))
-    opts.startDate = opts.startDate.getTime();
-    if(opts.endDate && (typeof opts.endDate == 'object'))
-    opts.endDate = opts.endDate.getTime();
+    if(typeof opts.startDate == 'object') opts.startDate = opts.startDate.getTime();
+    if(typeof opts.endDate == 'object') opts.endDate = opts.endDate.getTime();
+	if(opts.dataType =='calories.basal'){
+		//for basal calories, extend the query period
+		opts.startDate: new Date(opts.startDate.getTime() - navigator.health.BASAL_CALORIES_QUERY_PERIOD);
+	}
     exec(function(data){
       //reconvert the dates back to Date objects
       data.startDate = new Date(data.startDate);
       data.endDate = new Date(data.endDate);
+	  if(opts.dataType =='calories.basal'){
+		if(data.value == 0){
+			//same as before, if there are no values, better trying a different approach
+			onError('No basal metabolic energy expenditure found');
+			return;
+		}
+		//convert back the start date and the value to the actual query period
+		data.startDate = new Date(data.startDate.getTime() + navigator.health.BASAL_CALORIES_QUERY_PERIOD);
+		var basal_ms = data.value / navigator.health.BASAL_CALORIES_QUERY_PERIOD;
+		data.value -= basal_ms * (retval.endDate.getTime() - retval.startDate.getTime());
+	  }
+	  
       onSuccess(data);
     }, onError, "health", "queryAggregated", [opts]);
   }
