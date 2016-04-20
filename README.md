@@ -26,6 +26,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 |-----------------|---------------------------------------------------------|------------------------------------------|
 | steps           | HKQuantityTypeIdentifierStepCount (count)               | TYPE_STEP_COUNT_DELTA                    |
 | distance        | HKQuantityTypeIdentifierDistanceWalkingRunning (m) + HKQuantityTypeIdentifierDistanceCycling (m) | TYPE_DISTANCE_DELTA |
+| calories        | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned(kcal) | TYPE_CALORIES_EXPENDED |
 | calories.active | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
 | calories.basal  | HKQuantityTypeIdentifierBasalEnergyBurned (kcal)        | TYPE_BASAL_METABOLIC_RATE * time window  |
 | activity        | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT            |
@@ -103,8 +104,8 @@ navigator.health.query({
 
 Quirks of query()
 
-- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 2 or 3 days)
-- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the 5 days before endDate is taken
+- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more)
+- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is defined in a variable, currently set to 100)
 - when querying for activities, Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 - while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
 
