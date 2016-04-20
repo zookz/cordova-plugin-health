@@ -165,6 +165,8 @@ navigator.health.store({
 
 Quirks of store()
 
+- in iOS you cannot store the total calories, you need to specify either basal or active, if you use total calories, the active ones will be stored
+- in Android you can only store the total calories
 - in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `
 - in iOS, storing the sleep activities is not supported at the moment
 
