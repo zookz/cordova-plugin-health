@@ -5,9 +5,11 @@ A plugin that abstracts fitness and health repositories like Apple HealthKit or 
 
 This work is based on [cordova plugin googlefit](https://github.com/2dvisio/cordova-plugin-googlefit) and on [cordova healthkit plugin](https://github.com/Telerik-Verified-Plugins/HealthKit)
 
+For an introduction about Google Fit versus HealthKit see [this very good article](https://yalantis.com/blog/how-can-healthkit-and-googlefit-help-you-develop-healthcare-and-fitness-apps/).
+
 ## Warning
 
-This plugin stores health data in Google Fit, practice that is discouraged by Google.
+This plugin stores health data in Google Fit, practice that is [discouraged by Google](https://developers.google.com/fit/terms).
 
 ## Installation
 
