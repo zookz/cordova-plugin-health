@@ -28,6 +28,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 |-----------------|---------------------------------------------------------|------------------------------------------|
 | steps           | HKQuantityTypeIdentifierStepCount (count)               | TYPE_STEP_COUNT_DELTA                    |
 | distance        | HKQuantityTypeIdentifierDistanceWalkingRunning (m) + HKQuantityTypeIdentifierDistanceCycling (m) | TYPE_DISTANCE_DELTA |
+| calories        | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned(kcal) | TYPE_CALORIES_EXPENDED |
 | calories.active | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
 | calories.basal  | HKQuantityTypeIdentifierBasalEnergyBurned (kcal)        | TYPE_BASAL_METABOLIC_RATE * time window  |
 | activity        | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT            |
@@ -105,9 +106,9 @@ navigator.health.query({
 
 Quirks of query()
 
-- in Google Fit calories.basal is computed by taking an average over the last 100 days. There is an aggregated query for basal calories, but it doesn't work (see [this bug report](https://plus.google.com/+DarioSalviWork/posts/7bKkUBrdAYV). The reason for this time window to be so big is because basal data points are very scarce and we need a large window to be sure to get at least one samples. If no data points are found even in the 100 days window, an error is raised.
-- in Google Fit calories.active is computed by subtracting the basal from the total
-- when querying for activities, Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
+- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more). There is an aggregated query for basal calories, but it doesn't work (see [this bug report](https://plus.google.com/+DarioSalviWork/posts/7bKkUBrdAYV).
+- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is defined in a variable, currently set to 100). The reason for this time window to be so big is because basal data points are very scarce and we need a large window to be sure to get at least one samples. If no data points are found even in the 100 days window, an error is raised.
+- when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 - while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
 
 ### queryAggregated()
@@ -166,6 +167,8 @@ navigator.health.store({
 
 Quirks of store()
 
+- in iOS you cannot store the total calories, you need to specify either basal or active, if you use total calories, the active ones will be stored
+- in Android you can only store the total calories
 - in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `
 - in iOS, storing the sleep activities is not supported at the moment
 
@@ -188,7 +191,7 @@ Quirks of store()
 * You need to have the Google Services API downloaded in your SDK
 * Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-started) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin)
 * If you are wondering what key your compiled app is using, you can type `keytool -list -printcert -jarfile yourapp.apk`
-* At the moment, the plugin is not compatible with the Android 6 permissions model, so it's better to set `android-targetSdkVersion` to 22 
+* At the moment, the plugin is not compatible with the Android 6 permissions model, so it's better to set `android-targetSdkVersion` to 22
 
 Some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
 

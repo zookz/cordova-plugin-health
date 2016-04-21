@@ -7,6 +7,7 @@ var Health = function () {
 var dataTypes = [];
 dataTypes['steps'] = 'HKQuantityTypeIdentifierStepCount';
 dataTypes['distance'] = 'HKQuantityTypeIdentifierDistanceWalkingRunning'; //and HKQuantityTypeIdentifierDistanceCycling
+dataTypes['calories'] = 'HKQuantityTypeIdentifierActiveEnergyBurned'; //and HKQuantityTypeIdentifierBasalEnergyBurned
 dataTypes['calories.active'] = 'HKQuantityTypeIdentifierActiveEnergyBurned';
 dataTypes['calories.basal'] = 'HKQuantityTypeIdentifierBasalEnergyBurned';
 dataTypes['height'] = 'HKQuantityTypeIdentifierHeight';
@@ -19,6 +20,7 @@ dataTypes['activity'] = 'HKWorkoutTypeIdentifier'; //and HKCategoryTypeIdentifie
 var units = [];
 units['steps'] = 'count';
 units['distance'] = 'm';
+units['calories'] = 'kcal';
 units['calories.active'] = 'kcal';
 units['calories.basal'] = 'kcal';
 units['height'] = 'm';
@@ -40,6 +42,8 @@ Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
         HKdatatypes.push('HKQuantityTypeIdentifierDistanceCycling');
         if(dts[i] == 'activity')
         HKdatatypes.push('HKCategoryTypeIdentifierSleepAnalysis');
+        if(dts[i] == 'calories')
+        HKdatatypes.push('HKQuantityTypeIdentifierBasalEnergyBurned');
       } else {
         onError('unknown data type '+dts[i]);
         return;
@@ -175,8 +179,17 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           }
         };
         convertSamples(data);
-        if(opts.dataType== 'distance'){//in the case of the distance, add the cycling distances
+        if(opts.dataType == 'distance'){ //in the case of the distance, add the cycling distances
           opts.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
+          //reassing start and end times
+          opts.startDate = startD;
+          opts.endDate = endD;
+          window.plugins.healthkit.querySampleType(opts, function(data){
+            convertSamples(data);
+            onSuccess(result);
+          }, onError);
+        } else if(opts.dataType == 'calories'){ //in the case of the calories, add the basal
+          opts.sampleType = 'HKQuantityTypeIdentifierBasalEnergyBurned';
           //reassing start and end times
           opts.startDate = startD;
           opts.endDate = endD;
@@ -196,13 +209,14 @@ Health.prototype.query = function (opts, onSuccess, onError) {
 Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   var startD = opts.startDate;
   var endD = opts.endDate;
-  if((opts.dataType == 'steps') || (opts.dataType == 'distance') || (opts.dataType == 'calories.active') || (opts.dataType == 'calories.basal')){
+  if((opts.dataType == 'steps') || (opts.dataType == 'distance') || (opts.dataType == 'calories') || (opts.dataType == 'calories.active') || (opts.dataType == 'calories.basal')){
     opts.sampleType = dataTypes[ opts.dataType ];
     if(units[ opts.dataType ]) opts.unit = units[ opts.dataType ];
     window.plugins.healthkit.sumQuantityType(opts, function(value) {
       if(opts.dataType == 'distance'){
-        //add HKQuantityTypeIdentifierDistanceCycling to distance
+        //add cycled distance
         var dist = value;
+        opts.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
         opts.startDate = startD;
         opts.endDate = endD;
         window.plugins.healthkit.sumQuantityType(opts, function(value) {
@@ -210,6 +224,20 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
             startDate: startD,
             endDate: endD,
             value: value + dist,
+            unit: opts.unit
+          });
+        }, onError);
+      } else if(opts.dataType == 'calories'){
+        //add basal calories
+        var activecals = value;
+        opts.sampleType = 'HKQuantityTypeIdentifierBasalEnergyBurned';
+        opts.startDate = startD;
+        opts.endDate = endD;
+        window.plugins.healthkit.sumQuantityType(opts, function(basalcals) {
+          onSuccess({
+            startDate: startD,
+            endDate: endD,
+            value: basalcals + activecals,
             unit: opts.unit
           });
         }, onError);
