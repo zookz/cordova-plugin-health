@@ -151,6 +151,9 @@ public class HealthPlugin extends CordovaPlugin {
                 Log.i(TAG, "Got authorisation from Google Fit!!!");
                 if(!mClient.isConnected() && !mClient.isConnecting())
                     mClient.connect();
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                // The user cancelled the login dialog before selecting any action.
+                authReqCallbackCtx.error("User cancelled the dialog.");
             }
         }
     }
