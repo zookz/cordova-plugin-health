@@ -11,12 +11,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResolvingResultCallbacks;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
-import com.google.android.gms.fitness.FitnessActivities;
 import com.google.android.gms.fitness.data.Bucket;
 import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
@@ -341,6 +338,23 @@ public class HealthPlugin extends CordovaPlugin {
                 return;
             }
         }
+
+        /*
+        //use this to test the MBR, once Google has decided to fix it
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        Date now = new Date();
+        cal.setTime(now);
+        long endTime = cal.getTimeInMillis();
+        cal.add(Calendar.WEEK_OF_YEAR, -1);
+        long startTime = cal.getTimeInMillis();
+
+        DataReadRequest rrr = new DataReadRequest.Builder()
+                .aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY)
+                .bucketByTime(1, TimeUnit.DAYS)
+                .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+                .build();
+        DataReadResult resss = Fitness.HistoryApi.readData(mClient, rrr).await(1, TimeUnit.MINUTES);
+        */
 
         DataReadRequest readRequest =  new DataReadRequest.Builder()
                 .setTimeRange(st, et, TimeUnit.MILLISECONDS)
