@@ -19,6 +19,21 @@ Just execute this line in your project's folder:
 cordova plugin add cordova-plugin-health
 ```
 
+## Requirements for iOS apps
+
+* Make sure your app id has the 'HealthKit' entitlement when this plugin is installed (see iOS dev center).
+* Also, make sure your app and AppStore description complies with these Apple review guidelines: https://developer.apple.com/app-store/review/guidelines/#healthkit
+
+## Requirements for Android apps
+
+* You need to have the Google Services API downloaded in your SDK
+* Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-started) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin)
+* If you are wondering what key your compiled app is using, you can type `keytool -list -printcert -jarfile yourapp.apk`
+* At the moment, the plugin is not compatible with the Android 6 permissions model, so it's better to set `android-targetSdkVersion` to 22
+
+Some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
+
+
 ## Supported data types
 
 As HealthKit does not allow adding custom data types, only a subset of data types supported by HealthKit has been chosen.
@@ -42,7 +57,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 
 Note: units of measurements are fixed !
 
-Data types can be of different types, see examples below:
+Returned objects can be of different types, see examples below:
 
 | data type      | value                             |
 |----------------|-----------------------------------|
@@ -168,10 +183,10 @@ navigator.health.store({
 
 Quirks of store()
 
-- in iOS you cannot store the total calories, you need to specify either basal or active, if you use total calories, the active ones will be stored
-- in Android you can only store the total calories
-- in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `
-- in iOS, storing the sleep activities is not supported at the moment
+- in iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
+- in Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
+- in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
+- in iOS, storing the sleep activities is not supported at the moment.
 
 ## Differences between HealthKit and Google Fit
 
@@ -181,20 +196,6 @@ Quirks of store()
 * HealthKit automatically counts steps and distance when you carry your phone with you, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
 * HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also
 
-
-## Tips for iOS apps
-
-* Make sure your app id has the 'HealthKit' entitlement when this plugin is installed (see iOS dev center).
-* Also, make sure your app and AppStore description complies with these Apple review guidelines: https://developer.apple.com/app-store/review/guidelines/#healthkit
-
-## Tips for Android apps
-
-* You need to have the Google Services API downloaded in your SDK
-* Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-started) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin)
-* If you are wondering what key your compiled app is using, you can type `keytool -list -printcert -jarfile yourapp.apk`
-* At the moment, the plugin is not compatible with the Android 6 permissions model, so it's better to set `android-targetSdkVersion` to 22
-
-Some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
 
 ## External Resources
 

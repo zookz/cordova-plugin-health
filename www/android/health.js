@@ -112,34 +112,22 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
 };
 
 Health.prototype.store = function (data, onSuccess, onError) {
-  if(data.dataType =='calories.active'){
-    //get the basal calories
-    navigator.health.queryAggregated({
-      dataType:'calories.basal',
-      endDate: data.endDate,
-      startDate: new Date(data.endDate.getTime() - navigator.health.BASAL_CALORIES_QUERY_PERIOD)
-    }, function(basalData){
-      if(data.value == 0){
-        //the time window is probably too small, let's give an error, although a better approach would just increasing the time window further
-        onError('No basal metabolic energy expenditure found');
-        return;
-      }
-      var basal_ms = basalData.value / navigator.health.BASAL_CALORIES_QUERY_PERIOD;
-      //add basal calories
-      data.value += basal_ms * (data.endDate.getTime() - data.startDate.getTime());
-      data.dataType ='calories';
-      Health.prototype.store(data, onSuccess, onError);
-    }, onError);
-  } else {
-    if(data.startDate && (typeof data.startDate == 'object'))
-    data.startDate = data.startDate.getTime();
-    if(data.endDate && (typeof data.endDate == 'object'))
-    data.endDate = data.endDate.getTime();
-    if(data.dataType =='activity'){
-      data.value = navigator.health.toFitActivity(data.value);
-    }
-    exec(onSuccess, onError, "health", "store", [data]);
+  if(data.dataType =='calories.basal'){
+    onError('basal calories cannot be stored in Android');
+    return;
   }
+  if(data.dataType =='calories.active'){
+    //rename active calories to total calories
+    data.dataType ='calories';
+  }
+  if(data.startDate && (typeof data.startDate == 'object'))
+  data.startDate = data.startDate.getTime();
+  if(data.endDate && (typeof data.endDate == 'object'))
+  data.endDate = data.endDate.getTime();
+  if(data.dataType =='activity'){
+    data.value = navigator.health.toFitActivity(data.value);
+  }
+  exec(onSuccess, onError, "health", "store", [data]);
 };
 
 Health.prototype.toFitActivity = function(act){
