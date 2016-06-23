@@ -136,6 +136,7 @@ The following table shows what types are supported and examples of aggregated da
 |-----------------|----------------------------|
 | steps           | { startDate: Date, endDate: Date, value: 5780, unit: 'count' } |
 | distance        | { startDate: Date, endDate: Date, value: 12500.0, unit: 'm' } |
+| calories        | { startDate: Date, endDate: Date, value: 25698.1, unit: 'kcal' } |
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
 | activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in meters and calories in kcal) |

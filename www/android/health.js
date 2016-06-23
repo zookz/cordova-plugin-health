@@ -46,6 +46,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       }, onError);
     }, onError);
   } else {
+    //standard case, just use the name as it is
     if(opts.startDate && (typeof opts.startDate == 'object'))
     opts.startDate = opts.startDate.getTime();
     if(opts.endDate && (typeof opts.endDate == 'object'))
@@ -85,26 +86,26 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   } else {
     if(typeof opts.startDate == 'object') opts.startDate = opts.startDate.getTime();
     if(typeof opts.endDate == 'object') opts.endDate = opts.endDate.getTime();
-	if(opts.dataType =='calories.basal'){
-		//for basal calories, extend the query period
-		opts.startDate: new Date(opts.startDate.getTime() - navigator.health.BASAL_CALORIES_QUERY_PERIOD);
-	}
+    if(opts.dataType =='calories.basal'){
+      //for basal calories, extend the query period
+      opts.startDate= new Date(opts.startDate.getTime() - navigator.health.BASAL_CALORIES_QUERY_PERIOD);
+    }
     exec(function(data){
       //reconvert the dates back to Date objects
       data.startDate = new Date(data.startDate);
       data.endDate = new Date(data.endDate);
-	  if(opts.dataType =='calories.basal'){
-		if(data.value == 0){
-			//same as before, if there are no values, better trying a different approach
-			onError('No basal metabolic energy expenditure found');
-			return;
-		}
-		//convert back the start date and the value to the actual query period
-		data.startDate = new Date(data.startDate.getTime() + navigator.health.BASAL_CALORIES_QUERY_PERIOD);
-		var basal_ms = data.value / navigator.health.BASAL_CALORIES_QUERY_PERIOD;
-		data.value -= basal_ms * (retval.endDate.getTime() - retval.startDate.getTime());
-	  }
-	  
+      if(opts.dataType =='calories.basal'){
+        if(data.value == 0){
+          //same as before, if there are no values, better trying a different approach
+          onError('No basal metabolic energy expenditure found');
+          return;
+        }
+        //convert back the start date and the value to the actual query period
+        data.startDate = new Date(data.startDate.getTime() + navigator.health.BASAL_CALORIES_QUERY_PERIOD);
+        var basal_ms = data.value / navigator.health.BASAL_CALORIES_QUERY_PERIOD;
+        data.value -= basal_ms * (retval.endDate.getTime() - retval.startDate.getTime());
+      }
+
       onSuccess(data);
     }, onError, "health", "queryAggregated", [opts]);
   }
@@ -131,9 +132,9 @@ Health.prototype.store = function (data, onSuccess, onError) {
     }, onError);
   } else {
     if(data.startDate && (typeof data.startDate == 'object'))
-      data.startDate = data.startDate.getTime();
+    data.startDate = data.startDate.getTime();
     if(data.endDate && (typeof data.endDate == 'object'))
-      data.endDate = data.endDate.getTime();
+    data.endDate = data.endDate.getTime();
     if(data.dataType =='activity'){
       data.value = navigator.health.toFitActivity(data.value);
     }
