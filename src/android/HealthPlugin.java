@@ -97,13 +97,6 @@ public class HealthPlugin extends CordovaPlugin {
     public static Map<String, DataType> customdatatypes = new HashMap<String, DataType>();
 
 
-    public static Field genderField = Field.zzn("gender",Field.FORMAT_STRING);
-    public static Field dayField = Field.zzn("day",Field.FORMAT_INT32);
-    public static Field monthField = Field.zzn("month",Field.FORMAT_INT32);
-    public static Field yearField = Field.zzn("year",Field.FORMAT_INT32);
-
-
-
     public HealthPlugin() {
     }
 
@@ -124,7 +117,7 @@ public class HealthPlugin extends CordovaPlugin {
                     String packageName = cordova.getActivity().getApplicationContext().getPackageName();
                     DataTypeCreateRequest request = new DataTypeCreateRequest.Builder()
                             .setName(packageName+".gender")
-                            .addField(genderField)
+                            .addField("gender",Field.FORMAT_STRING)
                             .build();
                     PendingResult<DataTypeResult> pendingResult =  Fitness.ConfigApi.createCustomDataType(mClient, request);
                     DataTypeResult dataTypeResult = pendingResult.await();
@@ -136,9 +129,9 @@ public class HealthPlugin extends CordovaPlugin {
 
                     request = new DataTypeCreateRequest.Builder()
                             .setName(packageName + ".date_of_birth")
-                            .addField(dayField)
-                            .addField(monthField)
-                            .addField(yearField)
+                            .addField("day",Field.FORMAT_INT32)
+                            .addField("month",Field.FORMAT_INT32)
+                            .addField("year",Field.FORMAT_INT32)
                             .build();
                     pendingResult = Fitness.ConfigApi.createCustomDataType(mClient, request);
                     dataTypeResult = pendingResult.await();
@@ -148,7 +141,7 @@ public class HealthPlugin extends CordovaPlugin {
                     }
                     customdatatypes.put("date_of_birth", dataTypeResult.getDataType());
                     authReqCallbackCtx.success();
-                }catch (Exception ex){
+                } catch (Exception ex){
                     authReqCallbackCtx.error(ex.getMessage());
                 }
             }
@@ -407,16 +400,18 @@ public class HealthPlugin extends CordovaPlugin {
                         obj.put("value", activity);
                         obj.put("unit", "activityType");
                     } else if (DT.equals(customdatatypes.get("gender"))) {
-                        String gender = datapoint.getValue(genderField).asString();
-                        obj.put("value", gender);
+                        for(Field f : customdatatypes.get("gender").getFields()){
+                            //there should be only one field named gender
+                            String gender = datapoint.getValue(f).asString();
+                            obj.put("value", gender);
+                        }
                     } else if (DT.equals(customdatatypes.get("date_of_birth"))) {
-                        int day = datapoint.getValue(dayField).asInt();
-                        int month = datapoint.getValue(monthField).asInt();
-                        int year = datapoint.getValue(yearField).asInt();
                         JSONObject dob = new JSONObject();
-                        dob.put("day", day);
-                        dob.put("month", month);
-                        dob.put("year", year);
+                        for(Field f : customdatatypes.get("date_of_birth").getFields()){
+                            //all fields are integers
+                            int fieldvalue = datapoint.getValue(f).asInt();
+                            dob.put(f.getName(), fieldvalue);
+                        }
                         obj.put("value", dob);
                     }
 
@@ -679,15 +674,24 @@ public class HealthPlugin extends CordovaPlugin {
             datapoint.getValue(Field.FIELD_ACTIVITY).setActivity(value);
         } else if (dt.equals(customdatatypes.get("gender"))) {
             String value = args.getJSONObject(0).getString("value");
-            datapoint.getValue(genderField).setString(value);
+            for(Field f : customdatatypes.get("gender").getFields()){
+                //we expect only one field named gender
+                datapoint.getValue(f).setString(value);
+            }
         } else if(dt.equals(customdatatypes.get("date_of_birth"))){
             JSONObject dob = args.getJSONObject(0).getJSONObject("value");
             int year = dob.getInt("year");
             int month = dob.getInt("month");
             int day = dob.getInt("day");
-            datapoint.getValue(dayField).setInt(day);
-            datapoint.getValue(monthField).setInt(month);
-            datapoint.getValue(yearField).setInt(year);
+
+            for(Field f : customdatatypes.get("date_of_birth").getFields()){
+                if(f.getName().equalsIgnoreCase("day"))
+                    datapoint.getValue(f).setInt(day);
+                if(f.getName().equalsIgnoreCase("month"))
+                    datapoint.getValue(f).setInt(month);
+                if(f.getName().equalsIgnoreCase("year"))
+                    datapoint.getValue(f).setInt(year);
+            }
         }
         dataSet.add(datapoint);
 
@@ -700,6 +704,5 @@ public class HealthPlugin extends CordovaPlugin {
         } else {
             callbackContext.success();
         }
-
     }
 }
