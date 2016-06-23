@@ -29,7 +29,6 @@ cordova plugin add cordova-plugin-health
 * You need to have the Google Services API downloaded in your SDK
 * Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-started) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin)
 * If you are wondering what key your compiled app is using, you can type `keytool -list -printcert -jarfile yourapp.apk`
-* At the moment, the plugin is not compatible with the Android 6 permissions model, so it's better to set `android-targetSdkVersion` to 22
 
 Some more detailed instructions are provided [here](https://github.com/2dvisio/cordova-plugin-googlefit)
 
