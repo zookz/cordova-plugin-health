@@ -208,7 +208,6 @@ Quirks of store()
 short term
 
 - get steps from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
-- make the plugin compatible with the new Android 6 way of managing permissions (as in [cordova 5.0](https://cordova.apache.org/docs/en/latest/guide/platforms/android/plugin.html))
 - add support for HKCategory samples in HealthKit
 - refactor HealthKit.js to make it more understandable
 - extend the datatypes
