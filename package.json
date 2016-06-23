@@ -1,10 +1,10 @@
 {
-  "version": "0.6",
+  "version": "0.6.0",
   "name": "cordova-plugin-health",
   "cordova_name": "Health",
   "description": "A plugin that abstracts fitness and health repositories like Apple HealthKit or Google Fit",
   "license": "MIT",
-  "author": "Dario Salvi, based on code by Eddy Verbruggen / Telerik and Carmelo Velardo",
+  "author": "Dario Salvi",
   "homepage": "https://github.com/dariosalvi78/cordova-plugin-health",
   "repo": "https://github.com/dariosalvi78/cordova-plugin-health.git",
   "repository": {
