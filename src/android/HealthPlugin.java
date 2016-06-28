@@ -677,8 +677,8 @@ public class HealthPlugin extends CordovaPlugin {
             datapoint.getValue(Field.FIELD_WEIGHT).setFloat(weight);
         } else if (dt.equals(DataType.TYPE_HEART_RATE_BPM)) {
             String value = args.getJSONObject(0).getString("value");
-            int hr = Integer.parseInt(value);
-            datapoint.getValue(Field.FIELD_BPM).setInt(hr);
+            float hr = Float.parseFloat(value);
+            datapoint.getValue(Field.FIELD_BPM).setFloat(hr);
         } else if (dt.equals(DataType.TYPE_BODY_FAT_PERCENTAGE)) {
             String value = args.getJSONObject(0).getString("value");
             float perc = Float.parseFloat(value);
