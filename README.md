@@ -207,9 +207,11 @@ Quirks of store()
 
 short term
 
+- add query with buckets (see window.plugins.healthkit.querySampleTypeAggregated for HealthKit)
+- add delete
+- support correct basal calories in Google Fit
 - get steps from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
 - add support for HKCategory samples in HealthKit
-- refactor HealthKit.js to make it more understandable
 - extend the datatypes
  - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
  - food (HKCorrelationTypeIdentifierFood, TYPE_NUTRITION)
