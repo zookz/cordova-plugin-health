@@ -1,4 +1,3 @@
-cordova.define("cordova-plugin-health.health", function(require, exports, module) {
 var exec = require("cordova/exec");
 
 var Health = function () {
@@ -128,6 +127,4 @@ Health.prototype.toFitActivity = function(act){
 cordova.addConstructor(function(){
   navigator.health = new Health();
   return navigator.health;
-});
-
 });
