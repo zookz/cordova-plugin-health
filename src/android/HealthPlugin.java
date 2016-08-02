@@ -34,7 +34,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -342,28 +343,11 @@ public class HealthPlugin extends CordovaPlugin {
             }
         }
 
-        /*
-        //use this to test the MBR, once Google has decided to fix it
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        Date now = new Date();
-        cal.setTime(now);
-        long endTime = cal.getTimeInMillis();
-        cal.add(Calendar.WEEK_OF_YEAR, -1);
-        long startTime = cal.getTimeInMillis();
-
-        DataReadRequest rrr = new DataReadRequest.Builder()
-                .aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY)
-                .bucketByTime(1, TimeUnit.DAYS)
-                .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-                .build();
-        DataReadResult resss = Fitness.HistoryApi.readData(mClient, rrr).await(1, TimeUnit.MINUTES);
-        */
 
         DataReadRequest readRequest =  new DataReadRequest.Builder()
                 .setTimeRange(st, et, TimeUnit.MILLISECONDS)
                 .read(dt)
                 .build();
-
 
         DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
@@ -465,6 +449,65 @@ public class HealthPlugin extends CordovaPlugin {
             }
         }
 
+        //basal metabolic rate is treated in a different way
+        if(datatype.equalsIgnoreCase("calories.basal")){
+            //when querying for basal calories, the aggregated value is computed over a period that shall be larger than a day
+            //as we don't expect basal calories to change much over time (they are a usually function of age, sex, weight and height)
+            //so we'll choose a week as time window and then renormalise the value to the original time range
+            //TODO: a better approach would be using a time window similar to the original one, in case the window is larger than a week
+            Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(new Date(et));
+            //set start time to a week before end time
+            cal.add(Calendar.WEEK_OF_YEAR, -1);
+            long nst = cal.getTimeInMillis();
+
+            DataReadRequest.Builder builder = new DataReadRequest.Builder();
+            builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
+            builder.bucketByTime(1, TimeUnit.DAYS);
+            builder.setTimeRange(nst, et, TimeUnit.MILLISECONDS);
+            DataReadRequest readRequest = builder.build();
+
+            DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
+
+            if (dataReadResult.getStatus().isSuccess()) {
+                JSONObject obj = new JSONObject();
+                float avgs = 0;
+                int avgsN = 0;
+                for (Bucket bucket : dataReadResult.getBuckets()) {
+                    // in the com.google.bmr.summary data type, each data point represents
+                    // the average, maximum and minimum basal metabolic rate, in kcal per day, over the time interval of the data point.
+                    DataSet ds = bucket.getDataSet(DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
+                    for (DataPoint dp : ds.getDataPoints()) {
+                        float avg = dp.getValue(Field.FIELD_AVERAGE).asFloat();
+                        avgs += avg;
+                        avgsN++;
+                    }
+                }
+                if(avgs == 0){
+                    // strange case
+                    // maybe the time window is too small or Fit is missing information for computing the basal
+                    // let's give an error
+                    // TODO: a better approach would be giving some kind of approximation (like a fixed value)
+                    callbackContext.error("No basal metabolic energy expenditure found");
+                }
+                // do the average of the averages
+                avgs /= avgsN;
+                // renormalise to the original time window
+                // avgs is the daily average
+                avgs = (avgs / (24*60*60*1000)) * (et-st);
+                obj.put("value", avgs);
+                obj.put("startDate", st);
+                obj.put("endDate", et);
+                obj.put("unit", "kcal");
+
+                callbackContext.success(obj);
+            } else {
+                callbackContext.error(dataReadResult.getStatus().getStatusMessage());
+            }
+            // no need to go further
+            return;
+        }
+
         DataReadRequest.Builder builder = new DataReadRequest.Builder();
         builder.setTimeRange(st, et, TimeUnit.MILLISECONDS);
         int allms = (int)(et-st);
@@ -478,9 +521,6 @@ public class HealthPlugin extends CordovaPlugin {
         } else if(datatype.equalsIgnoreCase("calories")){
             builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
             builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
-        } else if(datatype.equalsIgnoreCase("calories.basal")){
-            builder.read(DataType.TYPE_BASAL_METABOLIC_RATE);
-            //we could use the aggregated AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY but it does not work, there's a bug in Google Fit!
         } else if(datatype.equalsIgnoreCase("activity")){
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
             builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
@@ -490,7 +530,6 @@ public class HealthPlugin extends CordovaPlugin {
         }
 
         DataReadRequest readRequest = builder.build();
-
         DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
         if (dataReadResult.getStatus().isSuccess()) {
@@ -563,32 +602,6 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                     }
                 }
-            }
-            //just for the case of basal calories, since the aggregated query does not work, we'll need to sum manually
-            if (datatype.equalsIgnoreCase("calories.basal")) {
-                //array used for ageraging values of BMR
-                ArrayList<Float> BMRs = new ArrayList<Float>();
-                obj.put("startDate", st);
-                obj.put("endDate", et);
-                obj.put("unit", "kcal");
-                //here we expect the data not to be bucketed
-                for(DataSet ds : dataReadResult.getDataSets()){
-                    for(DataPoint dp: ds.getDataPoints()){
-                        float basal = dp.getValue(Field.FIELD_CALORIES).asFloat();
-                        BMRs.add(basal);
-                    }
-                }
-                //return value
-                double val = 0;
-                //compute avg
-                if(BMRs.size() > 0){
-                    double avg = 0;
-                    for(Float v: BMRs) avg += v;
-                    avg /= BMRs.size();
-                    //in the specified time window
-                    val = (avg / (24*60*60*1000)) * (et-st);
-                }
-                obj.put("value", val);
             }
             callbackContext.success(obj);
         } else {

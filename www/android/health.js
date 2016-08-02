@@ -1,14 +1,9 @@
+cordova.define("cordova-plugin-health.health", function(require, exports, module) {
 var exec = require("cordova/exec");
 
 var Health = function () {
   this.name = "health";
 };
-
-//when querying for basal calories, there's a bug in current Google Services SDK that doesn't allow to aggregate with basal
-//the only way to fix it is to query single datapoints of the basal and then average
-//this variable specifies the time window on which we query for the basal
-//the longer the period, the more likely we get data points
-Health.prototype.BASAL_CALORIES_QUERY_PERIOD = 100 * 24 * 60 * 60 * 1000;//100 days
 
 Health.prototype.isAvailable = function (onSuccess, onError) {
   exec(onSuccess, onError, "health", "isAvailable", []);
@@ -26,21 +21,19 @@ Health.prototype.query = function (opts, onSuccess, onError) {
     navigator.health.queryAggregated({
       dataType:'calories.basal',
       endDate: opts.endDate,
-      startDate: new Date(opts.endDate.getTime() - navigator.health.BASAL_CALORIES_QUERY_PERIOD)
+      startDate: opts.startDate
     }, function(data){
-      if(data.value == 0){
-        //the time window is probably too small, let's give an error, although a better approach would just increasing the time window further
-        onError('No basal metabolic energy expenditure found');
-        return;
-      }
-      var basal_ms = data.value / navigator.health.BASAL_CALORIES_QUERY_PERIOD;
+      var basal_ms = data.value / (opts.endDate - opts.startDate);
       //now get the total
       opts.dataType ='calories';
       navigator.health.query(opts, function(data){
         //and subtract the basal
         for(var i=0; i<data.length; i++){
           data[i].value -= basal_ms * (data[i].endDate.getTime() - data[i].startDate.getTime());
-          if(data[i].value <0) data[i].value = 0; //negative values don't make sense
+
+          //although it shouldn't happen, after subtracting, sometimes the values are negative,
+          //in that case let's return 0 (negative values don't make sense)
+          if(data[i].value <0) data[i].value = 0;
         }
         onSuccess(data);
       }, onError);
@@ -67,45 +60,26 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
     navigator.health.queryAggregated({
       dataType:'calories.basal',
       endDate: opts.endDate,
-      startDate: new Date(opts.endDate.getTime() - navigator.health.BASAL_CALORIES_QUERY_PERIOD)
+      startDate: opts.startDate
     }, function(data){
-      if(data.value == 0){
-        //the time window is probably too small, let's give an error, although a better approach would be increasing the time window further or just provide some sort of average
-        onError('No basal metabolic energy expenditure found');
-        return;
-      }
-      var basal_ms = data.value / navigator.health.BASAL_CALORIES_QUERY_PERIOD;
+      var basal_ms = data.value / (opts.endDate - opts.startDate);
       //now get the total
       opts.dataType ='calories';
       navigator.health.queryAggregated(opts, function(retval){
         //and remove the basal
         retval.value -= basal_ms * (retval.endDate.getTime() - retval.startDate.getTime());
+        //although it shouldn't happen....
+        if(retval.value <0) retval.value = 0;
         onSuccess(retval);
       }, onError);
     }, onError);
   } else {
     if(typeof opts.startDate == 'object') opts.startDate = opts.startDate.getTime();
     if(typeof opts.endDate == 'object') opts.endDate = opts.endDate.getTime();
-    if(opts.dataType =='calories.basal'){
-      //for basal calories, extend the query period
-      opts.startDate= new Date(opts.startDate.getTime() - navigator.health.BASAL_CALORIES_QUERY_PERIOD);
-    }
     exec(function(data){
       //reconvert the dates back to Date objects
       data.startDate = new Date(data.startDate);
       data.endDate = new Date(data.endDate);
-      if(opts.dataType =='calories.basal'){
-        if(data.value == 0){
-          //same as before, if there are no values, better trying a different approach
-          onError('No basal metabolic energy expenditure found');
-          return;
-        }
-        //convert back the start date and the value to the actual query period
-        data.startDate = new Date(data.startDate.getTime() + navigator.health.BASAL_CALORIES_QUERY_PERIOD);
-        var basal_ms = data.value / navigator.health.BASAL_CALORIES_QUERY_PERIOD;
-        data.value -= basal_ms * (retval.endDate.getTime() - retval.startDate.getTime());
-      }
-
       onSuccess(data);
     }, onError, "health", "queryAggregated", [opts]);
   }
@@ -154,4 +128,6 @@ Health.prototype.toFitActivity = function(act){
 cordova.addConstructor(function(){
   navigator.health = new Health();
   return navigator.health;
+});
+
 });
