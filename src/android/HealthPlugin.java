@@ -135,6 +135,7 @@ public class HealthPlugin extends CordovaPlugin {
                     pendingResult = Fitness.ConfigApi.createCustomDataType(mClient, request);
                     dataTypeResult = pendingResult.await();
                     if(!dataTypeResult.getStatus().isSuccess()){
+                        Log.i(TAG, "Custom data types created");
                         authReqCallbackCtx.error(dataTypeResult.getStatus().getStatusMessage());
                         return;
                     }
@@ -226,7 +227,7 @@ public class HealthPlugin extends CordovaPlugin {
         this.cordova.setActivityResultCallback(this);
         authReqCallbackCtx = callbackContext;
 
-        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this.cordova.getActivity().getApplicationContext());
+        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this.cordova.getActivity());
         builder.addApi(Fitness.HISTORY_API);
         builder.addApi(Fitness.CONFIG_API);
         builder.addApi(Fitness.SESSIONS_API);
@@ -250,6 +251,28 @@ public class HealthPlugin extends CordovaPlugin {
         if(activityscope) builder.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE));
         if(locationscope) builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ_WRITE));
         if(nutritionscope) builder.addScope(new Scope(Scopes.FITNESS_NUTRITION_READ_WRITE));
+
+        builder.addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle bundle) {
+                        mClient.unregisterConnectionCallbacks(this);
+                        Log.i(TAG, "Google Fit connected");
+                        authReqSuccess();
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        String message = "";
+                        if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
+                            message = "connection lost, network lost";
+
+                        } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
+                            message = "connection lost, service disconnected";
+                        } else message = "connection lost, code: " + i;
+                        Log.e(TAG, message);
+                        callbackContext.error(message);
+                    }
+                });
 
         builder.addOnConnectionFailedListener(
                 new GoogleApiClient.OnConnectionFailedListener() {
@@ -275,27 +298,6 @@ public class HealthPlugin extends CordovaPlugin {
                 }
         );
         mClient = builder.build();
-        mClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-            @Override
-            public void onConnected(Bundle bundle) {
-                mClient.unregisterConnectionCallbacks(this);
-                Log.i(TAG, "Google Fit Connected!!!");
-                authReqSuccess();
-            }
-
-            @Override
-            public void onConnectionSuspended(int i) {
-                String message = "";
-                if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
-                    message = "Connection lost.  Cause: Network Lost";
-
-                } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
-                    message = "Connection lost.  Reason: Service Disconnected";
-                }
-                Log.e(TAG, message);
-                callbackContext.error(message);
-            }
-        });
         mClient.blockingConnect();
     }
 
