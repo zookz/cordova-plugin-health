@@ -62,12 +62,6 @@ Health.prototype.query = function (opts, onSuccess, onError) {
   var startD = opts.startDate;
   var endD = opts.endDate;
 
-  //from http://stackoverflow.com/questions/6704325/how-to-convert-date-in-format-yyyy-mm-dd-hhmmss-to-unix-timestamp
-  var convertDate = function(d){
-    var match = d.match(/^(\d+)-(\d+)-(\d+) (\d+)\:(\d+)\:(\d+)$/)
-    return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6]);
-  };
-
   if(opts.dataType== 'gender'){
     window.plugins.healthkit.readGender(function(data){
       var res = [];
@@ -99,8 +93,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       var result = [];
       for(var i=0; i<data.length; i++) {
         var res = {};
-        res.startDate = convertDate(data[i].startDate);
-        res.endDate = convertDate(data[i].endDate);
+        res.startDate = new Date(data[i].startDate);
+        res.endDate = new Date(data[i].endDate);
         //filter the results based on the dates
         if((res.startDate >= opts.startDate) && (res.endDate <=opts.endDate)) {
           res.value = data[i].activityType;
@@ -116,8 +110,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       window.plugins.healthkit.querySampleType(opts, function(data){
         for(var i=0; i<data.length; i++) {
           var res = {};
-          res.startDate = convertDate(data[i].startDate);
-          res.endDate = convertDate(data[i].endDate);
+          res.startDate = new Date(data[i].startDate);
+          res.endDate = new Date(data[i].endDate);
           if(data[i].value == 0) res.value = 'sleep.awake';
           else res.value = 'sleep';
           res.unit = 'activityType';
@@ -140,8 +134,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         window.plugins.healthkit.readWeight({ unit: 'kg' }, function(data){
           var res = [];
           res[0]= {
-            startDate: convertDate(data.date),
-            endDate: convertDate(data.date),
+            startDate: new Date(data.date),
+            endDate: new Date(data.date),
             value: data.value,
             unit: data.unit,
             source: "Health"
@@ -156,8 +150,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         window.plugins.healthkit.readHeight({ unit: 'm' }, function(data){
           var res = [];
           res[0]= {
-            startDate: convertDate(data.date),
-            endDate: convertDate(data.date),
+            startDate: new Date(data.date),
+            endDate: new Date(data.date),
             value: data.value,
             unit: data.unit,
             source: "Health"
@@ -169,8 +163,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         var convertSamples = function(samples){
           for(var i=0; i<samples.length; i++) {
             var res = {};
-            res.startDate = convertDate(samples[i].startDate);
-            res.endDate = convertDate(samples[i].endDate);
+            res.startDate = new Date(samples[i].startDate);
+            res.endDate = new Date(samples[i].endDate);
             res.value = samples[i].quantity;
             if(data[i].unit) res.unit = samples[i].unit;
             else if(opts.unit) res.unit = opts.unit;
