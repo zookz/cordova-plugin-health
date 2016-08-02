@@ -80,6 +80,7 @@ define('requestAuthorization');
 define('readDateOfBirth', {noArgs: true});
 define('readGender', {noArgs: true});
 define('findWorkouts');
+define('delete');
 define('readWeight');
 define('readHeight');
 define('readBloodType', {noArgs: true});
@@ -107,7 +108,7 @@ define('saveWorkout', {required: 'startDate'}, function(options) {
 
 define('monitorSampleType', {required: 'sampleType'});
 define('querySampleType', {required: 'sampleType'}, hasValidDates);
-
+define('querySampleTypeAggregated', {required: 'sampleType'}, hasValidDates);
 define('queryCorrelationType', {required: 'correlationType'}, hasValidDates);
 define('saveQuantitySample', {required: 'sampleType'}, hasValidDates);
 
