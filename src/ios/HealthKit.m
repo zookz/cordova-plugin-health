@@ -302,14 +302,14 @@ static NSString *const HKPluginKeyUUID = @"UUID";
             NSEnergyFormatter *energyFormatter = [NSEnergyFormatter new];
             energyFormatter.forFoodEnergyUse = NO;
             double energy = [workout.totalEnergyBurned doubleValueForUnit:[HKUnit kilocalorieUnit]];
-            NSString *calories = [energyFormatter stringFromJoules:energy];
+            NSString *calorieS = [energyFormatter stringFromJoules:energy];
 
             NSMutableDictionary *entry = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                           [NSNumber numberWithDouble:workout.duration], @"duration",
                                           [self stringFromDate:workout.startDate], HKPluginKeyStartDate,
                                           [self stringFromDate:workout.endDate], HKPluginKeyEndDate,
                                           distanceS, @"distance",
-                                          caloriesS, @"energy",
+                                          calorieS, @"energy",
                                           source.bundleIdentifier, HKPluginKeySourceBundleId,
                                           source.name, HKPluginKeySourceName,
                                           workoutActivity, @"activityType",
