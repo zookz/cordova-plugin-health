@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -149,7 +150,7 @@ public class HealthPlugin extends CordovaPlugin {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == REQUEST_OAUTH) {
             if (resultCode == Activity.RESULT_OK) {
-                Log.i(TAG, "Got authorisation from Google Fit!!!");
+                Log.i(TAG, "Got authorisation from Google Fit");
                 if(!mClient.isConnected() && !mClient.isConnecting())
                     mClient.connect();
             } else if (resultCode == Activity.RESULT_CANCELED) {
@@ -193,17 +194,31 @@ public class HealthPlugin extends CordovaPlugin {
 
 
     private void isAvailable(final CallbackContext callbackContext){
-        PackageManager pm = cordova.getActivity().getApplicationContext().getPackageManager();
-        try {
-            pm.getPackageInfo("com.google.android.apps.fitness", PackageManager.GET_ACTIVITIES);
-            // Success return object
+        //first check that the Google APIs are available
+        GoogleApiAvailability gapi = GoogleApiAvailability.getInstance();
+        int apiresult = gapi.isGooglePlayServicesAvailable(this.cordova.getActivity());
+        if(apiresult != ConnectionResult.SUCCESS){
             PluginResult result;
-            result = new PluginResult(PluginResult.Status.OK, true);
+            result = new PluginResult(PluginResult.Status.OK, false);
             callbackContext.sendPluginResult(result);
-        } catch (PackageManager.NameNotFoundException e) {
-            PluginResult result;
-            result = new PluginResult(PluginResult.Status.OK, true);
-            callbackContext.sendPluginResult(result);
+            if(gapi.isUserResolvableError(apiresult)){
+                // show the dialog, but no action is performed afterwards
+                gapi.showErrorDialogFragment(this.cordova.getActivity(), apiresult, 1000);
+            }
+        } else {
+            // check that Google Fit is actually installed
+            PackageManager pm = cordova.getActivity().getApplicationContext().getPackageManager();
+            try {
+                pm.getPackageInfo("com.google.android.apps.fitness", PackageManager.GET_ACTIVITIES);
+                // Success return object
+                PluginResult result;
+                result = new PluginResult(PluginResult.Status.OK, true);
+                callbackContext.sendPluginResult(result);
+            } catch (PackageManager.NameNotFoundException e) {
+                PluginResult result;
+                result = new PluginResult(PluginResult.Status.OK, false);
+                callbackContext.sendPluginResult(result);
+            }
         }
     }
 

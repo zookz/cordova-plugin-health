@@ -115,15 +115,16 @@ navigator.health.query({
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: String}, the data type to be queried (see above)
-- successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', source: "xxx" }   - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
+- successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', source: "xxx" }
+- errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 
 Quirks of query()
 
-- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more). There is an aggregated query for basal calories, but it doesn't work (see [this bug report](https://plus.google.com/+DarioSalviWork/posts/7bKkUBrdAYV).
-- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is defined in a variable, currently set to 100). The reason for this time window to be so big is because basal data points are very scarce and we need a large window to be sure to get at least one samples. If no data points are found even in the 100 days window, an error is raised.
-- when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
+- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more)
+- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is defined in a variable, currently set to 7)
 - while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
+- when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 
 ### queryAggregated()
 
@@ -140,7 +141,7 @@ navigator.health.queryAggregated({
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: String}, the data type to be queried (see below for supported data types)
-- successCallback: {type: function(data) }, called if all OK, data contains the result of the query, see below for returned data types
+- successCallback: {type: function(data)}, called if all OK, data contains the result of the query, see below for returned data types
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 Not all data types are supported for aggregated queries.
@@ -209,7 +210,6 @@ short term
 
 - add query with buckets (see window.plugins.healthkit.querySampleTypeAggregated for HealthKit)
 - add delete
-- support correct basal calories in Google Fit
 - get steps from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
 - add support for HKCategory samples in HealthKit
 - extend the datatypes
