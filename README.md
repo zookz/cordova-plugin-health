@@ -56,7 +56,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 
 Note: units of measurements are fixed !
 
-Returned objects can be of different types, see examples below:
+The value for each data type can be of different types, see examples below:
 
 | data type      | value                             |
 |----------------|-----------------------------------|
@@ -85,10 +85,18 @@ navigator.health.isAvailable(successCallback, errorCallback)
 - successCallback: {type: function(available)}, if available a true is passed as argument, false otherwise
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
+Quirks of isAvailable()
+
+- In Android, it checks both if recent Google Play Services and Google Fit are installed. If the play services are not installed, or are obsolete, it will show a pop-up suggesting to download them. If Google Fit is not installed, it will open the Play Store at the location of the Google Fit app. The plugin does not wait until the missing packages are installed, it will return immediately.
+
 ### requestAuthorization()
 
 Requests read and write access to a set of data types.
-This function should be called first in your application.
+This function has to be called before performing any query or storing.
+
+Warning: this function generates pop-ups that depend on the operating system.
+In iOS, it shows the the HealthKit authorisation pop-up.
+In Android, it launched the Google APIs OAuth authorisation process.
 
 ```
 navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)

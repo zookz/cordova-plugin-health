@@ -216,6 +216,15 @@ public class HealthPlugin extends CordovaPlugin {
                 result = new PluginResult(PluginResult.Status.OK, true);
                 callbackContext.sendPluginResult(result);
             } catch (PackageManager.NameNotFoundException e) {
+                //TODO: show popup for downloading app
+                //code from http://stackoverflow.com/questions/11753000/how-to-open-the-google-play-store-directly-from-my-android-application
+                /*
+                try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.fitness")));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.fitness")));
+                }
+                */
                 PluginResult result;
                 result = new PluginResult(PluginResult.Status.OK, false);
                 callbackContext.sendPluginResult(result);
