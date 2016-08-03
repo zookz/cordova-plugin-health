@@ -184,15 +184,16 @@ navigator.health.store({
 Quirks of store()
 
 - in iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
-- in Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
-- in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
-- in iOS, storing the sleep activities is not supported at the moment.
+- in Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active (though not 100% sure).
+- in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field `cycling: true`.
+- in iOS, you cannot store gender and date_of_birth at the moment.
+- in iOS, storing the sleep activities crashes at the moment.
 
 ## Differences between HealthKit and Google Fit
 
-* HealthKit includes medical data (eg blood glucose), Google Fit is currently only related to fitness data
+* HealthKit includes medical data (eg blood glucose), Google Fit is currently only related to fitness
 * HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types
-* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when quiered, Google Fit stores data with a fixed unit of measurement
+* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when queried, Google Fit stores data with a fixed unit of measurement
 * HealthKit automatically counts steps and distance when you carry your phone with you, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
 * HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also
 
@@ -203,22 +204,25 @@ Quirks of store()
 * For functions that require the `unit` attribute, you can find the comprehensive list of possible units from the [Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
 * [HealthKit constants](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Constants/index.html), used throughout the code
 * Google Fit [supported data types](https://developers.google.com/fit/android/data-types)
+* Google Fit [fields](https://developers.google.com/android/reference/com/google/android/gms/fitness/data/Field)
 
 ## Roadmap
 
-short term
+short term:
 
-- add query with buckets (see window.plugins.healthkit.querySampleTypeAggregated for HealthKit)
+- add query with buckets (see recently added window.plugins.healthkit.querySampleTypeAggregated for HealthKit)
 - add delete
-- get steps from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
-- add support for HKCategory samples in HealthKit
+- get steps also from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
+- add support for storing HKCategory samples in HealthKit
+- add storing of all category types (gender, DoB, blood type) in HK
 - extend the datatypes
  - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
  - food (HKCorrelationTypeIdentifierFood, TYPE_NUTRITION)
  - blood glucose
  - location (NA, TYPE_LOCATION)
+ - skin type
 
-long term
+long term:
 
 - add registration to updates
 - store vital signs on an encrypted DB in the case of Android (possible choice: [sqlcipher](https://www.zetetic.net/sqlcipher/sqlcipher-for-android/))
@@ -227,5 +231,5 @@ long term
 ## Contributions
 
 Any help is more than welcome!
-I cannot program in iOS, so I would particularly appreciate someone who can give me a hand.
+I don't know how to program in iOS, so I would particularly appreciate someone who can give me a hand.
 Just send me an email to my_username at gmail.com

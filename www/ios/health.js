@@ -184,7 +184,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           }, onError);
         } else if(opts.dataType == 'calories'){ //in the case of the calories, add the basal
           opts.sampleType = 'HKQuantityTypeIdentifierBasalEnergyBurned';
-          //reassing start and end times
+          //reassign start and end times
           opts.startDate = startD;
           opts.endDate = endD;
           window.plugins.healthkit.querySampleType(opts, function(data){
