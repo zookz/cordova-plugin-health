@@ -160,8 +160,8 @@ public class HealthPlugin extends CordovaPlugin {
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // The user cancelled the login dialog before selecting any action.
-                authReqCallbackCtx.error("User cancelled the dialog.");
-            }
+                authReqCallbackCtx.error("User cancelled the dialog");
+            } else authReqCallbackCtx.error("Authorisation failed, result code "+ resultCode);
         }
     }
 
@@ -278,7 +278,6 @@ public class HealthPlugin extends CordovaPlugin {
                         String message = "";
                         if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
                             message = "connection lost, network lost";
-
                         } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
                             message = "connection lost, service disconnected";
                         } else message = "connection lost, code: " + i;
@@ -291,21 +290,21 @@ public class HealthPlugin extends CordovaPlugin {
                 new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult result) {
-                        Log.i(TAG, "Connection failed. Cause: " + result.toString());
+                        Log.i(TAG, "Connection failed, cause: " + result.toString());
                         if (!result.hasResolution()) {
                             Log.e(TAG, "Connection failure has no resolution: " + result.getErrorMessage());
                             callbackContext.error(result.getErrorMessage());
-                            return;
-                        }
-                        // The failure has a resolution. Resolve it.
-                        // Called typically when the app is not yet authorized, and an
-                        // authorization dialog is displayed to the user.
-                        try {
-                            Log.i(TAG, "Attempting to resolve failed connection");
-                            result.startResolutionForResult(cordova.getActivity(), REQUEST_OAUTH);
-                        } catch (IntentSender.SendIntentException e) {
-                            Log.e(TAG, "Exception while starting resolution activity", e);
-                            callbackContext.error(result.getErrorMessage());
+                        } else {
+                            // The failure has a resolution. Resolve it.
+                            // Called typically when the app is not yet authorized, and an
+                            // authorization dialog is displayed to the user.
+                            try {
+                                Log.i(TAG, "Attempting to resolve failed connection");
+                                result.startResolutionForResult(cordova.getActivity(), REQUEST_OAUTH);
+                            } catch (IntentSender.SendIntentException e) {
+                                Log.e(TAG, "Exception while starting resolution activity", e);
+                                callbackContext.error(result.getErrorMessage());
+                            }
                         }
                     }
                 }
