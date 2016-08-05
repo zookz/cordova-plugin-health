@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -135,11 +136,12 @@ public class HealthPlugin extends CordovaPlugin {
                     pendingResult = Fitness.ConfigApi.createCustomDataType(mClient, request);
                     dataTypeResult = pendingResult.await();
                     if(!dataTypeResult.getStatus().isSuccess()){
-                        Log.i(TAG, "Custom data types created");
                         authReqCallbackCtx.error(dataTypeResult.getStatus().getStatusMessage());
                         return;
                     }
                     customdatatypes.put("date_of_birth", dataTypeResult.getDataType());
+
+                    Log.i(TAG, "All custom data types created");
                     authReqCallbackCtx.success();
                 } catch (Exception ex){
                     authReqCallbackCtx.error(ex.getMessage());
@@ -152,8 +154,10 @@ public class HealthPlugin extends CordovaPlugin {
         if (requestCode == REQUEST_OAUTH) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.i(TAG, "Got authorisation from Google Fit");
-                if(!mClient.isConnected() && !mClient.isConnecting())
+                if(!mClient.isConnected() && !mClient.isConnecting()){
+                    Log.d(TAG, "Re-trying connection with Fit");
                     mClient.connect();
+                }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // The user cancelled the login dialog before selecting any action.
                 authReqCallbackCtx.error("User cancelled the dialog.");
@@ -220,9 +224,9 @@ public class HealthPlugin extends CordovaPlugin {
                 //code from http://stackoverflow.com/questions/11753000/how-to-open-the-google-play-store-directly-from-my-android-application
 
                 try {
-                  startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.fitness")));
+                  cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.fitness")));
                 } catch (android.content.ActivityNotFoundException anfe) {
-                  startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.fitness")));
+                    cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.fitness")));
                 }
 
                 PluginResult result;
@@ -321,7 +325,7 @@ public class HealthPlugin extends CordovaPlugin {
         mClient = builder.build();
         mClient.blockingConnect();
         if(mClient.isConnected()){
-            Log.i(TAG, "Google Fit Connected!!!!!!!");
+            Log.i(TAG, "Google Fit connected (light)");
             return true;
         } else {
             return false;
