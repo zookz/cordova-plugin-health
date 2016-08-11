@@ -578,6 +578,44 @@ static NSString *const HKPluginKeyUUID = @"UUID";
   }];
 }
 
+
+- (void) readFitzpatrickSkinType:(CDVInvokedUrlCommand*)command {
+  // fp skintype is available since iOS 9, so we need to check it
+  if(![self.healthStore respondsToSelector:@selector(fitzpatrickSkinTypeWithError:)]) {
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"not available on this device"];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    return;
+  }
+
+  HKCharacteristicType *type = [HKObjectType characteristicTypeForIdentifier:HKCharacteristicTypeIdentifierFitzpatrickSkinType];
+  [self.healthStore requestAuthorizationToShareTypes:nil readTypes:[NSSet setWithObjects: type, nil] completion:^(BOOL success, NSError *error) {
+    if (success) {
+      HKFitzpatrickSkinTypeObject *skinType = [self.healthStore fitzpatrickSkinTypeWithError:&error];
+      if (skinType) {
+        NSString* skin = @"unknown";
+        if (skinType.skinType == HKFitzpatrickSkinTypeI) {
+          skin = @"I";
+        } else if (skinType.skinType == HKFitzpatrickSkinTypeII) {
+          skin = @"II";
+        } else if (skinType.skinType == HKFitzpatrickSkinTypeIII) {
+          skin = @"III";
+        } else if (skinType.skinType == HKFitzpatrickSkinTypeIV) {
+          skin = @"IV";
+        } else if (skinType.skinType == HKFitzpatrickSkinTypeV) {
+          skin = @"V";
+        } else if (skinType.skinType == HKFitzpatrickSkinTypeVI) {
+          skin = @"VI";
+        }
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:skin];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+      } else {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+      }
+    }
+  }];
+}
+
 - (void) readBloodType:(CDVInvokedUrlCommand*)command {
   HKCharacteristicType *bloodType = [HKObjectType characteristicTypeForIdentifier:HKCharacteristicTypeIdentifierBloodType];
   [self.healthStore requestAuthorizationToShareTypes:nil readTypes:[NSSet setWithObjects: bloodType, nil] completion:^(BOOL success, NSError *error) {

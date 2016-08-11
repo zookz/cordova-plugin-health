@@ -310,7 +310,7 @@ public class HealthPlugin extends CordovaPlugin {
                 }
         );
         mClient = builder.build();
-        mClient.blockingConnect();
+        mClient.connect();
     }
 
     private boolean lightConnect(){
