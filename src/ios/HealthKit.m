@@ -567,6 +567,8 @@ static NSString *const HKPluginKeyUUID = @"UUID";
           gender = @"male";
         } else if (sex.biologicalSex == HKBiologicalSexFemale) {
           gender = @"female";
+        } else if (sex.biologicalSex == HKBiologicalSexOther) {
+          gender = @"other";
         }
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:gender];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
