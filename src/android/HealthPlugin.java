@@ -184,10 +184,28 @@ public class HealthPlugin extends CordovaPlugin {
             requestAuthorization(args, callbackContext);
             return true;
         } else if("query".equals(action)){
-            query(args, callbackContext);
+            new Thread(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        query(args, callbackContext);
+                    } catch (Exception ex){
+                        callbackContext.error(ex.getMessage());
+                    }
+                }
+            }).start();
             return true;
         } else if("queryAggregated".equals(action)){
-            queryAggregated(args, callbackContext);
+            new Thread(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        queryAggregated(args, callbackContext);
+                    } catch (Exception ex){
+                        callbackContext.error(ex.getMessage());
+                    }
+                }
+            }).start();
             return true;
         } else if("store".equals(action)) {
             store(args, callbackContext);
