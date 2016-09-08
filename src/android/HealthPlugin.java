@@ -408,7 +408,11 @@ public class HealthPlugin extends CordovaPlugin {
                     obj.put("endDate", datapoint.getEndTime(TimeUnit.MILLISECONDS));
                     if (datapoint.getDataSource() != null)
                         obj.put("source", datapoint.getDataSource().getName());
-                    DataSource hhh = datapoint.getDataSource();
+                    if (datapoint.getOriginalDataSource() != null) {
+                        DataSource dataSource = datapoint.getOriginalDataSource();
+                        String appPkgName = dataSource.getAppPackageName();
+                        obj.put("originalSourcePackage", appPkgName);
+                    }
 
                     //reference for fields: https://developers.google.com/android/reference/com/google/android/gms/fitness/data/Field.html
                     if (DT.equals(DataType.TYPE_STEP_COUNT_DELTA)) {
