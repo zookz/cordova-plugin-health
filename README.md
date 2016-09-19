@@ -23,6 +23,7 @@ cordova plugin add cordova-plugin-health
 
 * Make sure your app id has the 'HealthKit' entitlement when this plugin is installed (see iOS dev center).
 * Also, make sure your app and AppStore description complies with these Apple review guidelines: https://developer.apple.com/app-store/review/guidelines/#healthkit
+* In iOS10, you need to add [two keys](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW48) to the info.plist file: NSHealthShareUsageDescription="A very good reason why I want to read your data."; NSHealthUpdateUsageDescription="A very good reason why I want to write data."; 
 
 ## Requirements for Android apps
 
