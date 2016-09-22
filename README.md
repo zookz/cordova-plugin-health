@@ -120,7 +120,7 @@ navigator.health.query({
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: String}, the data type to be queried (see above)
-- successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', source: "xxx" }
+- successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', sourceName: '', sourceBundleId: '' }
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 
@@ -176,16 +176,19 @@ navigator.health.store({
 	endDate: new Date(),
 	dataType: 'steps',
 	value: 180,
-	source: 'my_app'}, successCallback, errorCallback)
+	sourceName: 'my_app',
+	sourceBundleId: 'com.example.my_app' }, successCallback, errorCallback)
 ```
 
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: a String}, the data type
 - value: {type: a number or an Object}, depending on the actual data type
-- source: {type: String}, the source that produced this data. In iOS this is ignored and set automatically to the name of your app.
+- sourceName: {type: String}, the source that produced this data. In iOS this is ignored and set automatically to the name of your app.
+- sourceBundleId: {type: String}, the complete package of the source that produced this data. In Android, if not specified, it's assigned to the package of the App. In iOS this is ignored and set automatically to the bunde id of the app.
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
+
 
 Quirks of store()
 

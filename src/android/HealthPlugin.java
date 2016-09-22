@@ -408,12 +408,10 @@ public class HealthPlugin extends CordovaPlugin {
                     obj.put("endDate", datapoint.getEndTime(TimeUnit.MILLISECONDS));
                     DataSource dataSource = datapoint.getOriginalDataSource();
                     if (dataSource != null) {
-                        JSONObject source = new JSONObject();
-                        String sourceName = dataSource.getName();
-                        source.put("sourceName", sourceName);
+						String sourceName = dataSource.getName();
+						obj.put("sourceName", sourceName);
                         String sourceBundleId = dataSource.getAppPackageName();
-                        source.put("sourceBundleId", sourceBundleId);
-                        obj.put("source", source);
+                        obj.put("sourceBundleId", sourceBundleId);
                     }
 
                     //reference for fields: https://developers.google.com/android/reference/com/google/android/gms/fitness/data/Field.html
@@ -683,11 +681,16 @@ public class HealthPlugin extends CordovaPlugin {
             callbackContext.error("Missing argument value");
             return;
         }
-        if (!args.getJSONObject(0).has("source")) {
-            callbackContext.error("Missing argument source");
+        if (!args.getJSONObject(0).has("sourceName")) {
+            callbackContext.error("Missing argument sourceName");
             return;
         }
-        String source = args.getJSONObject(0).getString("source");
+        String sourceName = args.getJSONObject(0).getString("sourceName");
+		
+		String sourceBundleId = cordova.getActivity().getApplicationContext().getPackageName();
+		if (args.getJSONObject(0).has("sourceBundleId")) {
+            sourceBundleId = args.getJSONObject(0).getString("sourceBundleId");
+        }
 
         DataType dt = null;
         if (bodydatatypes.get(datatype) != null)
@@ -712,11 +715,9 @@ public class HealthPlugin extends CordovaPlugin {
             }
         }
 
-        String packageName = cordova.getActivity().getApplicationContext().getPackageName();
-
         DataSource datasrc = new DataSource.Builder()
-                .setAppPackageName(packageName)
-                .setName(source)
+                .setAppPackageName(sourceBundleId)
+                .setName(sourceName)
                 .setDataType(dt)
                 .setType(DataSource.TYPE_RAW)
                 .build();
