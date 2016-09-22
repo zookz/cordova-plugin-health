@@ -69,7 +69,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         startDate: startD,
         endDate: endD,
         value: data,
-        source: "com.apple.Health"
+        sourceName: "Health",
+		sourceBundleId: "com.apple.Health"
       };
       onSuccess(res);
     }, onError);
@@ -83,7 +84,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         startDate: opts.startDate,
         endDate: opts.endDate,
         value: { day: date.getDate(), month: date.getMonth()+1, year: date.getFullYear()},
-        source: "Health"
+        sourceName: "Health",
+		sourceBundleId: "com.apple.Health"
       };
       onSuccess(res);
     }, onError);
@@ -101,7 +103,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           res.unit = 'activityType';
           res.calories = data[i].energy;
           res.distance = data[i].distance;
-          res.source = data[i].sourceName;
+          res.sourceName = data[i].sourceName;
+		  res.sourceBundleId = data[i].sourceBundleId;
           result.push(res);
         }
       }
@@ -115,7 +118,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           if(data[i].value == 0) res.value = 'sleep.awake';
           else res.value = 'sleep';
           res.unit = 'activityType';
-          res.source = data[i].sourceName;
+          res.sourceName = data[i].sourceName;
+		  res.sourceBundleId = data[i].sourceBundleId;
           result.push(res);
         }
         onSuccess(result);
@@ -138,7 +142,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             endDate: new Date(data.date),
             value: data.value,
             unit: data.unit,
-            source: "Health"
+            sourceName: "Health",
+			sourceBundleId: "com.apple.Health"
           };
           onSuccess(res);
           return;
@@ -154,7 +159,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             endDate: new Date(data.date),
             value: data.value,
             unit: data.unit,
-            source: "Health"
+            sourceName: "Health",
+			sourceBundleId: "com.apple.Health"
           };
           onSuccess(res);
           return;
@@ -168,7 +174,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             res.value = samples[i].quantity;
             if(data[i].unit) res.unit = samples[i].unit;
             else if(opts.unit) res.unit = opts.unit;
-            res.source = samples[i].sourceName;
+            res.sourceName = samples[i].sourceName;
+			res.sourceBundleId = samples[i].sourceBundleId;
             result.push(res);
           }
         };
