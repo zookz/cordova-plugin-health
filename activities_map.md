@@ -127,8 +127,8 @@ This means that, for example, if you try to save "aerobics" in an iOS applicatio
 |	walking	|	WALKING	|	HKWorkoutActivityTypeWalking	|
 |	walking.fitness	|	WALKING_FITNESS	|	HKWorkoutActivityTypeWalking	|
 |	walking.nordic	|	WALKING_NORDIC	|	HKWorkoutActivityTypeWalking	|
-|	walking.treadmill	|	WALKING_STROLLER	|	HKWorkoutActivityTypeWalking	|
-|	walking.stroller	|	WALKING_TREADMILL	|	HKWorkoutActivityTypeWalking	|
+|	walking.treadmill	|	WALKING_TREADMILL	|	HKWorkoutActivityTypeWalking	|
+|	walking.stroller	|	WALKING_STROLLER	|	HKWorkoutActivityTypeWalking	|
 |	water_fitness	|	NA	|	HKWorkoutActivityTypeWaterFitness	|
 |	water_polo	|	WATER_POLO	|	HKWorkoutActivityTypeWaterPolo	|
 |	water_sports	|	NA	|	HKWorkoutActivityTypeWaterSports	|
