@@ -213,7 +213,20 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   if((opts.dataType == 'steps') || (opts.dataType == 'distance') || (opts.dataType == 'calories') || (opts.dataType == 'calories.active') || (opts.dataType == 'calories.basal')){
     opts.sampleType = dataTypes[ opts.dataType ];
     if(units[ opts.dataType ]) opts.unit = units[ opts.dataType ];
-    window.plugins.healthkit.sumQuantityType(opts, function(value) {
+	if(opts.aggregation) {
+		// with aggregation
+		window.plugins.healthkit.querySampleTypeAggregated(opts, function(value) {
+          onSuccess({
+            startDate: startD,
+            endDate: endD,
+            value: value,
+            unit: opts.unit
+          });
+        }, onError);
+		
+	} else {
+	  // no aggregation, just sum
+	  window.plugins.healthkit.sumQuantityType(opts, function(value) {
       if(opts.dataType == 'distance'){
         //add cycled distance
         var dist = value;
@@ -276,6 +289,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
       }
       onSuccess(res);
     }, onError);
+	}
   } else {
     onError('Datatype '+opts.dataType+' not supported in queryAggregated');
   }
