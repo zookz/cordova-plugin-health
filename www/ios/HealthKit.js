@@ -68,10 +68,10 @@ var define = function(methodName, params, fn) {
         onError(error.message);
       }
 
-      var args = options ? [options] : []
+      var args = options ? [options] : [];
       cordova.exec(callback, onError, 'HealthKit', methodName, args);
     };
-  };
+  }
 };
 
 define('available', {noArgs: true});
@@ -109,7 +109,9 @@ define('saveWorkout', {required: 'startDate'}, function(options) {
 
 define('monitorSampleType', {required: 'sampleType'});
 define('querySampleType', {required: 'sampleType'}, hasValidDates);
+
 define('querySampleTypeAggregated', {required: 'sampleType'}, hasValidDates);
+
 define('queryCorrelationType', {required: 'correlationType'}, hasValidDates);
 define('saveQuantitySample', {required: 'sampleType'}, hasValidDates);
 
