@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
   id="cordova-plugin-health"
   version="0.6.2">
-
+  
   <name>Cordova Health</name>
 
   <description>
@@ -45,8 +45,16 @@
         <string>healthkit</string>
       </array>
     </config-file>
-	
+
 	<!-- Usage description of Health, mandatory since iOS 10 -->
+    <config-file target="*-Info.plist" parent="NSHealthShareUsageDescription">
+      <string/>
+    </config-file>
+    <config-file target="*-Info.plist" parent="NSHealthUpdateUsageDescription">
+      <string/>
+    </config-file>
+
+    <!-- Usage description of Health, mandatory since iOS 10 -->
     <config-file target="*-Info.plist" parent="NSHealthShareUsageDescription">
       <string/>
     </config-file>
