@@ -103,28 +103,33 @@ Health.prototype.store = function (data, onSuccess, onError) {
   exec(onSuccess, onError, "health", "store", [data]);
 };
 
-Health.prototype.toFitActivity = function(act){
-  //unsupported activities are mapped to 'other'
-  if((act == 'archery') ||
-  (act == 'bowling') ||
-  (act == 'fishing') ||
-  (act == 'functional_strength') ||
-  (act == 'hunting') ||
-  (act == 'lacrosse') ||
-  (act == 'mixed_metabolic_cardio') ||
-  (act == 'paddle_sports') ||
-  (act == 'play') ||
-  (act == 'preparation_and_recovery') ||
-  (act == 'snow_sports') ||
-  (act == 'softball') ||
-  (act == 'water_fitness') ||
-  (act == 'water_sports') ||
-  (act == 'wrestling'))
-  return 'other';
+Health.prototype.toFitActivity = function (act) {
+  if (act === 'core_training') return 'strength_training';
+  if (act === 'flexibility') return 'gymnastics';
+  if (act === 'stairs') return 'stair_climbing';
+  if (act === 'wheelchair.walkpace') return 'wheelchair';
+  if (act === 'wheelchair.runpace') return 'wheelchair';
+  // unsupported activities are mapped to 'other'
+  if ((act === 'archery') ||
+  (act === 'barre') ||
+  (act === 'bowling') ||
+  (act === 'fishing') ||
+  (act === 'functional_strength') ||
+  (act === 'hunting') ||
+  (act === 'lacrosse') ||
+  (act === 'mixed_metabolic_cardio') ||
+  (act === 'paddle_sports') ||
+  (act === 'play') ||
+  (act === 'preparation_and_recovery') ||
+  (act === 'snow_sports') ||
+  (act === 'softball') ||
+  (act === 'water_fitness') ||
+  (act === 'water_sports') ||
+  (act === 'wrestling')) return 'other';
   else return act;
 };
 
-cordova.addConstructor(function(){
+cordova.addConstructor(function () {
   navigator.health = new Health();
   return navigator.health;
 });

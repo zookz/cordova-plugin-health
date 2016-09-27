@@ -1,3 +1,4 @@
 .idea
 *.iml
 __TEST
+.DS_Store
