@@ -1,7 +1,7 @@
-var exec = require("cordova/exec");
+var exec = require('cordova/exec');
 
 var Health = function () {
-  this.name = "health";
+  this.name = 'health';
 };
 
 var dataTypes = [];
@@ -15,7 +15,6 @@ dataTypes['weight'] = 'HKQuantityTypeIdentifierBodyMass';
 dataTypes['heart_rate'] = 'HKQuantityTypeIdentifierHeartRate';
 dataTypes['fat_percentage'] = 'HKQuantityTypeIdentifierBodyFatPercentage';
 dataTypes['activity'] = 'HKWorkoutTypeIdentifier'; // and HKCategoryTypeIdentifierSleepAnalysis
-
 
 var units = [];
 units['steps'] = 'count';
@@ -98,8 +97,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         if ((res.startDate >= opts.startDate) && (res.endDate <= opts.endDate)) {
           res.value = data[i].activityType;
           res.unit = 'activityType';
-          res.calories = data[i].energy;
-          res.distance = data[i].distance;
+          res.calories = parseInt(data[i].energy.slice(0, -2)); // remove the ending J
+          res.distance = parseInt(data[i].distance);
           res.sourceName = data[i].sourceName;
           res.sourceBundleId = data[i].sourceBundleId;
           result.push(res);
@@ -131,7 +130,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       var result = [];
       // fallback scenario for weight
       if ((opts.dataType === 'weight') && (data.length == 0)) {
-        //let's try to get it from the health ID
+        // let's try to get it from the health ID
         window.plugins.healthkit.readWeight({ unit: 'kg' }, function (data) {
           var res = [];
           res[0] = {
@@ -139,8 +138,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             endDate: new Date(data.date),
             value: data.value,
             unit: data.unit,
-            sourceName: "Health",
-            sourceBundleId: "com.apple.Health"
+            sourceName: 'Health',
+            sourceBundleId: 'com.apple.Health'
           };
           onSuccess(res);
           return;
@@ -149,15 +148,15 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       // fallback scenario for height
       else if ((opts.dataType === 'height') && (data.length == 0)) {
         // let's try to get it from the health ID
-        window.plugins.healthkit.readHeight({ unit: 'm' }, function(data){
+        window.plugins.healthkit.readHeight({ unit: 'm' }, function (data) {
           var res = [];
           res[0] = {
             startDate: new Date(data.date),
             endDate: new Date(data.date),
             value: data.value,
             unit: data.unit,
-            sourceName: "Health",
-            sourceBundleId: "com.apple.Health"
+            sourceName: 'Health',
+            sourceBundleId: 'com.apple.Health'
           };
           onSuccess(res);
           return;
@@ -169,7 +168,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             res.startDate = new Date(samples[i].startDate);
             res.endDate = new Date(samples[i].endDate);
             res.value = samples[i].quantity;
-            if(data[i].unit) res.unit = samples[i].unit;
+            if (data[i].unit) res.unit = samples[i].unit;
             else if (opts.unit) res.unit = opts.unit;
             res.sourceName = samples[i].sourceName;
             res.sourceBundleId = samples[i].sourceBundleId;
@@ -268,8 +267,8 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
             if ((data[i].endDate <= retval[j].endDate) && (data[i].startDate >= retval[j].startDate)) {
               // add the sample to the bucket
               var dur = (data[i].endDate - data[i].startDate);
-              var dist = parseInt(data[i].distance);
-              var cals = data[i].calories; // TODO: parseInt this too
+              var dist = data[i].distance;
+              var cals = data[i].calories;
               if (retval[j].value[data[i].value]) {
                 retval[j].value[data[i].value].duration += dur;
                 retval[j].value[data[i].value].distance += dist;
@@ -361,11 +360,13 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
             res.value[data[i].value].duration += dur;
             res.value[data[i].value].distance += dist;
             res.value[data[i].value].calories += cals;
-          } else res.value[data[i].value] = {
-            duration: dur,
-            distance: dist,
-            calories: cals
-          };
+          } else {
+            res.value[data[i].value] = {
+              duration: dur,
+              distance: dist,
+              calories: cals
+            };
+          }
         }
         onSuccess(res);
       }, onError);
@@ -431,7 +432,14 @@ Health.prototype.store = function (data, onSuccess, onError) {
       window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
     } else {
       data.activityType = data.value;
-      // TODO: add energy (energyUnit: 'kcal') and distance (distanceUnit: 'm' )
+      if (data.calories) {
+        data.energy = data.calories;
+        data.energyUnit = 'kcal';
+      }
+      if (data.distance) {
+        data.distance = data.distance;
+        data.distanceUnit = 'm';
+      }
       window.plugins.healthkit.saveWorkout(data, onSuccess, onError);
     }
   } else if (dataTypes[ data.dataType ]) {
@@ -445,12 +453,11 @@ Health.prototype.store = function (data, onSuccess, onError) {
     }
     window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
   } else {
-    onError('unknown data type '+data.dataType);
+    onError('unknown data type ' + data.dataType);
   }
 };
 
-
-cordova.addConstructor(function(){
+cordova.addConstructor(function () {
   navigator.health = new Health();
   return navigator.health;
 });
