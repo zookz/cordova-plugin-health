@@ -177,21 +177,20 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           }
         };
         convertSamples(data);
-        if (opts.dataType == 'distance') { // in the case of the distance, add the cycling distances
+        if (opts.dataType === 'distance') { // in the case of the distance, add the cycling distances
           opts.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
-          //reassing start and end times
+          // re-assign start and end times (because the plugin modifies them later)
           opts.startDate = startD;
           opts.endDate = endD;
           window.plugins.healthkit.querySampleType(opts, function (data) {
             convertSamples(data);
             onSuccess(result);
           }, onError);
-        } else if (opts.dataType == 'calories') { // in the case of the calories, add the basal
+        } else if (opts.dataType === 'calories') { // in the case of the calories, add the basal
           opts.sampleType = 'HKQuantityTypeIdentifierBasalEnergyBurned';
-          //reassign start and end times
           opts.startDate = startD;
           opts.endDate = endD;
-          window.plugins.healthkit.querySampleType(opts, function(data){
+          window.plugins.healthkit.querySampleType(opts, function (data) {
             convertSamples(data);
             onSuccess(result);
           }, onError);
@@ -199,24 +198,95 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       }
     }, onError);// first call to querySampleType
   } else {
-    onError('unknown data type '+dts[i]);
+    onError('unknown data type ' + opts.dataType);
   }
 };
 
-
 Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
+  if ((opts.dataType !== 'steps') && (opts.dataType !== 'distance') &&
+  (opts.dataType !== 'calories') && (opts.dataType !== 'calories.active') &&
+  (opts.dataType !== 'calories.basal') && (opts.dataType !== 'activity')) {
+    // unsupported datatype
+    onError('Datatype ' + opts.dataType + ' not supported in queryAggregated');
+    return;
+  }
   var startD = opts.startDate;
   var endD = opts.endDate;
-  if ((opts.dataType === 'steps') || (opts.dataType === 'distance') ||
-  (opts.dataType === 'calories') || (opts.dataType === 'calories.active') ||
-  (opts.dataType === 'calories.basal')) {
-    opts.sampleType = dataTypes[ opts.dataType ];
-    if(units[ opts.dataType ]) opts.unit = units[ opts.dataType ];
-    if (opts.bucket) {
-      // with buckets
-      opts.aggregation = opts.bucket;
-      opts.startDate = startD;
-      opts.endDate = endD;
+  opts.sampleType = dataTypes[ opts.dataType ];
+  if (units[ opts.dataType ]) opts.unit = units[ opts.dataType ];
+  if (opts.bucket) {
+    // ----- with buckets
+    opts.aggregation = opts.bucket;
+    opts.startDate = startD;
+    opts.endDate = endD;
+    if (opts.dataType === 'activity') {
+      // query and manually aggregate
+      navigator.health.query(opts, function (data) {
+        // aggregate by period and activity
+        var retval = [];
+        // create buckets
+        var sd;
+        if (opts.bucket === 'hour') {
+          sd = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate(), startD.getHours());
+        } else if (opts.bucket === 'day') {
+          sd = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate());
+        } else if (opts.bucket === 'week') {
+          sd = new Date(startD.getTime());
+          sd.setDate(startD.getDate() - (startD.getDay() === 0 ? 6 : startD.getDay() - 1)); // last monday
+        } else if (opts.bucket === 'month') {
+          sd = new Date(startD.getFullYear(), startD.getMonth());
+        } else if (opts.bucket === 'year') {
+          sd = new Date(startD.getFullYear());
+        } else {
+          onError('Bucket not recognised ' + opts.bucket);
+          return;
+        }
+        while (sd <= endD) {
+          var ed;
+          if (opts.bucket === 'hour') {
+            ed = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), sd.getHours() + 1);
+          } else if (opts.bucket === 'day') {
+            ed = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate() + 1);
+          } else if (opts.bucket === 'week') {
+            ed = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate() + 7);
+          } else if (opts.bucket === 'month') {
+            ed = new Date(sd.getFullYear(), sd.getMonth() + 1);
+          } else if (opts.bucket === 'year') {
+            ed = new Date(sd.getFullYear() + 1);
+          }
+          retval.push({
+            startDate: sd,
+            endDate: ed,
+            value: {},
+            unit: 'activitySummary'
+          });
+          sd = ed;
+        }
+        for (var i = 0; i < data.length; i++) {
+          // select the bucket
+          for (var j = 0; j < retval.length; j++) {
+            if ((data[i].endDate <= retval[j].endDate) && (data[i].startDate >= retval[j].startDate)) {
+              // add the sample to the bucket
+              var dur = (data[i].endDate - data[i].startDate);
+              var dist = parseInt(data[i].distance);
+              var cals = data[i].calories; // TODO: parseInt this too
+              if (retval[j].value[data[i].value]) {
+                retval[j].value[data[i].value].duration += dur;
+                retval[j].value[data[i].value].distance += dist;
+                retval[j].value[data[i].value].calories += cals;
+              } else {
+                retval[j].value[data[i].value] = {
+                  duration: dur,
+                  distance: dist,
+                  calories: cals
+                };
+              }
+            }
+          }
+        }
+        onSuccess(retval);
+      }, onError);
+    } else {
       window.plugins.healthkit.querySampleTypeAggregated(opts, function (value) {
         // merges values and adds unit
         var mergeAndSuccess = function (value, previous) {
@@ -256,69 +326,6 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
           window.plugins.healthkit.sumQuantityType(opts, function (v) {
             mergeAndSuccess(v, activecals);
           }, onError);
-        } else if (opts.dataType === 'activity') {
-          // query and manually aggregate
-          navigator.health.query(opts, function (data) {
-            // aggregate by period and activity
-            var retval = [];
-            // create buckets
-            var sd;
-            if (opts.bucket === 'hour') {
-              sd = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate(), startD.getHours());
-            } else if (opts.bucket === 'day') {
-              sd = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate());
-            } else if (opts.bucket === 'week') {
-              sd = new Date(endD.setDate(endD.getDate() - endD.getDay() + 1)); // last monday
-            } else if (opts.bucket === 'month') {
-              sd = new Date(startD.getFullYear(), startD.getMonth());
-            } else if (opts.bucket === 'year') {
-              sd = new Date(startD.getFullYear());
-            } else onError('Bucket not recognised ' + opts.bucket);
-            while (sd <= endD) {
-              var ed;
-              if (opts.bucket === 'hour') {
-                ed = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate(), startD.getHours() + 1);
-              } else if (opts.bucket === 'day') {
-                ed = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate() + 1);
-              } else if (opts.bucket === 'week') {
-                ed = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate() + 7);
-              } else if (opts.bucket === 'month') {
-                ed = new Date(startD.getFullYear(), startD.getMonth() + 1);
-              } else if (opts.bucket === 'year') {
-                ed = new Date(startD.getFullYear() + 1);
-              }
-              retval.push({
-                startDate: sd,
-                endDate: ed,
-                value: {},
-                unit: 'activity'
-              });
-              sd = ed;
-            }
-            for (var i = 0; i < data.length; i++) {
-              // select the bucket
-              for (var j = 0; j < retval.length; j++) {
-                if ((data[i].endDate <= retval[j].endDate) && (data[i].startDate >= retval[j].startDate)) {
-                  // add the sample to the bucket
-                  var dur = (data[i].endDate - data[i].startDate);
-                  var dist = data[i].distance;
-                  var cals = data[i].calories;
-                  if (retval[j].value[data[i].value]) {
-                    retval[j].value[data[i].value].duration += dur;
-                    retval[j].value[data[i].value].distance += dist;
-                    retval[j].value[data[i].value].calories += cals;
-                  } else {
-                    retval[j].value[data[i].value] = {
-                      duration: dur,
-                      distance: dist,
-                      calories: cals
-                    };
-                  }
-                }
-              }
-            }
-            onSuccess(retval);
-          }, onError);
         } else {
           // refactor objects
           var retval = [];
@@ -328,17 +335,44 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
               endDate: value[i].endDate,
               value: value[i].quantity,
               unit: opts.unit
-            }
+            };
             retval.push(sample);
           }
-          onSuccess(retval);;
+          onSuccess(retval);
         }
       }, onError);
+    }
+  } else {
+    // ---- no aggregation, just sum
+    if (opts.dataType === 'activity') {
+      var res = {
+        startDate: startD,
+        endDate: endD,
+        value: {},
+        unit: 'activitySummary'
+      };
+      navigator.health.query(opts, function (data) {
+        // aggregate by activity
+        for (var i = 0; i < data.length; i++) {
+          var dur = (data[i].endDate - data[i].startDate);
+          var dist = data[i].distance;
+          var cals = data[i].calories;
+          if (res.value[data[i].value]) {
+            res.value[data[i].value].duration += dur;
+            res.value[data[i].value].distance += dist;
+            res.value[data[i].value].calories += cals;
+          } else res.value[data[i].value] = {
+            duration: dur,
+            distance: dist,
+            calories: cals
+          };
+        }
+        onSuccess(res);
+      }, onError);
     } else {
-      // no aggregation, just sum
       window.plugins.healthkit.sumQuantityType(opts, function (value) {
         if (opts.dataType === 'distance') {
-          //add cycled distance
+          // add cycled distance
           var dist = value;
           opts.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
           opts.startDate = startD;
@@ -365,31 +399,6 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
               unit: opts.unit
             });
           }, onError);
-        } else if (opts.dataType === 'activity') {
-          var res = {
-            startDate: startD,
-            endDate: endD,
-            value: {},
-            unit: 'activitySummary'
-          };
-          navigator.health.query(opts, function (data) {
-            // aggregate by activity
-            for (var i = 0; i < data.length; i++) {
-              var dur = (data[i].endDate - data[i].startDate);
-              var dist = data[i].distance;
-              var cals = data[i].calories;
-              if (res.value[data[i].value]) {
-                res.value[data[i].value].duration += dur;
-                res.value[data[i].value].distance += dist;
-                res.value[data[i].value].calories += cals;
-              } else res.value[data[i].value] = {
-                duration: dur,
-                distance: dist,
-                calories: cals
-              };
-            }
-            onSuccess(res);
-          }, onError);
         } else {
           onSuccess({
             startDate: startD,
@@ -400,17 +409,15 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
         }
       }, onError);
     }
-  } else { // unsupported datatype
-    onError('Datatype '+opts.dataType+' not supported in queryAggregated');
   }
 };
 
 Health.prototype.store = function (data, onSuccess, onError) {
-  if (data.dataType == 'gender') {
+  if (data.dataType === 'gender') {
     onError('Gender is not writeable');
-  } else if (data.dataType== 'date_of_birth') {
+  } else if (data.dataType === 'date_of_birth') {
     onError('Date of birth is not writeable');
-  } else if (data.dataType == 'activity') {
+  } else if (data.dataType === 'activity') {
     if ((data.value === 'sleep') ||
     (data.value === 'sleep.light') ||
     (data.value === 'sleep.deep') ||
