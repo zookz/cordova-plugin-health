@@ -128,40 +128,6 @@ Health.prototype.query = function (opts, onSuccess, onError) {
     }
     window.plugins.healthkit.querySampleType(opts, function (data) {
       var result = [];
-      // fallback scenario for weight
-      if ((opts.dataType === 'weight') && (data.length == 0)) {
-        // let's try to get it from the health ID
-        window.plugins.healthkit.readWeight({ unit: 'kg' }, function (data) {
-          var res = [];
-          res[0] = {
-            startDate: new Date(data.date),
-            endDate: new Date(data.date),
-            value: data.value,
-            unit: data.unit,
-            sourceName: 'Health',
-            sourceBundleId: 'com.apple.Health'
-          };
-          onSuccess(res);
-          return;
-        }, onError);
-      }
-      // fallback scenario for height
-      else if ((opts.dataType === 'height') && (data.length == 0)) {
-        // let's try to get it from the health ID
-        window.plugins.healthkit.readHeight({ unit: 'm' }, function (data) {
-          var res = [];
-          res[0] = {
-            startDate: new Date(data.date),
-            endDate: new Date(data.date),
-            value: data.value,
-            unit: data.unit,
-            sourceName: 'Health',
-            sourceBundleId: 'com.apple.Health'
-          };
-          onSuccess(res);
-          return;
-        }, onError);
-      } else {
         var convertSamples = function (samples) {
           for (var i = 0; i < samples.length; i++) {
             var res = {};
@@ -194,8 +160,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             onSuccess(result);
           }, onError);
         } else onSuccess(result);
-      }
-    }, onError);// first call to querySampleType
+    }, onError); // first call to querySampleType
   } else {
     onError('unknown data type ' + opts.dataType);
   }
@@ -342,7 +307,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
       }, onError);
     }
   } else {
-    // ---- no aggregation, just sum
+    // ---- no bucketing, just sum
     if (opts.dataType === 'activity') {
       var res = {
         startDate: startD,
@@ -419,6 +384,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
   } else if (data.dataType === 'date_of_birth') {
     onError('Date of birth is not writeable');
   } else if (data.dataType === 'activity') {
+    // sleep activity, needs a different call than workout
     if ((data.value === 'sleep') ||
     (data.value === 'sleep.light') ||
     (data.value === 'sleep.deep') ||
@@ -431,6 +397,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
       data.amount = 0; // amount or value??
       window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
     } else {
+      // some other kind of workout
       data.activityType = data.value;
       if (data.calories) {
         data.energy = data.calories;
@@ -443,6 +410,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
       window.plugins.healthkit.saveWorkout(data, onSuccess, onError);
     }
   } else if (dataTypes[ data.dataType ]) {
+    // generic case
     data.sampleType = dataTypes[ data.dataType ];
     if ((data.dataType === 'distance') && data.cycling) {
       data.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
