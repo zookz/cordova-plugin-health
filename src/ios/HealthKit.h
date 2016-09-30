@@ -45,7 +45,6 @@
  * @param command *CDVInvokedUrlCommand
  */
 - (void) readDateOfBirth:(CDVInvokedUrlCommand*)command;
-- (void) readFitzpatrickSkinType:(CDVInvokedUrlCommand*)command;
 
 /**
  * Read Fitzpatrick Skin Type Data
@@ -116,7 +115,6 @@
  * @param command *CDVInvokedUrlCommand
  */
 - (void) querySampleType:(CDVInvokedUrlCommand*)command;
-- (void) querySampleTypeAggregated:(CDVInvokedUrlCommand*)command;
 
 /**
  * Query a specified sample type using an aggregation

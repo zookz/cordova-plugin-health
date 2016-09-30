@@ -149,7 +149,7 @@ navigator.health.queryAggregated({
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: String}, the data type to be queried (see below for supported data types)
-- bucket: {type: String}, if specified, aggregation is grouped into "buckets" (windows of time), supported values are: 'hour', 'day', 'week', 'month', 'year'
+- bucket: {type: String}, if specified, aggregation is grouped an array of "buckets" (windows of time), supported values are: 'hour', 'day', 'week', 'month', 'year'
 - successCallback: {type: function(data)}, called if all OK, data contains the result of the query, see below for returned data types
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
