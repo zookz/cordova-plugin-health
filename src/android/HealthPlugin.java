@@ -58,8 +58,10 @@ public class HealthPlugin extends CordovaPlugin {
     private GoogleApiClient mClient;
 
     public static final int REQUEST_OAUTH = 1;
+    public static final int REQUEST_DYN_PERMS = 2;
 
-    //Scope for read/write access to activity-related data types in Google Fit. These include activity type, calories consumed and expended, step counts, and others.
+    //Scope for read/write access to activity-related data types in Google Fit.
+    //These include activity type, calories consumed and expended, step counts, and others.
     public static Map<String, DataType> activitydatatypes = new HashMap<String, DataType>();
 
     static {
@@ -84,7 +86,6 @@ public class HealthPlugin extends CordovaPlugin {
 
     static {
         locationdatatypes.put("distance", DataType.TYPE_DISTANCE_DELTA);
-        //locationdatatypes.put("location", DataType.TYPE_LOCATION_SAMPLE);
     }
 
     //Scope for read/write access to nutrition data types in Google Fit.
@@ -162,7 +163,35 @@ public class HealthPlugin extends CordovaPlugin {
                 // The user cancelled the login dialog before selecting any action.
                 authReqCallbackCtx.error("User cancelled the dialog");
             } else authReqCallbackCtx.error("Authorisation failed, result code "+ resultCode);
+        } else if(requestCode == REQUEST_DYN_PERMS) {
+          if (resultCode == Activity.RESULT_OK) {
+
+                // permission was granted, yay! Do the
+                // contacts-related task you need to do.
+
+            } else {
+
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+            }
         }
+    }
+
+    public void requestDynamicPermissions(boolean bodyscope, boolean locationscope) {
+
+      Log.i(TAG, "Requesting dynamic permissions for Android >= 6");
+      LinkedList<String> perms = new LinkedList<String>();
+
+      if(bodyscope && ContextCompat.checkSelfPermission(thisActivity, Manifest.permission.BODY_SENSORS) != PackageManager.PERMISSION_GRANTED)
+        perms.add(Manifest.permission.BODY_SENSORS);
+      }
+      if(locationscope && ContextCompat.checkSelfPermission(thisActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        perms.add(Manifest.permission.ACCESS_FINE_LOCATION);
+      }
+
+      if (!perms.isEmpty()){
+        ActivityCompat.requestPermissions(thisActivity, perms.toArray(), MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+      }
     }
 
     /**
@@ -686,7 +715,7 @@ public class HealthPlugin extends CordovaPlugin {
             return;
         }
         String sourceName = args.getJSONObject(0).getString("sourceName");
-		
+
 		String sourceBundleId = cordova.getActivity().getApplicationContext().getPackageName();
 		if (args.getJSONObject(0).has("sourceBundleId")) {
             sourceBundleId = args.getJSONObject(0).getString("sourceBundleId");
