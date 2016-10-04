@@ -165,7 +165,11 @@ public class HealthPlugin extends CordovaPlugin {
                     perms.add(p);
                 }
             }
-            cordova.requestPermissions(this, REQUEST_DYN_PERMS, perms.toArray(new String[perms.size()]));
+            if(perms.isEmpty()){
+                authReqCallbackCtx.success();
+            } else {
+                cordova.requestPermissions(this, REQUEST_DYN_PERMS, perms.toArray(new String[perms.size()]));
+            }
         }
     }
 
