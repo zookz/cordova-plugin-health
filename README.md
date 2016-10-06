@@ -92,7 +92,9 @@ Quirks of isAvailable()
 ### requestAuthorization()
 
 Requests read and write access to a set of data types.
-This function should be called first in your application.
+It is recommendable to always explain why the app needs access to the data before asking the user to authorise it.
+
+This function must be called before using the query and store functions, even if the authorisation has already been given at some point in the past.
 
 ```
 navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
@@ -101,6 +103,12 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 - datatypes: {type: Array of String}, a list of data types you want to be granted access to
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
+
+Quirks of requestAuthorization()
+
+- In Android, it will try to get authorisation from the Google Fit APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
+- In Android, be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the autorisation will ensure that the app is connected again.
+- In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
 
 ### query()
 
