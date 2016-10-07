@@ -544,9 +544,9 @@ public class HealthPlugin extends CordovaPlugin {
         String bucketType = "";
         if(hasbucket) {
             bucketType = args.getJSONObject(0).getString("bucket");
-            if(bucketType == "hour" || bucketType == "day") {
+            if(bucketType.equalsIgnoreCase("hour")  || bucketType.equalsIgnoreCase("day")) {
                 // OK don't do anything
-            } else if(bucketType == "week" || bucketType == "month" || bucketType == "year") {
+            } else if(bucketType.equalsIgnoreCase("week") || bucketType.equalsIgnoreCase("month") || bucketType.equalsIgnoreCase("year")) {
                 customBuckets = true;
             } else {
                 // error
@@ -642,11 +642,11 @@ public class HealthPlugin extends CordovaPlugin {
         }
 
         if(hasbucket) {
-            if (bucketType == "hour") {
+            if (bucketType.equalsIgnoreCase("hour")) {
                 builder.bucketByTime(1, TimeUnit.HOURS);
-            } else if(bucketType == "day"){
+            } else if(bucketType.equalsIgnoreCase("day")){
                 builder.bucketByTime(1, TimeUnit.DAYS);
-            } else if(bucketType == "week" || bucketType == "month" || bucketType == "year"){
+            } else {
                 // use days, then will need to aggregate manually
                 builder.bucketByTime(1, TimeUnit.DAYS);
             }
@@ -669,9 +669,9 @@ public class HealthPlugin extends CordovaPlugin {
                     cal.clear(Calendar.MINUTE);
                     cal.clear(Calendar.SECOND);
                     cal.clear(Calendar.MILLISECOND);
-                    if (bucketType == "week") {
+                    if (bucketType.equalsIgnoreCase("week")) {
                         cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
-                    } else if (bucketType == "month") {
+                    } else if (bucketType.equalsIgnoreCase("month")) {
                         cal.set(Calendar.DAY_OF_MONTH, 1);
                     } else {
                         cal.set(Calendar.DAY_OF_YEAR, 1);
@@ -679,9 +679,9 @@ public class HealthPlugin extends CordovaPlugin {
                     while (cal.getTimeInMillis() < et) {
                         JSONObject customBuck = new JSONObject();
                         customBuck.put("startDate", cal.getTimeInMillis());
-                        if (bucketType == "week") {
+                        if (bucketType.equalsIgnoreCase("week")) {
                             cal.add(Calendar.DAY_OF_YEAR, 7);
-                        } else if (bucketType == "month") {
+                        } else if (bucketType.equalsIgnoreCase("month")) {
                             cal.add(Calendar.MONTH, 1);
                         } else {
                             cal.set(Calendar.YEAR, 1);
