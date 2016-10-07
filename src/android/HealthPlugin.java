@@ -539,6 +539,22 @@ public class HealthPlugin extends CordovaPlugin {
         }
         String datatype = args.getJSONObject(0).getString("dataType");
 
+        boolean hasbucket = args.getJSONObject(0).has("bucket");
+        boolean customBuckets = false;
+        String bucketType = "";
+        if(hasbucket) {
+            bucketType = args.getJSONObject(0).getString("bucket");
+            if(bucketType == "hour" || bucketType == "day") {
+                // OK don't do anything
+            } else if(bucketType == "week" || bucketType == "month" || bucketType == "year") {
+                customBuckets = true;
+            } else {
+                // error
+                callbackContext.error("Bucket type " + bucketType + " not recognised");
+                return;
+            }
+        }
+
         if ((mClient == null) || (!mClient.isConnected())){
             if(!lightConnect()){
                 callbackContext.error("Cannot connect to Google Fit");
@@ -546,8 +562,11 @@ public class HealthPlugin extends CordovaPlugin {
             }
         }
 
+
         //basal metabolic rate is treated in a different way
         if(datatype.equalsIgnoreCase("calories.basal")){
+            //TODO bucket
+
             //when querying for basal calories, the aggregated value is computed over a period that shall be larger than a day
             //as we don't expect basal calories to change much over time (they are a usually function of age, sex, weight and height)
             //so we'll choose a week as time window and then renormalise the value to the original time range
@@ -611,78 +630,132 @@ public class HealthPlugin extends CordovaPlugin {
 
         if(datatype.equalsIgnoreCase("steps")){
             builder.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA);
-            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         } else if(datatype.equalsIgnoreCase("distance")){
             builder.aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA);
-            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         } else if(datatype.equalsIgnoreCase("calories")){
             builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
-            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         } else if(datatype.equalsIgnoreCase("activity")){
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
-            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         } else {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
+        }
+
+        if(hasbucket) {
+            if (bucketType == "hour") {
+                builder.bucketByTime(1, TimeUnit.HOURS);
+            } else if(bucketType == "day"){
+                builder.bucketByTime(1, TimeUnit.DAYS);
+            } else if(bucketType == "week" || bucketType == "month" || bucketType == "year"){
+                // use days, then will need to aggregate manually
+                builder.bucketByTime(1, TimeUnit.DAYS);
+            }
+        } else {
+            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         }
 
         DataReadRequest readRequest = builder.build();
         DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
         if (dataReadResult.getStatus().isSuccess()) {
-            JSONObject obj = new JSONObject();
+            JSONObject retBucket = new JSONObject();
+            JSONArray retBucketsArr = new JSONArray();
+            if(hasbucket){
+                if(customBuckets) {
+                    // create custom buckets, as these are not supported by Google Fit
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTimeInMillis(st);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.clear(Calendar.MINUTE);
+                    cal.clear(Calendar.SECOND);
+                    cal.clear(Calendar.MILLISECOND);
+                    if (bucketType == "week") {
+                        cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+                    } else if (bucketType == "month") {
+                        cal.set(Calendar.DAY_OF_MONTH, 1);
+                    } else {
+                        cal.set(Calendar.DAY_OF_YEAR, 1);
+                    }
+                    while (cal.getTimeInMillis() < et) {
+                        JSONObject customBuck = new JSONObject();
+                        customBuck.put("startDate", cal.getTimeInMillis());
+                        if (bucketType == "week") {
+                            cal.add(Calendar.DAY_OF_YEAR, 7);
+                        } else if (bucketType == "month") {
+                            cal.add(Calendar.MONTH, 1);
+                        } else {
+                            cal.set(Calendar.YEAR, 1);
+                        }
+                        customBuck.put("endDate", cal.getTimeInMillis());
+                        retBucketsArr.put(customBuck);
+                    }
+                }
+            } else {
+                //there will be only one bucket spanning all the period
+                retBucket.put("startDate", st);
+                retBucket.put("startDate", et);
+            }
+
             for(Bucket bucket : dataReadResult.getBuckets()){
+                if(hasbucket){
+                    if(customBuckets){
+                        //find the bucket among customs
+                        for(int i=0; i<retBucketsArr.length(); i++){
+                            retBucket = retBucketsArr.getJSONObject(i);
+                            long bst = retBucket.getLong("startDate");
+                            long bet = retBucket.getLong("endDate");
+                            if(bucket.getStartTime(TimeUnit.MILLISECONDS) >= bst
+                                    && bucket.getEndTime(TimeUnit.MILLISECONDS) <= bet){
+                                break;
+                            }
+                        }
+                    } else {
+                        //pick the current
+                        retBucket.put("startDate", bucket.getStartTime(TimeUnit.MILLISECONDS));
+                        retBucket.put("endDate", bucket.getStartTime(TimeUnit.MILLISECONDS));
+                    }
+                }
+                // aggregate data points over the bucket
+
                 for (DataSet dataset : bucket.getDataSets()) {
                     for (DataPoint datapoint : dataset.getDataPoints()) {
                         long nsd = datapoint.getStartTime(TimeUnit.MILLISECONDS);
-                        if(obj.has("startDate")) {
-                            long osd = obj.getLong("startDate");
-                            if(nsd < osd) obj.put("startDate", nsd);
-                        } else
-                            obj.put("startDate", nsd);
-
-                        long ned = datapoint.getEndTime(TimeUnit.MILLISECONDS);
-                        if(obj.has("endDate")) {
-                            long oed = obj.getLong("endDate");
-                            if(ned > oed) obj.put("endDate", ned);
-                        } else
-                            obj.put("endDate", ned);
 
                         if (datatype.equalsIgnoreCase("steps")) {
                             int nsteps = datapoint.getValue(Field.FIELD_STEPS).asInt();
-                            if(obj.has("value")) {
-                                int osteps = obj.getInt("value");
-                                obj.put("value", osteps + nsteps);
+                            if(retBucket.has("value")) {
+                                int osteps = retBucket.getInt("value");
+                                retBucket.put("value", osteps + nsteps);
                             } else {
-                                obj.put("value", nsteps);
-                                obj.put("unit", "count");
+                                retBucket.put("value", nsteps);
+                                retBucket.put("unit", "count");
                             }
                         } else if (datatype.equalsIgnoreCase("distance")) {
                             float ndist = datapoint.getValue(Field.FIELD_DISTANCE).asFloat();
-                            if(obj.has("value")) {
-                                double odist = obj.getDouble("value");
-                                obj.put("value", odist + ndist);
+                            if(retBucket.has("value")) {
+                                double odist = retBucket.getDouble("value");
+                                retBucket.put("value", odist + ndist);
                             } else {
-                                obj.put("value", ndist);
-                                obj.put("unit", "m");
+                                retBucket.put("value", ndist);
+                                retBucket.put("unit", "m");
                             }
                         } else if (datatype.equalsIgnoreCase("calories")) {
                             float ncal = datapoint.getValue(Field.FIELD_CALORIES).asFloat();
-                            if(obj.has("value")) {
-                                double ocal = obj.getDouble("value");
-                                obj.put("value", ocal + ncal);
+                            if(retBucket.has("value")) {
+                                double ocal = retBucket.getDouble("value");
+                                retBucket.put("value", ocal + ncal);
                             } else {
-                                obj.put("value", ncal);
-                                obj.put("unit", "kcal");
+                                retBucket.put("value", ncal);
+                                retBucket.put("unit", "kcal");
                             }
                         } else if (datatype.equalsIgnoreCase("activity")) {
                             JSONObject actobj;
                             String activity = datapoint.getValue(Field.FIELD_ACTIVITY).asActivity();
-                            if(obj.has("value")) {
-                                actobj = obj.getJSONObject("value");
+                            if(retBucket.has("value")) {
+                                actobj = retBucket.getJSONObject("value");
                             } else {
                                 actobj = new JSONObject();
-                                obj.put("unit", "activitySummary");
+                                retBucket.put("unit", "activitySummary");
                             }
                             JSONObject summary;
                             int ndur = datapoint.getValue(Field.FIELD_DURATION).asInt();
@@ -695,12 +768,15 @@ public class HealthPlugin extends CordovaPlugin {
                                 summary.put("duration", ndur);
                             }
                             actobj.put(activity, summary);
-                            obj.put("value", actobj);
+                            retBucket.put("value", actobj);
                         }
                     }
-                }
-            }
-            callbackContext.success(obj);
+                } //end of data set loop
+                if(hasbucket)
+                    retBucketsArr.put(retBucket);
+            } // end of buckets loop
+            if(hasbucket) callbackContext.success(retBucketsArr);
+            else callbackContext.success(retBucket);
         } else {
             callbackContext.error(dataReadResult.getStatus().getStatusMessage());
         }
