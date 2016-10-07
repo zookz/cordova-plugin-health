@@ -529,24 +529,17 @@ public class HealthPlugin extends CordovaPlugin {
             return;
         }
         long st = args.getJSONObject(0).getLong("startDate");
-        long originalst = st;
         if (!args.getJSONObject(0).has("endDate")) {
             callbackContext.error("Missing argument endDate");
             return;
         }
         long et = args.getJSONObject(0).getLong("endDate");
-        long originalet = et;
+        long _et = et; // keep track of the original end time, needed for basal calories
         if (!args.getJSONObject(0).has("dataType")) {
             callbackContext.error("Missing argument dataType");
             return;
         }
         String datatype = args.getJSONObject(0).getString("dataType");
-
-        // basal calories need to be queried over a period longer than a day
-        if (datatype.equalsIgnoreCase("calories.basal")){
-            if(et-st < 24*60*60*1000)
-                st = et - 24*60*60*1000;
-        }
 
         boolean hasbucket = args.getJSONObject(0).has("bucket");
         boolean customBuckets = false;
@@ -570,6 +563,13 @@ public class HealthPlugin extends CordovaPlugin {
             c.clear(Calendar.MILLISECOND);
             if (!bucketType.equalsIgnoreCase("hour")) {
                 c.set(Calendar.HOUR_OF_DAY, 0);
+                if (bucketType.equalsIgnoreCase("week")) {
+                    c.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek());
+                } else if (bucketType.equalsIgnoreCase("month")) {
+                    c.set(Calendar.DAY_OF_MONTH, 1);
+                } else if (bucketType.equalsIgnoreCase("year")) {
+                    c.set(Calendar.DAY_OF_YEAR, 1);
+                }
             }
             st = c.getTimeInMillis();
 
@@ -583,6 +583,12 @@ public class HealthPlugin extends CordovaPlugin {
                 c.set(Calendar.HOUR_OF_DAY, 0);
                 if (bucketType.equalsIgnoreCase("day")) {
                     c.add(Calendar.DAY_OF_YEAR, 1);
+                } else if (bucketType.equalsIgnoreCase("week")) {
+                    c.add(Calendar.DAY_OF_YEAR, 7);
+                } else if (bucketType.equalsIgnoreCase("month")) {
+                    c.add(Calendar.MONTH, 1);
+                } else if (bucketType.equalsIgnoreCase("year")) {
+                    c.add(Calendar.YEAR, 1);
                 }
             }
             et = c.getTimeInMillis();
@@ -591,6 +597,19 @@ public class HealthPlugin extends CordovaPlugin {
         if ((mClient == null) || (!mClient.isConnected())) {
             if (!lightConnect()) {
                 callbackContext.error("Cannot connect to Google Fit");
+                return;
+            }
+        }
+
+        // basal metabolic rate is treated in a different way
+        // we need to query per day and not all days may have a sample
+        // so we query over a week then we take the average
+        float basalAVG = 0;
+        if (datatype.equalsIgnoreCase("calories.basal")) {
+            try{
+                basalAVG = getBasalAVG(_et);
+            } catch (Exception ex){
+                callbackContext.error(ex.getMessage());
                 return;
             }
         }
@@ -605,31 +624,26 @@ public class HealthPlugin extends CordovaPlugin {
             builder.aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA);
         } else if (datatype.equalsIgnoreCase("calories")) {
             builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
+        } else if(datatype.equalsIgnoreCase("calories.basal")) {
+            builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else if (datatype.equalsIgnoreCase("activity")) {
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
-        } else if (datatype.equalsIgnoreCase("calories.basal")) {
-            builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
         }
 
-        if (datatype.equalsIgnoreCase("calories.basal")){
-            // basal calories are an exception always
-            builder.bucketByTime(1, TimeUnit.DAYS);
-        } else {
-            if (hasbucket) {
-                if (bucketType.equalsIgnoreCase("hour")) {
-                    builder.bucketByTime(1, TimeUnit.HOURS);
-                } else if (bucketType.equalsIgnoreCase("day")) {
-                    builder.bucketByTime(1, TimeUnit.DAYS);
-                } else {
-                    // use days, then will need to aggregate manually
-                    builder.bucketByTime(1, TimeUnit.DAYS);
-                }
+        if (hasbucket) {
+            if (bucketType.equalsIgnoreCase("hour")) {
+                builder.bucketByTime(1, TimeUnit.HOURS);
+            } else if (bucketType.equalsIgnoreCase("day")) {
+                builder.bucketByTime(1, TimeUnit.DAYS);
             } else {
-                builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+                // use days, then will need to aggregate manually
+                builder.bucketByTime(1, TimeUnit.DAYS);
             }
+        } else {
+            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
         }
 
         DataReadRequest readRequest = builder.build();
@@ -643,17 +657,6 @@ public class HealthPlugin extends CordovaPlugin {
                     // create custom buckets, as these are not supported by Google Fit
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(st);
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.clear(Calendar.MINUTE);
-                    cal.clear(Calendar.SECOND);
-                    cal.clear(Calendar.MILLISECOND);
-                    if (bucketType.equalsIgnoreCase("week")) {
-                        cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
-                    } else if (bucketType.equalsIgnoreCase("month")) {
-                        cal.set(Calendar.DAY_OF_MONTH, 1);
-                    } else {
-                        cal.set(Calendar.DAY_OF_YEAR, 1);
-                    }
                     while (cal.getTimeInMillis() < et) {
                         JSONObject customBuck = new JSONObject();
                         customBuck.put("startDate", cal.getTimeInMillis());
@@ -662,7 +665,7 @@ public class HealthPlugin extends CordovaPlugin {
                         } else if (bucketType.equalsIgnoreCase("month")) {
                             cal.add(Calendar.MONTH, 1);
                         } else {
-                            cal.set(Calendar.YEAR, 1);
+                            cal.add(Calendar.YEAR, 1);
                         }
                         customBuck.put("endDate", cal.getTimeInMillis());
                         retBucketsArr.put(customBuck);
@@ -671,8 +674,8 @@ public class HealthPlugin extends CordovaPlugin {
             } else {
                 //there will be only one bucket spanning all the period
                 retBucket = new JSONObject();
-                retBucket.put("startDate", originalst);
-                retBucket.put("endDate", originalet);
+                retBucket.put("startDate", st);
+                retBucket.put("endDate", et);
                 retBucket.put("value", 0);
                 if (datatype.equalsIgnoreCase("steps")) {
                     retBucket.put("unit", "count");
@@ -721,9 +724,10 @@ public class HealthPlugin extends CordovaPlugin {
                     }
                 }
                 // aggregate data points over the bucket
+                boolean atleastone = false;
                 for (DataSet dataset : bucket.getDataSets()) {
                     for (DataPoint datapoint : dataset.getDataPoints()) {
-                        long nsd = datapoint.getStartTime(TimeUnit.MILLISECONDS);
+                        atleastone = true;
                         if (datatype.equalsIgnoreCase("steps")) {
                             int nsteps = datapoint.getValue(Field.FIELD_STEPS).asInt();
                             int osteps = retBucket.getInt("value");
@@ -738,17 +742,6 @@ public class HealthPlugin extends CordovaPlugin {
                             retBucket.put("value", ocal + ncal);
                         } else if (datatype.equalsIgnoreCase("calories.basal")) {
                             float ncal = datapoint.getValue(Field.FIELD_AVERAGE).asFloat();
-                            if (ncal == 0) {
-                                // strange case, let's give an error
-                                // TODO: a better approach would be giving some kind of approximation (like a fixed value)
-                                callbackContext.error("No basal metabolic energy expenditure found");
-                                return;
-                            }
-                            if(!hasbucket || bucketType.equalsIgnoreCase("hour")){
-                                // when no buckets are specified or when in less than daily buckets:
-                                // renormalise to the original time window
-                                ncal = (ncal / (24 * 60 * 60 * 1000)) * (et - st);
-                            }
                             double ocal = retBucket.getDouble("value");
                             retBucket.put("value", ocal + ncal);
                         } else if (datatype.equalsIgnoreCase("activity")) {
@@ -769,12 +762,67 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                     }
                 } //end of data set loop
+                if (datatype.equalsIgnoreCase("calories.basal")){
+                    double basals = retBucket.getDouble("value");
+                    if(!atleastone) {
+                        //when no basal is available, use the daily average
+                        basals += basalAVG;
+                        retBucket.put("value", basals);
+                    }
+                    // if the bucket is not daily, it needs to be normalised
+                    if(!hasbucket || bucketType.equalsIgnoreCase("hour")){
+                        long sst = retBucket.getLong("startDate");
+                        long eet = retBucket.getLong("endDate");
+                        basals = (basals / (24 * 60 * 60 * 1000)) * (eet - sst);
+                        retBucket.put("value", basals);
+                    }
+                }
             } // end of buckets loop
+            for(int i=0; i< retBucketsArr.length(); i++){
+                long _sss = retBucketsArr.getJSONObject(i).getLong("startDate");
+                long _eee = retBucketsArr.getJSONObject(i).getLong("endDate");
+                Log.d(TAG, "Bucket: "+ new Date(_sss) + " " + new Date(_eee));
+            }
             if (hasbucket) callbackContext.success(retBucketsArr);
             else callbackContext.success(retBucket);
         } else {
             callbackContext.error(dataReadResult.getStatus().getStatusMessage());
         }
+    }
+
+    private float getBasalAVG(long _et) throws Exception {
+        float basalAVG = 0;
+        Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(new Date(_et));
+        //set start time to a week before end time
+        cal.add(Calendar.WEEK_OF_YEAR, -1);
+        long nst = cal.getTimeInMillis();
+
+        DataReadRequest.Builder builder = new DataReadRequest.Builder();
+        builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
+        builder.bucketByTime(1, TimeUnit.DAYS);
+        builder.setTimeRange(nst, _et, TimeUnit.MILLISECONDS);
+        DataReadRequest readRequest = builder.build();
+
+        DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
+
+        if (dataReadResult.getStatus().isSuccess()) {
+            JSONObject obj = new JSONObject();
+            int avgsN = 0;
+            for (Bucket bucket : dataReadResult.getBuckets()) {
+                // in the com.google.bmr.summary data type, each data point represents
+                // the average, maximum and minimum basal metabolic rate, in kcal per day, over the time interval of the data point.
+                DataSet ds = bucket.getDataSet(DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
+                for (DataPoint dp : ds.getDataPoints()) {
+                    float avg = dp.getValue(Field.FIELD_AVERAGE).asFloat();
+                    basalAVG += avg;
+                    avgsN++;
+                }
+            }
+            // do the average of the averages
+            if (avgsN != 0) basalAVG /= avgsN; // this a daily average
+            return basalAVG;
+        } else throw new Exception(dataReadResult.getStatus().getStatusMessage());
     }
 
 
