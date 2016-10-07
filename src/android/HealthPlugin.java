@@ -529,16 +529,24 @@ public class HealthPlugin extends CordovaPlugin {
             return;
         }
         long st = args.getJSONObject(0).getLong("startDate");
+        long originalst = st;
         if (!args.getJSONObject(0).has("endDate")) {
             callbackContext.error("Missing argument endDate");
             return;
         }
         long et = args.getJSONObject(0).getLong("endDate");
+        long originalet = et;
         if (!args.getJSONObject(0).has("dataType")) {
             callbackContext.error("Missing argument dataType");
             return;
         }
         String datatype = args.getJSONObject(0).getString("dataType");
+
+        // basal calories need to be queried over a period longer than a day
+        if (datatype.equalsIgnoreCase("calories.basal")){
+            if(et-st < 24*60*60*1000)
+                st = et - 24*60*60*1000;
+        }
 
         boolean hasbucket = args.getJSONObject(0).has("bucket");
         boolean customBuckets = false;
@@ -587,67 +595,6 @@ public class HealthPlugin extends CordovaPlugin {
             }
         }
 
-        //basal metabolic rate is treated in a different way
-        if (datatype.equalsIgnoreCase("calories.basal")) {
-            //TODO bucket
-
-            //when querying for basal calories, the aggregated value is computed over a period that shall be larger than a day
-            //as we don't expect basal calories to change much over time (they are a usually function of age, sex, weight and height)
-            //so we'll choose a week as time window and then renormalise the value to the original time range
-            //TODO: a better approach would be using a time window similar to the original one, in case the window is larger than a week
-            Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(new Date(et));
-            //set start time to a week before end time
-            cal.add(Calendar.WEEK_OF_YEAR, -1);
-            long nst = cal.getTimeInMillis();
-
-            DataReadRequest.Builder builder = new DataReadRequest.Builder();
-            builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
-            builder.bucketByTime(1, TimeUnit.DAYS);
-            builder.setTimeRange(nst, et, TimeUnit.MILLISECONDS);
-            DataReadRequest readRequest = builder.build();
-
-            DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
-
-            if (dataReadResult.getStatus().isSuccess()) {
-                JSONObject obj = new JSONObject();
-                float avgs = 0;
-                int avgsN = 0;
-                for (Bucket bucket : dataReadResult.getBuckets()) {
-                    // in the com.google.bmr.summary data type, each data point represents
-                    // the average, maximum and minimum basal metabolic rate, in kcal per day, over the time interval of the data point.
-                    DataSet ds = bucket.getDataSet(DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
-                    for (DataPoint dp : ds.getDataPoints()) {
-                        float avg = dp.getValue(Field.FIELD_AVERAGE).asFloat();
-                        avgs += avg;
-                        avgsN++;
-                    }
-                }
-                if (avgs == 0) {
-                    // strange case
-                    // maybe the time window is too small or Fit is missing information for computing the basal
-                    // let's give an error
-                    // TODO: a better approach would be giving some kind of approximation (like a fixed value)
-                    callbackContext.error("No basal metabolic energy expenditure found");
-                }
-                // do the average of the averages
-                avgs /= avgsN;
-                // renormalise to the original time window
-                // avgs is the daily average
-                avgs = (avgs / (24 * 60 * 60 * 1000)) * (et - st);
-                obj.put("value", avgs);
-                obj.put("startDate", st);
-                obj.put("endDate", et);
-                obj.put("unit", "kcal");
-
-                callbackContext.success(obj);
-            } else {
-                callbackContext.error(dataReadResult.getStatus().getStatusMessage());
-            }
-            // no need to go further
-            return;
-        }
-
         DataReadRequest.Builder builder = new DataReadRequest.Builder();
         builder.setTimeRange(st, et, TimeUnit.MILLISECONDS);
         int allms = (int) (et - st);
@@ -660,22 +607,29 @@ public class HealthPlugin extends CordovaPlugin {
             builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
         } else if (datatype.equalsIgnoreCase("activity")) {
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
+        } else if (datatype.equalsIgnoreCase("calories.basal")) {
+            builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
         }
 
-        if (hasbucket) {
-            if (bucketType.equalsIgnoreCase("hour")) {
-                builder.bucketByTime(1, TimeUnit.HOURS);
-            } else if (bucketType.equalsIgnoreCase("day")) {
-                builder.bucketByTime(1, TimeUnit.DAYS);
-            } else {
-                // use days, then will need to aggregate manually
-                builder.bucketByTime(1, TimeUnit.DAYS);
-            }
+        if (datatype.equalsIgnoreCase("calories.basal")){
+            // basal calories are an exception always
+            builder.bucketByTime(1, TimeUnit.DAYS);
         } else {
-            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+            if (hasbucket) {
+                if (bucketType.equalsIgnoreCase("hour")) {
+                    builder.bucketByTime(1, TimeUnit.HOURS);
+                } else if (bucketType.equalsIgnoreCase("day")) {
+                    builder.bucketByTime(1, TimeUnit.DAYS);
+                } else {
+                    // use days, then will need to aggregate manually
+                    builder.bucketByTime(1, TimeUnit.DAYS);
+                }
+            } else {
+                builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+            }
         }
 
         DataReadRequest readRequest = builder.build();
@@ -717,8 +671,8 @@ public class HealthPlugin extends CordovaPlugin {
             } else {
                 //there will be only one bucket spanning all the period
                 retBucket = new JSONObject();
-                retBucket.put("startDate", st);
-                retBucket.put("endDate", et);
+                retBucket.put("startDate", originalst);
+                retBucket.put("endDate", originalet);
                 retBucket.put("value", 0);
                 if (datatype.equalsIgnoreCase("steps")) {
                     retBucket.put("unit", "count");
@@ -780,6 +734,21 @@ public class HealthPlugin extends CordovaPlugin {
                             retBucket.put("value", odist + ndist);
                         } else if (datatype.equalsIgnoreCase("calories")) {
                             float ncal = datapoint.getValue(Field.FIELD_CALORIES).asFloat();
+                            double ocal = retBucket.getDouble("value");
+                            retBucket.put("value", ocal + ncal);
+                        } else if (datatype.equalsIgnoreCase("calories.basal")) {
+                            float ncal = datapoint.getValue(Field.FIELD_AVERAGE).asFloat();
+                            if (ncal == 0) {
+                                // strange case, let's give an error
+                                // TODO: a better approach would be giving some kind of approximation (like a fixed value)
+                                callbackContext.error("No basal metabolic energy expenditure found");
+                                return;
+                            }
+                            if(!hasbucket || bucketType.equalsIgnoreCase("hour")){
+                                // when no buckets are specified or when in less than daily buckets:
+                                // renormalise to the original time window
+                                ncal = (ncal / (24 * 60 * 60 * 1000)) * (et - st);
+                            }
                             double ocal = retBucket.getDouble("value");
                             retBucket.put("value", ocal + ncal);
                         } else if (datatype.equalsIgnoreCase("activity")) {
