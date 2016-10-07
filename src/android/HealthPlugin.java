@@ -112,21 +112,22 @@ public class HealthPlugin extends CordovaPlugin {
     }
 
     private CallbackContext authReqCallbackCtx;
-    private void authReqSuccess(){
+
+    private void authReqSuccess() {
         //Create custom data types
-        cordova.getThreadPool().execute(new Runnable(){
+        cordova.getThreadPool().execute(new Runnable() {
 
             @Override
             public void run() {
-                try{
+                try {
                     String packageName = cordova.getActivity().getApplicationContext().getPackageName();
                     DataTypeCreateRequest request = new DataTypeCreateRequest.Builder()
-                            .setName(packageName+".gender")
-                            .addField("gender",Field.FORMAT_STRING)
+                            .setName(packageName + ".gender")
+                            .addField("gender", Field.FORMAT_STRING)
                             .build();
-                    PendingResult<DataTypeResult> pendingResult =  Fitness.ConfigApi.createCustomDataType(mClient, request);
+                    PendingResult<DataTypeResult> pendingResult = Fitness.ConfigApi.createCustomDataType(mClient, request);
                     DataTypeResult dataTypeResult = pendingResult.await();
-                    if(!dataTypeResult.getStatus().isSuccess()){
+                    if (!dataTypeResult.getStatus().isSuccess()) {
                         authReqCallbackCtx.error(dataTypeResult.getStatus().getStatusMessage());
                         return;
                     }
@@ -134,13 +135,13 @@ public class HealthPlugin extends CordovaPlugin {
 
                     request = new DataTypeCreateRequest.Builder()
                             .setName(packageName + ".date_of_birth")
-                            .addField("day",Field.FORMAT_INT32)
-                            .addField("month",Field.FORMAT_INT32)
-                            .addField("year",Field.FORMAT_INT32)
+                            .addField("day", Field.FORMAT_INT32)
+                            .addField("month", Field.FORMAT_INT32)
+                            .addField("year", Field.FORMAT_INT32)
                             .build();
                     pendingResult = Fitness.ConfigApi.createCustomDataType(mClient, request);
                     dataTypeResult = pendingResult.await();
-                    if(!dataTypeResult.getStatus().isSuccess()){
+                    if (!dataTypeResult.getStatus().isSuccess()) {
                         authReqCallbackCtx.error(dataTypeResult.getStatus().getStatusMessage());
                         return;
                     }
@@ -148,24 +149,24 @@ public class HealthPlugin extends CordovaPlugin {
 
                     Log.i(TAG, "All custom data types created");
                     requestDynamicPermissions();
-                } catch (Exception ex){
+                } catch (Exception ex) {
                     authReqCallbackCtx.error(ex.getMessage());
                 }
             }
         });
     }
 
-    public void requestDynamicPermissions(){
-        if(dynPerms.isEmpty()){
+    public void requestDynamicPermissions() {
+        if (dynPerms.isEmpty()) {
             authReqCallbackCtx.success();
         } else {
             LinkedList<String> perms = new LinkedList<String>();
-            for(String p: dynPerms){
-                if(!cordova.hasPermission(p)){
+            for (String p : dynPerms) {
+                if (!cordova.hasPermission(p)) {
                     perms.add(p);
                 }
             }
-            if(perms.isEmpty()){
+            if (perms.isEmpty()) {
                 authReqCallbackCtx.success();
             } else {
                 cordova.requestPermissions(this, REQUEST_DYN_PERMS, perms.toArray(new String[perms.size()]));
@@ -174,11 +175,11 @@ public class HealthPlugin extends CordovaPlugin {
     }
 
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
-        if(requestCode == REQUEST_DYN_PERMS) {
-            for(int i=0; i<grantResults.length; i++) {
-                if(grantResults[i] == PackageManager.PERMISSION_DENIED) {
+        if (requestCode == REQUEST_DYN_PERMS) {
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
                     String errmsg = "Permission denied ";
-                    for(String perm : permissions){
+                    for (String perm : permissions) {
                         errmsg += " " + perm;
                     }
                     authReqCallbackCtx.error("Permission denied: " + permissions[i]);
@@ -194,14 +195,14 @@ public class HealthPlugin extends CordovaPlugin {
         if (requestCode == REQUEST_OAUTH) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.i(TAG, "Got authorisation from Google Fit");
-                if(!mClient.isConnected() && !mClient.isConnecting()){
+                if (!mClient.isConnected() && !mClient.isConnecting()) {
                     Log.d(TAG, "Re-trying connection with Fit");
                     mClient.connect();
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // The user cancelled the login dialog before selecting any action.
                 authReqCallbackCtx.error("User cancelled the dialog");
-            } else authReqCallbackCtx.error("Authorisation failed, result code "+ resultCode);
+            } else authReqCallbackCtx.error("Authorisation failed, result code " + resultCode);
         }
     }
 
@@ -217,37 +218,37 @@ public class HealthPlugin extends CordovaPlugin {
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
 
-        if("isAvailable".equals(action)){
+        if ("isAvailable".equals(action)) {
             isAvailable(callbackContext);
             return true;
-        } else  if ("requestAuthorization".equals(action)) {
+        } else if ("requestAuthorization".equals(action)) {
             requestAuthorization(args, callbackContext);
             return true;
-        } else if("query".equals(action)){
-            cordova.getThreadPool().execute(new Runnable(){
+        } else if ("query".equals(action)) {
+            cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
-                    try{
+                    try {
                         query(args, callbackContext);
-                    } catch (Exception ex){
+                    } catch (Exception ex) {
                         callbackContext.error(ex.getMessage());
                     }
                 }
             });
             return true;
-        } else if("queryAggregated".equals(action)){
-            cordova.getThreadPool().execute(new Runnable(){
+        } else if ("queryAggregated".equals(action)) {
+            cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
-                    try{
+                    try {
                         queryAggregated(args, callbackContext);
-                    } catch (Exception ex){
+                    } catch (Exception ex) {
                         callbackContext.error(ex.getMessage());
                     }
                 }
             });
             return true;
-        } else if("store".equals(action)) {
+        } else if ("store".equals(action)) {
             store(args, callbackContext);
             return true;
         }
@@ -256,15 +257,15 @@ public class HealthPlugin extends CordovaPlugin {
     }
 
 
-    private void isAvailable(final CallbackContext callbackContext){
+    private void isAvailable(final CallbackContext callbackContext) {
         //first check that the Google APIs are available
         GoogleApiAvailability gapi = GoogleApiAvailability.getInstance();
         int apiresult = gapi.isGooglePlayServicesAvailable(this.cordova.getActivity());
-        if(apiresult != ConnectionResult.SUCCESS){
+        if (apiresult != ConnectionResult.SUCCESS) {
             PluginResult result;
             result = new PluginResult(PluginResult.Status.OK, false);
             callbackContext.sendPluginResult(result);
-            if(gapi.isUserResolvableError(apiresult)){
+            if (gapi.isUserResolvableError(apiresult)) {
                 // show the dialog, but no action is performed afterwards
                 gapi.showErrorDialogFragment(this.cordova.getActivity(), apiresult, 1000);
             }
@@ -282,7 +283,7 @@ public class HealthPlugin extends CordovaPlugin {
                 //code from http://stackoverflow.com/questions/11753000/how-to-open-the-google-play-store-directly-from-my-android-application
 
                 try {
-                  cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.fitness")));
+                    cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.fitness")));
                 } catch (android.content.ActivityNotFoundException anfe) {
                     cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.fitness")));
                 }
@@ -304,51 +305,51 @@ public class HealthPlugin extends CordovaPlugin {
         boolean locationscope = false;
         boolean nutritionscope = false;
 
-        for(int i=0; i< args.length(); i++){
-            String type= args.getString(i);
-            if(bodydatatypes.get(type) != null)
+        for (int i = 0; i < args.length(); i++) {
+            String type = args.getString(i);
+            if (bodydatatypes.get(type) != null)
                 bodyscope = true;
-            if(activitydatatypes.get(type) != null)
+            if (activitydatatypes.get(type) != null)
                 activityscope = true;
-            if(locationdatatypes.get(type) != null)
+            if (locationdatatypes.get(type) != null)
                 locationscope = true;
-            if(nutritiondatatypes.get(type) != null)
+            if (nutritiondatatypes.get(type) != null)
                 nutritionscope = true;
         }
         dynPerms.clear();
-        if(locationscope) dynPerms.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        if(bodyscope) dynPerms.add(Manifest.permission.BODY_SENSORS);
+        if (locationscope) dynPerms.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        if (bodyscope) dynPerms.add(Manifest.permission.BODY_SENSORS);
 
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this.cordova.getActivity());
         builder.addApi(Fitness.HISTORY_API);
         builder.addApi(Fitness.CONFIG_API);
         builder.addApi(Fitness.SESSIONS_API);
         //scopes: https://developers.google.com/android/reference/com/google/android/gms/common/Scopes.html
-        if(bodyscope) builder.addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE));
-        if(activityscope) builder.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE));
-        if(locationscope) builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ_WRITE));
-        if(nutritionscope) builder.addScope(new Scope(Scopes.FITNESS_NUTRITION_READ_WRITE));
+        if (bodyscope) builder.addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE));
+        if (activityscope) builder.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE));
+        if (locationscope) builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ_WRITE));
+        if (nutritionscope) builder.addScope(new Scope(Scopes.FITNESS_NUTRITION_READ_WRITE));
 
         builder.addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle bundle) {
-                        mClient.unregisterConnectionCallbacks(this);
-                        Log.i(TAG, "Google Fit connected");
-                        authReqSuccess();
-                    }
+            @Override
+            public void onConnected(Bundle bundle) {
+                mClient.unregisterConnectionCallbacks(this);
+                Log.i(TAG, "Google Fit connected");
+                authReqSuccess();
+            }
 
-                    @Override
-                    public void onConnectionSuspended(int i) {
-                        String message = "";
-                        if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
-                            message = "connection lost, network lost";
-                        } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
-                            message = "connection lost, service disconnected";
-                        } else message = "connection lost, code: " + i;
-                        Log.e(TAG, message);
-                        callbackContext.error(message);
-                    }
-                });
+            @Override
+            public void onConnectionSuspended(int i) {
+                String message = "";
+                if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
+                    message = "connection lost, network lost";
+                } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
+                    message = "connection lost, service disconnected";
+                } else message = "connection lost, code: " + i;
+                Log.e(TAG, message);
+                callbackContext.error(message);
+            }
+        });
 
         builder.addOnConnectionFailedListener(
                 new GoogleApiClient.OnConnectionFailedListener() {
@@ -377,7 +378,7 @@ public class HealthPlugin extends CordovaPlugin {
         mClient.connect();
     }
 
-    private boolean lightConnect(){
+    private boolean lightConnect() {
         this.cordova.setActivityResultCallback(this);
 
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this.cordova.getActivity().getApplicationContext());
@@ -387,7 +388,7 @@ public class HealthPlugin extends CordovaPlugin {
 
         mClient = builder.build();
         mClient.blockingConnect();
-        if(mClient.isConnected()){
+        if (mClient.isConnected()) {
             Log.i(TAG, "Google Fit connected (light)");
             return true;
         } else {
@@ -396,30 +397,30 @@ public class HealthPlugin extends CordovaPlugin {
     }
 
     private void query(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-        if(!args.getJSONObject(0).has("startDate")){
+        if (!args.getJSONObject(0).has("startDate")) {
             callbackContext.error("Missing argument startDate");
             return;
         }
         long st = args.getJSONObject(0).getLong("startDate");
-        if(!args.getJSONObject(0).has("endDate")){
+        if (!args.getJSONObject(0).has("endDate")) {
             callbackContext.error("Missing argument endDate");
             return;
         }
         long et = args.getJSONObject(0).getLong("endDate");
-        if(!args.getJSONObject(0).has("dataType")){
+        if (!args.getJSONObject(0).has("dataType")) {
             callbackContext.error("Missing argument dataType");
             return;
         }
         String datatype = args.getJSONObject(0).getString("dataType");
         DataType dt = null;
 
-        if(bodydatatypes.get(datatype) != null)
+        if (bodydatatypes.get(datatype) != null)
             dt = bodydatatypes.get(datatype);
-        if(activitydatatypes.get(datatype) != null)
+        if (activitydatatypes.get(datatype) != null)
             dt = activitydatatypes.get(datatype);
-        if(locationdatatypes.get(datatype) != null)
+        if (locationdatatypes.get(datatype) != null)
             dt = locationdatatypes.get(datatype);
-        if(nutritiondatatypes.get(datatype) != null)
+        if (nutritiondatatypes.get(datatype) != null)
             dt = nutritiondatatypes.get(datatype);
         if (customdatatypes.get(datatype) != null)
             dt = customdatatypes.get(datatype);
@@ -429,15 +430,15 @@ public class HealthPlugin extends CordovaPlugin {
         }
         final DataType DT = dt;
 
-        if ((mClient == null) || (!mClient.isConnected())){
-            if(!lightConnect()){
+        if ((mClient == null) || (!mClient.isConnected())) {
+            if (!lightConnect()) {
                 callbackContext.error("Cannot connect to Google Fit");
                 return;
             }
         }
 
 
-        DataReadRequest readRequest =  new DataReadRequest.Builder()
+        DataReadRequest readRequest = new DataReadRequest.Builder()
                 .setTimeRange(st, et, TimeUnit.MILLISECONDS)
                 .read(dt)
                 .build();
@@ -454,8 +455,8 @@ public class HealthPlugin extends CordovaPlugin {
                     obj.put("endDate", datapoint.getEndTime(TimeUnit.MILLISECONDS));
                     DataSource dataSource = datapoint.getOriginalDataSource();
                     if (dataSource != null) {
-						String sourceName = dataSource.getName();
-						obj.put("sourceName", sourceName);
+                        String sourceName = dataSource.getName();
+                        obj.put("sourceName", sourceName);
                         String sourceBundleId = dataSource.getAppPackageName();
                         obj.put("sourceBundleId", sourceBundleId);
                     }
@@ -498,14 +499,14 @@ public class HealthPlugin extends CordovaPlugin {
                         obj.put("value", activity);
                         obj.put("unit", "activityType");
                     } else if (DT.equals(customdatatypes.get("gender"))) {
-                        for(Field f : customdatatypes.get("gender").getFields()){
+                        for (Field f : customdatatypes.get("gender").getFields()) {
                             //there should be only one field named gender
                             String gender = datapoint.getValue(f).asString();
                             obj.put("value", gender);
                         }
                     } else if (DT.equals(customdatatypes.get("date_of_birth"))) {
                         JSONObject dob = new JSONObject();
-                        for(Field f : customdatatypes.get("date_of_birth").getFields()){
+                        for (Field f : customdatatypes.get("date_of_birth").getFields()) {
                             //all fields are integers
                             int fieldvalue = datapoint.getValue(f).asInt();
                             dob.put(f.getName(), fieldvalue);
@@ -523,17 +524,17 @@ public class HealthPlugin extends CordovaPlugin {
     }
 
     private void queryAggregated(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-        if(!args.getJSONObject(0).has("startDate")){
+        if (!args.getJSONObject(0).has("startDate")) {
             callbackContext.error("Missing argument startDate");
             return;
         }
         long st = args.getJSONObject(0).getLong("startDate");
-        if(!args.getJSONObject(0).has("endDate")){
+        if (!args.getJSONObject(0).has("endDate")) {
             callbackContext.error("Missing argument endDate");
             return;
         }
         long et = args.getJSONObject(0).getLong("endDate");
-        if(!args.getJSONObject(0).has("dataType")){
+        if (!args.getJSONObject(0).has("dataType")) {
             callbackContext.error("Missing argument dataType");
             return;
         }
@@ -542,29 +543,52 @@ public class HealthPlugin extends CordovaPlugin {
         boolean hasbucket = args.getJSONObject(0).has("bucket");
         boolean customBuckets = false;
         String bucketType = "";
-        if(hasbucket) {
+        if (hasbucket) {
             bucketType = args.getJSONObject(0).getString("bucket");
-            if(bucketType.equalsIgnoreCase("hour")  || bucketType.equalsIgnoreCase("day")) {
-                // OK don't do anything
-            } else if(bucketType.equalsIgnoreCase("week") || bucketType.equalsIgnoreCase("month") || bucketType.equalsIgnoreCase("year")) {
+            if(!bucketType.equalsIgnoreCase("hour") && !bucketType.equalsIgnoreCase("day")) {
                 customBuckets = true;
-            } else {
-                // error
-                callbackContext.error("Bucket type " + bucketType + " not recognised");
-                return;
+                if(!bucketType.equalsIgnoreCase("week") && !bucketType.equalsIgnoreCase("month") && ! bucketType.equalsIgnoreCase("year")){
+                    // error
+                    callbackContext.error("Bucket type " + bucketType + " not recognised");
+                    return;
+                }
             }
+            // Google fit bucketing is different and start and end must be quantised
+            Calendar c = Calendar.getInstance();
+
+            c.setTimeInMillis(st);
+            c.clear(Calendar.MINUTE);
+            c.clear(Calendar.SECOND);
+            c.clear(Calendar.MILLISECOND);
+            if (!bucketType.equalsIgnoreCase("hour")) {
+                c.set(Calendar.HOUR_OF_DAY, 0);
+            }
+            st = c.getTimeInMillis();
+
+            c.setTimeInMillis(et);
+            c.clear(Calendar.MINUTE);
+            c.clear(Calendar.SECOND);
+            c.clear(Calendar.MILLISECOND);
+            if (bucketType.equalsIgnoreCase("hour")) {
+                c.add(Calendar.HOUR_OF_DAY, 1);
+            } else {
+                c.set(Calendar.HOUR_OF_DAY, 0);
+                if (bucketType.equalsIgnoreCase("day")) {
+                    c.add(Calendar.DAY_OF_YEAR, 1);
+                }
+            }
+            et = c.getTimeInMillis();
         }
 
-        if ((mClient == null) || (!mClient.isConnected())){
-            if(!lightConnect()){
+        if ((mClient == null) || (!mClient.isConnected())) {
+            if (!lightConnect()) {
                 callbackContext.error("Cannot connect to Google Fit");
                 return;
             }
         }
 
-
         //basal metabolic rate is treated in a different way
-        if(datatype.equalsIgnoreCase("calories.basal")){
+        if (datatype.equalsIgnoreCase("calories.basal")) {
             //TODO bucket
 
             //when querying for basal calories, the aggregated value is computed over a period that shall be larger than a day
@@ -599,7 +623,7 @@ public class HealthPlugin extends CordovaPlugin {
                         avgsN++;
                     }
                 }
-                if(avgs == 0){
+                if (avgs == 0) {
                     // strange case
                     // maybe the time window is too small or Fit is missing information for computing the basal
                     // let's give an error
@@ -610,7 +634,7 @@ public class HealthPlugin extends CordovaPlugin {
                 avgs /= avgsN;
                 // renormalise to the original time window
                 // avgs is the daily average
-                avgs = (avgs / (24*60*60*1000)) * (et-st);
+                avgs = (avgs / (24 * 60 * 60 * 1000)) * (et - st);
                 obj.put("value", avgs);
                 obj.put("startDate", st);
                 obj.put("endDate", et);
@@ -626,25 +650,25 @@ public class HealthPlugin extends CordovaPlugin {
 
         DataReadRequest.Builder builder = new DataReadRequest.Builder();
         builder.setTimeRange(st, et, TimeUnit.MILLISECONDS);
-        int allms = (int)(et-st);
+        int allms = (int) (et - st);
 
-        if(datatype.equalsIgnoreCase("steps")){
+        if (datatype.equalsIgnoreCase("steps")) {
             builder.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA);
-        } else if(datatype.equalsIgnoreCase("distance")){
+        } else if (datatype.equalsIgnoreCase("distance")) {
             builder.aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA);
-        } else if(datatype.equalsIgnoreCase("calories")){
+        } else if (datatype.equalsIgnoreCase("calories")) {
             builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
-        } else if(datatype.equalsIgnoreCase("activity")){
+        } else if (datatype.equalsIgnoreCase("activity")) {
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
         } else {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
         }
 
-        if(hasbucket) {
+        if (hasbucket) {
             if (bucketType.equalsIgnoreCase("hour")) {
                 builder.bucketByTime(1, TimeUnit.HOURS);
-            } else if(bucketType.equalsIgnoreCase("day")){
+            } else if (bucketType.equalsIgnoreCase("day")) {
                 builder.bucketByTime(1, TimeUnit.DAYS);
             } else {
                 // use days, then will need to aggregate manually
@@ -658,10 +682,10 @@ public class HealthPlugin extends CordovaPlugin {
         DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
         if (dataReadResult.getStatus().isSuccess()) {
-            JSONObject retBucket = new JSONObject();
+            JSONObject retBucket = null;
             JSONArray retBucketsArr = new JSONArray();
-            if(hasbucket){
-                if(customBuckets) {
+            if (hasbucket) {
+                if (customBuckets) {
                     // create custom buckets, as these are not supported by Google Fit
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(st);
@@ -692,74 +716,78 @@ public class HealthPlugin extends CordovaPlugin {
                 }
             } else {
                 //there will be only one bucket spanning all the period
+                retBucket = new JSONObject();
                 retBucket.put("startDate", st);
-                retBucket.put("startDate", et);
+                retBucket.put("endDate", et);
+                retBucket.put("value", 0);
+                if (datatype.equalsIgnoreCase("steps")) {
+                    retBucket.put("unit", "count");
+                } else if (datatype.equalsIgnoreCase("distance")) {
+                    retBucket.put("unit", "m");
+                } else if (datatype.equalsIgnoreCase("calories")) {
+                    retBucket.put("unit", "kcal");
+                } else if (datatype.equalsIgnoreCase("activity")) {
+                    retBucket.put("value", new JSONObject());
+                    retBucket.put("unit", "activitySummary");
+                }
             }
 
-            for(Bucket bucket : dataReadResult.getBuckets()){
-                if(hasbucket){
-                    if(customBuckets){
+            for (Bucket bucket : dataReadResult.getBuckets()) {
+                if (hasbucket) {
+                    if (customBuckets) {
                         //find the bucket among customs
-                        for(int i=0; i<retBucketsArr.length(); i++){
+                        for (int i = 0; i < retBucketsArr.length(); i++) {
                             retBucket = retBucketsArr.getJSONObject(i);
                             long bst = retBucket.getLong("startDate");
                             long bet = retBucket.getLong("endDate");
-                            if(bucket.getStartTime(TimeUnit.MILLISECONDS) >= bst
-                                    && bucket.getEndTime(TimeUnit.MILLISECONDS) <= bet){
+                            if (bucket.getStartTime(TimeUnit.MILLISECONDS) >= bst
+                                    && bucket.getEndTime(TimeUnit.MILLISECONDS) <= bet) {
                                 break;
                             }
                         }
                     } else {
                         //pick the current
+                        retBucket = new JSONObject();
                         retBucket.put("startDate", bucket.getStartTime(TimeUnit.MILLISECONDS));
-                        retBucket.put("endDate", bucket.getStartTime(TimeUnit.MILLISECONDS));
+                        retBucket.put("endDate", bucket.getEndTime(TimeUnit.MILLISECONDS));
+                        retBucketsArr.put(retBucket);
+                    }
+                    if(!retBucket.has("value")) {
+                        retBucket.put("value", 0);
+                        if (datatype.equalsIgnoreCase("steps")) {
+                            retBucket.put("unit", "count");
+                        } else if (datatype.equalsIgnoreCase("distance")) {
+                            retBucket.put("unit", "m");
+                        } else if (datatype.equalsIgnoreCase("calories")) {
+                            retBucket.put("unit", "kcal");
+                        } else if (datatype.equalsIgnoreCase("activity")) {
+                            retBucket.put("value", new JSONObject());
+                            retBucket.put("unit", "activitySummary");
+                        }
                     }
                 }
                 // aggregate data points over the bucket
-
                 for (DataSet dataset : bucket.getDataSets()) {
                     for (DataPoint datapoint : dataset.getDataPoints()) {
                         long nsd = datapoint.getStartTime(TimeUnit.MILLISECONDS);
-
                         if (datatype.equalsIgnoreCase("steps")) {
                             int nsteps = datapoint.getValue(Field.FIELD_STEPS).asInt();
-                            if(retBucket.has("value")) {
-                                int osteps = retBucket.getInt("value");
-                                retBucket.put("value", osteps + nsteps);
-                            } else {
-                                retBucket.put("value", nsteps);
-                                retBucket.put("unit", "count");
-                            }
+                            int osteps = retBucket.getInt("value");
+                            retBucket.put("value", osteps + nsteps);
                         } else if (datatype.equalsIgnoreCase("distance")) {
                             float ndist = datapoint.getValue(Field.FIELD_DISTANCE).asFloat();
-                            if(retBucket.has("value")) {
-                                double odist = retBucket.getDouble("value");
-                                retBucket.put("value", odist + ndist);
-                            } else {
-                                retBucket.put("value", ndist);
-                                retBucket.put("unit", "m");
-                            }
+                            double odist = retBucket.getDouble("value");
+                            retBucket.put("value", odist + ndist);
                         } else if (datatype.equalsIgnoreCase("calories")) {
                             float ncal = datapoint.getValue(Field.FIELD_CALORIES).asFloat();
-                            if(retBucket.has("value")) {
-                                double ocal = retBucket.getDouble("value");
-                                retBucket.put("value", ocal + ncal);
-                            } else {
-                                retBucket.put("value", ncal);
-                                retBucket.put("unit", "kcal");
-                            }
+                            double ocal = retBucket.getDouble("value");
+                            retBucket.put("value", ocal + ncal);
                         } else if (datatype.equalsIgnoreCase("activity")) {
-                            JSONObject actobj;
                             String activity = datapoint.getValue(Field.FIELD_ACTIVITY).asActivity();
-                            if(retBucket.has("value")) {
-                                actobj = retBucket.getJSONObject("value");
-                            } else {
-                                actobj = new JSONObject();
-                                retBucket.put("unit", "activitySummary");
-                            }
+                            JSONObject actobj = retBucket.getJSONObject("value");
                             JSONObject summary;
                             int ndur = datapoint.getValue(Field.FIELD_DURATION).asInt();
-                            if(actobj.has(activity)){
+                            if (actobj.has(activity)) {
                                 summary = actobj.getJSONObject(activity);
                                 int odur = summary.getInt("duration");
                                 summary.put("duration", odur + ndur);
@@ -772,10 +800,8 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                     }
                 } //end of data set loop
-                if(hasbucket)
-                    retBucketsArr.put(retBucket);
             } // end of buckets loop
-            if(hasbucket) callbackContext.success(retBucketsArr);
+            if (hasbucket) callbackContext.success(retBucketsArr);
             else callbackContext.success(retBucket);
         } else {
             callbackContext.error(dataReadResult.getStatus().getStatusMessage());
@@ -809,8 +835,8 @@ public class HealthPlugin extends CordovaPlugin {
         }
         String sourceName = args.getJSONObject(0).getString("sourceName");
 
-		String sourceBundleId = cordova.getActivity().getApplicationContext().getPackageName();
-		if (args.getJSONObject(0).has("sourceBundleId")) {
+        String sourceBundleId = cordova.getActivity().getApplicationContext().getPackageName();
+        if (args.getJSONObject(0).has("sourceBundleId")) {
             sourceBundleId = args.getJSONObject(0).getString("sourceBundleId");
         }
 
@@ -830,8 +856,8 @@ public class HealthPlugin extends CordovaPlugin {
             return;
         }
 
-        if ((mClient == null) || (!mClient.isConnected())){
-            if(!lightConnect()){
+        if ((mClient == null) || (!mClient.isConnected())) {
+            if (!lightConnect()) {
                 callbackContext.error("Cannot connect to Google Fit");
                 return;
             }
@@ -875,27 +901,27 @@ public class HealthPlugin extends CordovaPlugin {
             String value = args.getJSONObject(0).getString("value");
             float perc = Float.parseFloat(value);
             datapoint.getValue(Field.FIELD_PERCENTAGE).setFloat(perc);
-        }  else if (dt.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
+        } else if (dt.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
             String value = args.getJSONObject(0).getString("value");
             datapoint.getValue(Field.FIELD_ACTIVITY).setActivity(value);
         } else if (dt.equals(customdatatypes.get("gender"))) {
             String value = args.getJSONObject(0).getString("value");
-            for(Field f : customdatatypes.get("gender").getFields()){
+            for (Field f : customdatatypes.get("gender").getFields()) {
                 //we expect only one field named gender
                 datapoint.getValue(f).setString(value);
             }
-        } else if(dt.equals(customdatatypes.get("date_of_birth"))){
+        } else if (dt.equals(customdatatypes.get("date_of_birth"))) {
             JSONObject dob = args.getJSONObject(0).getJSONObject("value");
             int year = dob.getInt("year");
             int month = dob.getInt("month");
             int day = dob.getInt("day");
 
-            for(Field f : customdatatypes.get("date_of_birth").getFields()){
-                if(f.getName().equalsIgnoreCase("day"))
+            for (Field f : customdatatypes.get("date_of_birth").getFields()) {
+                if (f.getName().equalsIgnoreCase("day"))
                     datapoint.getValue(f).setInt(day);
-                if(f.getName().equalsIgnoreCase("month"))
+                if (f.getName().equalsIgnoreCase("month"))
                     datapoint.getValue(f).setInt(month);
-                if(f.getName().equalsIgnoreCase("year"))
+                if (f.getName().equalsIgnoreCase("year"))
                     datapoint.getValue(f).setInt(year);
             }
         }
