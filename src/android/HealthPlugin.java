@@ -23,6 +23,7 @@ import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.data.Value;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.request.DataTypeCreateRequest;
 import com.google.android.gms.fitness.result.DataReadResult;
@@ -96,7 +97,8 @@ public class HealthPlugin extends CordovaPlugin {
     public static Map<String, DataType> nutritiondatatypes = new HashMap<String, DataType>();
 
     static {
-        //nutritiondatatypes.put("food", DataType.TYPE_NUTRITION);
+        nutritiondatatypes.put("nutrition.calories", DataType.TYPE_NUTRITION);
+        nutritiondatatypes.put("nutrition.carbohydrates", DataType.TYPE_NUTRITION);
     }
 
     public static Map<String, DataType> customdatatypes = new HashMap<String, DataType>();
@@ -470,6 +472,24 @@ public class HealthPlugin extends CordovaPlugin {
                         float distance = datapoint.getValue(Field.FIELD_DISTANCE).asFloat();
                         obj.put("value", distance);
                         obj.put("unit", "m");
+                    } else if (DT.equals(DataType.TYPE_NUTRITION)) {
+                        Value nutrients = datapoint.getValue(Field.FIELD_NUTRIENTS);
+                        String field = null, unit = null;
+                        switch (datatype) {
+                            case "nutrition.calories":
+                                field = Field.NUTRIENT_CALORIES;
+                                unit = "kcal";
+                                break;
+                            case "nutrition.carbohydrates":
+                                field = Field.NUTRIENT_TOTAL_CARBS;
+                                unit = "g";
+                                break;
+                        }
+                        if (field != null) {
+                            float value = nutrients.getKeyValue(field);
+                            obj.put("value", value);
+                            obj.put("unit", unit);
+                        }
                     } else if (DT.equals(DataType.TYPE_CALORIES_EXPENDED)) {
                         float calories = datapoint.getValue(Field.FIELD_CALORIES).asFloat();
                         obj.put("value", calories);
