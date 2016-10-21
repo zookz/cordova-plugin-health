@@ -104,7 +104,7 @@ public class HealthPlugin extends CordovaPlugin {
     }
 
     //Lookup for nutrition fields and units
-    public static Map<String, NutrientFieldInfo> nutrientFields = new HashMap<>();
+    public static Map<String, NutrientFieldInfo> nutrientFields = new HashMap<String, NutrientFieldInfo>();
 
     static {
         nutrientFields.put("nutrition.calories", new NutrientFieldInfo(Field.NUTRIENT_CALORIES, "kcal"));
