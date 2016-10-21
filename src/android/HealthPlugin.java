@@ -93,12 +93,47 @@ public class HealthPlugin extends CordovaPlugin {
         locationdatatypes.put("distance", DataType.TYPE_DISTANCE_DELTA);
     }
 
+    private static class NutrientFieldInfo {
+        public String field;
+        public String unit;
+
+        public NutrientFieldInfo(String field, String unit) {
+            this.field = field;
+            this.unit = unit;
+        }
+    }
+
+    //Lookup for nutrition fields and units
+    public static Map<String, NutrientFieldInfo> nutrientFields = new HashMap<>();
+
+    static {
+        nutrientFields.put("nutrition.calories", new NutrientFieldInfo(Field.NUTRIENT_CALORIES, "kcal"));
+        nutrientFields.put("nutrition.fat.total", new NutrientFieldInfo(Field.NUTRIENT_TOTAL_FAT, "g"));
+        nutrientFields.put("nutrition.fat.saturated", new NutrientFieldInfo(Field.NUTRIENT_SATURATED_FAT, "g"));
+        nutrientFields.put("nutrition.fat.unsaturated", new NutrientFieldInfo(Field.NUTRIENT_UNSATURATED_FAT, "g"));
+        nutrientFields.put("nutrition.fat.polyunsaturated", new NutrientFieldInfo(Field.NUTRIENT_POLYUNSATURATED_FAT, "g"));
+        nutrientFields.put("nutrition.fat.monounsaturated", new NutrientFieldInfo(Field.NUTRIENT_MONOUNSATURATED_FAT, "g"));
+        nutrientFields.put("nutrition.fat.trans", new NutrientFieldInfo(Field.NUTRIENT_TRANS_FAT, "g"));
+        nutrientFields.put("nutrition.cholesterol", new NutrientFieldInfo(Field.NUTRIENT_CHOLESTEROL, "mg"));
+        nutrientFields.put("nutrition.sodium", new NutrientFieldInfo(Field.NUTRIENT_SODIUM, "mg"));
+        nutrientFields.put("nutrition.potassium", new NutrientFieldInfo(Field.NUTRIENT_POTASSIUM, "mg"));
+        nutrientFields.put("nutrition.carbs.total", new NutrientFieldInfo(Field.NUTRIENT_TOTAL_CARBS, "g"));
+        nutrientFields.put("nutrition.dietary_fiber", new NutrientFieldInfo(Field.NUTRIENT_DIETARY_FIBER, "g"));
+        nutrientFields.put("nutrition.sugar", new NutrientFieldInfo(Field.NUTRIENT_SUGAR, "g"));
+        nutrientFields.put("nutrition.protein", new NutrientFieldInfo(Field.NUTRIENT_PROTEIN, "g"));
+        nutrientFields.put("nutrition.vitamin_a", new NutrientFieldInfo(Field.NUTRIENT_VITAMIN_A, "IU"));
+        nutrientFields.put("nutrition.vitamin_c", new NutrientFieldInfo(Field.NUTRIENT_VITAMIN_C, "mg"));
+        nutrientFields.put("nutrition.calcium", new NutrientFieldInfo(Field.NUTRIENT_CALCIUM, "mg"));
+        nutrientFields.put("nutrition.iron", new NutrientFieldInfo(Field.NUTRIENT_IRON, "mg"));
+    }
+
     //Scope for read/write access to nutrition data types in Google Fit.
     public static Map<String, DataType> nutritiondatatypes = new HashMap<String, DataType>();
 
     static {
-        nutritiondatatypes.put("nutrition.calories", DataType.TYPE_NUTRITION);
-        nutritiondatatypes.put("nutrition.carbohydrates", DataType.TYPE_NUTRITION);
+        for (String dataType : nutrientFields.keySet()) {
+            nutritiondatatypes.put(dataType, DataType.TYPE_NUTRITION);
+        }
     }
 
     public static Map<String, DataType> customdatatypes = new HashMap<String, DataType>();
@@ -474,21 +509,10 @@ public class HealthPlugin extends CordovaPlugin {
                         obj.put("unit", "m");
                     } else if (DT.equals(DataType.TYPE_NUTRITION)) {
                         Value nutrients = datapoint.getValue(Field.FIELD_NUTRIENTS);
-                        String field = null, unit = null;
-                        switch (datatype) {
-                            case "nutrition.calories":
-                                field = Field.NUTRIENT_CALORIES;
-                                unit = "kcal";
-                                break;
-                            case "nutrition.carbohydrates":
-                                field = Field.NUTRIENT_TOTAL_CARBS;
-                                unit = "g";
-                                break;
-                        }
-                        if (field != null) {
-                            float value = nutrients.getKeyValue(field);
-                            obj.put("value", value);
-                            obj.put("unit", unit);
+                        NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);
+                        if (fieldInfo != null) {
+                            obj.put("value", (float) nutrients.getKeyValue(fieldInfo.field));
+                            obj.put("unit", fieldInfo.unit);
                         }
                     } else if (DT.equals(DataType.TYPE_CALORIES_EXPENDED)) {
                         float calories = datapoint.getValue(Field.FIELD_CALORIES).asFloat();
@@ -648,7 +672,7 @@ public class HealthPlugin extends CordovaPlugin {
             builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else if (datatype.equalsIgnoreCase("activity")) {
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
-        } else if (nutritiondatatypes.get(datatype)) {
+        } else if (nutritiondatatypes.get(datatype) != null) {
             builder.aggregate(DataType.TYPE_NUTRITION, DataType.AGGREGATE_NUTRITION_SUMMARY);
         } else {
             callbackContext.error("Datatype " + datatype + " not supported");
@@ -742,9 +766,11 @@ public class HealthPlugin extends CordovaPlugin {
                         } else if (datatype.equalsIgnoreCase("activity")) {
                             retBucket.put("value", new JSONObject());
                             retBucket.put("unit", "activitySummary");
-                        } else if (nutritiondatatypes.get(datatype)) {
-                            // TODO: set the correct unit for each nutrition type
-                            retBucket.put("unit", "kcal");
+                        } else if (nutritiondatatypes.get(datatype) != null) {
+                            NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);
+                            if (fieldInfo != null) {
+                                retBucket.put("unit", fieldInfo.unit);
+                            }
                         }
                     }
                 }
@@ -769,21 +795,11 @@ public class HealthPlugin extends CordovaPlugin {
                             float ncal = datapoint.getValue(Field.FIELD_AVERAGE).asFloat();
                             double ocal = retBucket.getDouble("value");
                             retBucket.put("value", ocal + ncal);
-                        } else if (nutritiondatatypes.get(datatype)) {
+                        } else if (nutritiondatatypes.get(datatype) != null) {
                             Value nutrients = datapoint.getValue(Field.FIELD_NUTRIENTS);
-                            String field = null, unit = null;
-                            switch (datatype) {
-                                case "nutrition.calories":
-                                    field = Field.NUTRIENT_CALORIES;
-                                    unit = "kcal";
-                                    break;
-                                case "nutrition.carbohydrates":
-                                    field = Field.NUTRIENT_TOTAL_CARBS;
-                                    unit = "g";
-                                    break;
-                            }
-                            if (field != null) {
-                                float value = nutrients.getKeyValue(field);
+                            NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);
+                            if (fieldInfo != null) {
+                                float value = nutrients.getKeyValue(fieldInfo.field);
                                 double total = retBucket.getDouble("value");
                                 retBucket.put("value", total + value);
                             }
