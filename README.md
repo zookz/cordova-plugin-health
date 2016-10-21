@@ -134,7 +134,7 @@ navigator.health.query({
 Quirks of query()
 
 - in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more)
-- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is defined in a variable, currently set to 7)
+- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is 7)
 - while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
 - when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 - when querying for activities, calories and distance are also provided in HealthKit (units are kcal and metres) and never in Google Fit
@@ -177,6 +177,8 @@ Quirks of queryAggregated()
 
 - when querying for activities, calories and distance are provided when available in HealthKit and never in Google Fit
 - in Android, the start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
+- when bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00
+- weeks start on Monday
 
 ### store()
 
@@ -207,16 +209,15 @@ Quirks of store()
 - in iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
 - in Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
 - in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
-- in iOS, storing the sleep activities is not supported at the moment.
+- in iOS storing the sleep activities is not supported at the moment.
 
 ## Differences between HealthKit and Google Fit
 
-* HealthKit includes medical data (eg blood glucose), Google Fit is currently only related to fitness data
+* HealthKit includes medical data (eg blood glucose), Google Fit is only related to fitness data
 * HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types
-* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when quiered, Google Fit stores data with a fixed unit of measurement
-* HealthKit automatically counts steps and distance when you carry your phone with you, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
+* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when quiered, Google Fit uses fixed units of measurement
+* HealthKit automatically counts steps and distance when you carry your phone with you and if your phone has the CoreMotion chip, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
 * HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also
-
 
 ## External Resources
 
@@ -229,24 +230,24 @@ Quirks of store()
 
 short term
 
-- add query with buckets (see window.plugins.healthkit.querySampleTypeAggregated for HealthKit)
 - add delete
 - get steps from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
 - add support for HKCategory samples in HealthKit
 - extend the datatypes
  - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
- - food (HKCorrelationTypeIdentifierFood, TYPE_NUTRITION)
  - blood glucose
  - location (NA, TYPE_LOCATION)
 
 long term
 
 - add registration to updates (in Fit:  HistoryApi#registerDataUpdateListener() )
-- store vital signs on an encrypted DB in the case of Android and remove custom datatypes (possible choice: [sqlcipher](https://www.zetetic.net/sqlcipher/sqlcipher-for-android/). The file would be stored on shared drive, and it would be shared among apps through a service. You could more simply share the file, but then how would you share the password? If shared through a service, all apps would have the same service because it's part of the plugin, so the service should not auto-start until the first app tries to bind it (see [this](http://stackoverflow.com/questions/31506177/the-same-android-service-instance-for-two-apps) for suggestions). This is sub-optimal, as all apps would have the same copy of the service (although lightweight). A better approach would be requiring an extra app, but this creates other issues like "who would publish it?", "why the user would be needed to download another app?" etc.
+- store vital signs on an encrypted DB in the case of Android and remove custom datatypes. Possible choice: [sqlcipher](https://www.zetetic.net/sqlcipher/sqlcipher-for-android/). The file would be stored on shared drive, and it would be shared among apps through a service. You could more simply share the file, but then how would you share the password? If shared through a service, all apps would have the same service because it's part of the plugin, so the service should not auto-start until the first app tries to bind it (see [this](http://stackoverflow.com/questions/31506177/the-same-android-service-instance-for-two-apps) for suggestions). This is sub-optimal, as all apps would have the same copy of the service (although lightweight). A better approach would be requiring an extra app, but this creates other issues like "who would publish it?", "why the user would be needed to download another app?" etc.
 - add also Samsung Health as a health record for Android
 
 ## Contributions
 
 Any help is more than welcome!
-I cannot program in iOS, so I would particularly appreciate someone who can give me a hand.
+I don't know Objectve C and I am not interested into learning it now, so I would particularly appreciate someone who can give me a hand with the iOS part.
+Particularly, I'd like to allow support for HKCategory.
+Also, I would love to know from you if the plugin is currently used in any app actually available online.
 Just send me an email to my_username at gmail.com
