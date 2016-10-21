@@ -648,6 +648,8 @@ public class HealthPlugin extends CordovaPlugin {
             builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else if (datatype.equalsIgnoreCase("activity")) {
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
+        } else if (nutritiondatatypes.get(datatype)) {
+            builder.aggregate(DataType.TYPE_NUTRITION, DataType.AGGREGATE_NUTRITION_SUMMARY);
         } else {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
@@ -740,6 +742,9 @@ public class HealthPlugin extends CordovaPlugin {
                         } else if (datatype.equalsIgnoreCase("activity")) {
                             retBucket.put("value", new JSONObject());
                             retBucket.put("unit", "activitySummary");
+                        } else if (nutritiondatatypes.get(datatype)) {
+                            // TODO: set the correct unit for each nutrition type
+                            retBucket.put("unit", "kcal");
                         }
                     }
                 }
@@ -764,6 +769,24 @@ public class HealthPlugin extends CordovaPlugin {
                             float ncal = datapoint.getValue(Field.FIELD_AVERAGE).asFloat();
                             double ocal = retBucket.getDouble("value");
                             retBucket.put("value", ocal + ncal);
+                        } else if (nutritiondatatypes.get(datatype)) {
+                            Value nutrients = datapoint.getValue(Field.FIELD_NUTRIENTS);
+                            String field = null, unit = null;
+                            switch (datatype) {
+                                case "nutrition.calories":
+                                    field = Field.NUTRIENT_CALORIES;
+                                    unit = "kcal";
+                                    break;
+                                case "nutrition.carbohydrates":
+                                    field = Field.NUTRIENT_TOTAL_CARBS;
+                                    unit = "g";
+                                    break;
+                            }
+                            if (field != null) {
+                                float value = nutrients.getKeyValue(field);
+                                double total = retBucket.getDouble("value");
+                                retBucket.put("value", total + value);
+                            }
                         } else if (datatype.equalsIgnoreCase("activity")) {
                             String activity = datapoint.getValue(Field.FIELD_ACTIVITY).asActivity();
                             JSONObject actobj = retBucket.getJSONObject("value");
