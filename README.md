@@ -52,7 +52,27 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | fat_percentage  | HKQuantityTypeIdentifierBodyFatPercentage (%)           | TYPE_BODY_FAT_PERCENTAGE                 |
 | gender          | HKCharacteristicTypeIdentifierBiologicalSex             | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth   | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
-
+| nutrition       | HKCorrelationTypeIdentifierFood                         | TYPE_NUTRITION                           |
+| nutrition.calories | HKQuantityTypeIdentifierDietaryEnergyConsumed (kcal) | TYPE_NUTRITION, NUTRIENT_CALORIES |
+| nutrition.fat.total | HKQuantityTypeIdentifierDietaryFatTotal (g) | TYPE_NUTRITION, NUTRIENT_TOTAL_FAT |
+| nutrition.fat.saturated | HKQuantityTypeIdentifierDietaryFatSaturated (g) | TYPE_NUTRITION, NUTRIENT_SATURATED_FAT |
+| nutrition.fat.unsaturated | NA (g)  | TYPE_NUTRITION, NUTRIENT_UNSATURATED_FAT |
+| nutrition.fat.polyunsaturated | HKQuantityTypeIdentifierDietaryFatPolyunsaturated (g) | TYPE_NUTRITION, NUTRIENT_POLYUNSATURATED_FAT |
+| nutrition.fat.monounsaturated | HKQuantityTypeIdentifierDietaryFatMonounsaturated (g) | TYPE_NUTRITION, NUTRIENT_MONOUNSATURATED_FAT |
+| nutrition.fat.trans | NA (g) | TYPE_NUTRITION, NUTRIENT_TRANS_FAT |
+| nutrition.cholesterol | HKQuantityTypeIdentifierDietaryCholesterol (mg) | TYPE_NUTRITION, NUTRIENT_CHOLESTEROL |
+| nutrition.sodium | HKQuantityTypeIdentifierDietarySodium (mg) | TYPE_NUTRITION, NUTRIENT_SODIUM |
+| nutrition.potassium | HKQuantityTypeIdentifierDietaryPotassium (mg) | TYPE_NUTRITION, NUTRIENT_POTASSIUM |
+| nutrition.carbs.total | HKQuantityTypeIdentifierDietaryCarbohydrates (g) | TYPE_NUTRITION, NUTRIENT_TOTAL_CARBS |
+| nutrition.dietary_fiber | HKQuantityTypeIdentifierDietaryFiber (g) | TYPE_NUTRITION, NUTRIENT_DIETARY_FIBER |
+| nutrition.sugar | HKQuantityTypeIdentifierDietarySugar (g) | TYPE_NUTRITION, NUTRIENT_SUGAR |
+| nutrition.protein | HKQuantityTypeIdentifierDietaryProtein (g) | TYPE_NUTRITION, NUTRIENT_PROTEIN |
+| nutrition.vitamin_a | HKQuantityTypeIdentifierDietaryVitaminA (IU) | TYPE_NUTRITION, NUTRIENT_VITAMIN_A |
+| nutrition.vitamin_c | HKQuantityTypeIdentifierDietaryVitaminC (mg) | TYPE_NUTRITION, NUTRIENT_VITAMIN_C |
+| nutrition.calcium | HKQuantityTypeIdentifierDietaryCalcium (mg) | TYPE_NUTRITION, NUTRIENT_CALCIUM |
+| nutrition.iron | HKQuantityTypeIdentifierDietaryIron (mg) | TYPE_NUTRITION, NUTRIENT_IRON |
+| nutrition.water | HKQuantityTypeIdentifierDietaryWater (g) | NA |
+| nutrition.caffeine | HKQuantityTypeIdentifierDietaryCaffeine (g) | NA |
 
 Note: units of measurements are fixed !
 
