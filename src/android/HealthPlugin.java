@@ -131,6 +131,8 @@ public class HealthPlugin extends CordovaPlugin {
     public static Map<String, DataType> nutritiondatatypes = new HashMap<String, DataType>();
 
     static {
+        nutritiondatatypes.put("nutrition", DataType.TYPE_NUTRITION);
+        nutritiondatatypes.put("nutrition.water", DataType.TYPE_HYDRATION);
         for (String dataType : nutrientFields.keySet()) {
             nutritiondatatypes.put(dataType, DataType.TYPE_NUTRITION);
         }
@@ -507,12 +509,37 @@ public class HealthPlugin extends CordovaPlugin {
                         float distance = datapoint.getValue(Field.FIELD_DISTANCE).asFloat();
                         obj.put("value", distance);
                         obj.put("unit", "m");
+                    } else if (DT.equals(DataType.TYPE_HYDRATION)) {
+                        float distance = datapoint.getValue(Field.FIELD_VOLUME).asFloat();
+                        obj.put("value", distance);
+                        obj.put("unit", "l");
                     } else if (DT.equals(DataType.TYPE_NUTRITION)) {
-                        Value nutrients = datapoint.getValue(Field.FIELD_NUTRIENTS);
-                        NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);
-                        if (fieldInfo != null) {
-                            obj.put("value", (float) nutrients.getKeyValue(fieldInfo.field));
-                            obj.put("unit", fieldInfo.unit);
+                        if(datatype.equalsIgnoreCase("nutrition")) {
+                            JSONObject dob = new JSONObject();
+                            if(datapoint.getValue(Field.FIELD_FOOD_ITEM) != null){
+                                dob.put("item", datapoint.getValue(Field.FIELD_FOOD_ITEM).asString());
+                            }
+                            if(datapoint.getValue(Field.FIELD_MEAL_TYPE) != null){
+                                int mealt = datapoint.getValue(Field.FIELD_MEAL_TYPE).asInt();
+                                if(mealt == Field.MEAL_TYPE_BREAKFAST) dob.put("meal_type", "breakfast");
+                                else if(mealt == Field.MEAL_TYPE_DINNER) dob.put("meal_type", "dinner");
+                                else if(mealt == Field.MEAL_TYPE_LUNCH) dob.put("meal_type", "lunch");
+                                else if(mealt == Field.MEAL_TYPE_SNACK) dob.put("meal_type", "snack");
+                                else dob.put("meal_type", "unknown");
+                            }
+                            if(datapoint.getValue(Field.FIELD_NUTRIENTS) != null){
+                                Value v = datapoint.getValue(Field.FIELD_NUTRIENTS);
+                                dob.put("nutrients", getNutrients(v, null));
+                            }
+                            obj.put("value", dob);
+                            obj.put("unit", "nutrition");
+                        } else {
+                            Value nutrients = datapoint.getValue(Field.FIELD_NUTRIENTS);
+                            NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);
+                            if (fieldInfo != null) {
+                                obj.put("value", (float) nutrients.getKeyValue(fieldInfo.field));
+                                obj.put("unit", fieldInfo.unit);
+                            }
                         }
                     } else if (DT.equals(DataType.TYPE_CALORIES_EXPENDED)) {
                         float calories = datapoint.getValue(Field.FIELD_CALORIES).asFloat();
@@ -564,6 +591,54 @@ public class HealthPlugin extends CordovaPlugin {
             callbackContext.success(resultset);
         } else {
             callbackContext.error(dataReadResult.getStatus().getStatusMessage());
+        }
+    }
+
+    private JSONObject getNutrients(Value nutrientsMap, JSONObject mergewith) throws JSONException {
+        JSONObject nutrients;
+        if(mergewith != null){
+            nutrients = mergewith;
+        } else {
+            nutrients = new JSONObject();
+        }
+        mergeNutrient(Field.NUTRIENT_CALORIES, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_TOTAL_FAT, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_SATURATED_FAT, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_UNSATURATED_FAT, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_POLYUNSATURATED_FAT, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_MONOUNSATURATED_FAT, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_TRANS_FAT, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_CHOLESTEROL, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_SODIUM, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_POTASSIUM, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_TOTAL_CARBS, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_DIETARY_FIBER, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_SUGAR, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_PROTEIN, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_VITAMIN_A, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_VITAMIN_C, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_CALCIUM, nutrientsMap, nutrients);
+        mergeNutrient(Field.NUTRIENT_IRON, nutrientsMap, nutrients);
+
+        return nutrients;
+    }
+
+    private void mergeNutrient(String f, Value nutrientsMap, JSONObject nutrients) throws JSONException {
+        if(nutrientsMap.getKeyValue(f) != null) {
+            String n = null;
+            for(String name : nutrientFields.keySet()){
+                if(nutrientFields.get(name).field.equalsIgnoreCase(f)){
+                    n = name;
+                    break;
+                }
+            }
+            if(n != null) {
+                float val = nutrientsMap.getKeyValue(f);
+                if(nutrients.has(n)) {
+                    val += nutrients.getDouble(n);
+                }
+                nutrients.put(n, val);
+            }
         }
     }
 
@@ -732,6 +807,12 @@ public class HealthPlugin extends CordovaPlugin {
                 } else if (datatype.equalsIgnoreCase("activity")) {
                     retBucket.put("value", new JSONObject());
                     retBucket.put("unit", "activitySummary");
+                } else  if(datatype.equalsIgnoreCase("nutrition")) {
+                    retBucket.put("value", new JSONObject());
+                    retBucket.put("unit", "nutrition");
+                } else if (nutritiondatatypes.get(datatype) != null) {
+                    retBucket.put("value", new JSONObject());
+                    retBucket.put("unit", nutrientFields.get(datatype).unit);
                 }
             }
 
@@ -795,6 +876,12 @@ public class HealthPlugin extends CordovaPlugin {
                             float ncal = datapoint.getValue(Field.FIELD_AVERAGE).asFloat();
                             double ocal = retBucket.getDouble("value");
                             retBucket.put("value", ocal + ncal);
+                        } else  if(datatype.equalsIgnoreCase("nutrition")) {
+                            JSONObject nutrsob = retBucket.getJSONObject("value");
+                            if(datapoint.getValue(Field.FIELD_NUTRIENTS) != null){
+                                nutrsob = getNutrients(datapoint.getValue(Field.FIELD_NUTRIENTS), nutrsob);
+                            }
+                            retBucket.put("value", nutrsob);
                         } else if (nutritiondatatypes.get(datatype) != null) {
                             Value nutrients = datapoint.getValue(Field.FIELD_NUTRIENTS);
                             NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);

@@ -71,7 +71,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | nutrition.vitamin_c | HKQuantityTypeIdentifierDietaryVitaminC (mg) | TYPE_NUTRITION, NUTRIENT_VITAMIN_C |
 | nutrition.calcium | HKQuantityTypeIdentifierDietaryCalcium (mg) | TYPE_NUTRITION, NUTRIENT_CALCIUM |
 | nutrition.iron | HKQuantityTypeIdentifierDietaryIron (mg) | TYPE_NUTRITION, NUTRIENT_IRON |
-| nutrition.water | HKQuantityTypeIdentifierDietaryWater (g) | NA |
+| nutrition.water | HKQuantityTypeIdentifierDietaryWater (l) | TYPE_HYDRATION |
 | nutrition.caffeine | HKQuantityTypeIdentifierDietaryCaffeine (g) | NA |
 
 Note: units of measurements are fixed !
@@ -90,7 +90,8 @@ Returned objects can be of different types, see examples below:
 | fat_percentage | 31.2                              |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
-
+| nutrition      | { item: "cheese", meal_type: "lunch", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } } |
+| nutrition.X    | 12.4                              |
 
 ## Methods
 
@@ -192,6 +193,8 @@ The following table shows what types are supported and examples of aggregated da
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
 | activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in metres and calories in kcal) |
+| nutrition       | { startDate: Date, endDate: Date, value: {}, unit: 'nutrition' } |
+| nutrition.X     | { startDate: Date, endDate: Date, value: 23, unit: 'mg'} |
 
 Quirks of queryAggregated()
 
