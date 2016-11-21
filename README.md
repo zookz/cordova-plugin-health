@@ -72,7 +72,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | nutrition.vitamin_c | HKQuantityTypeIdentifierDietaryVitaminC (mg) | TYPE_NUTRITION, NUTRIENT_VITAMIN_C |
 | nutrition.calcium | HKQuantityTypeIdentifierDietaryCalcium (mg) | TYPE_NUTRITION, NUTRIENT_CALCIUM |
 | nutrition.iron | HKQuantityTypeIdentifierDietaryIron (mg) | TYPE_NUTRITION, NUTRIENT_IRON |
-| nutrition.water | HKQuantityTypeIdentifierDietaryWater (l) | TYPE_HYDRATION |
+| nutrition.water | HKQuantityTypeIdentifierDietaryWater (ml) | TYPE_HYDRATION |
 | nutrition.caffeine | HKQuantityTypeIdentifierDietaryCaffeine (g) | NA |
 
 Note: units of measurements are fixed !
