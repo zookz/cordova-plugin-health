@@ -811,7 +811,6 @@ public class HealthPlugin extends CordovaPlugin {
                     retBucket.put("value", new JSONObject());
                     retBucket.put("unit", "nutrition");
                 } else if (nutritiondatatypes.get(datatype) != null) {
-                    retBucket.put("value", new JSONObject());
                     retBucket.put("unit", nutrientFields.get(datatype).unit);
                 }
             }
@@ -847,6 +846,9 @@ public class HealthPlugin extends CordovaPlugin {
                         } else if (datatype.equalsIgnoreCase("activity")) {
                             retBucket.put("value", new JSONObject());
                             retBucket.put("unit", "activitySummary");
+                        } else  if(datatype.equalsIgnoreCase("nutrition")) {
+                            retBucket.put("value", new JSONObject());
+                            retBucket.put("unit", "nutrition");
                         } else if (nutritiondatatypes.get(datatype) != null) {
                             NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);
                             if (fieldInfo != null) {
