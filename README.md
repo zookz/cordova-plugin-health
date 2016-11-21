@@ -1,5 +1,6 @@
 # Cordova Health Plugin
 
+
 A plugin that abstracts fitness and health repositories like Apple HealthKit or Google Fit.
 
 This work is based on [cordova plugin googlefit](https://github.com/2dvisio/cordova-plugin-googlefit) and on [cordova healthkit plugin](https://github.com/Telerik-Verified-Plugins/HealthKit)
