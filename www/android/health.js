@@ -48,7 +48,25 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         data[i].startDate = new Date(data[i].startDate);
         data[i].endDate = new Date(data[i].endDate);
       }
-      onSuccess(data);
+      // if nutrition, add water
+      if(opts.dataType == 'nutrition'){
+        opts.dataType ='nutrition.water';
+        navigator.health.query(opts, function(water){
+            // merge and sort
+            for(var i=0; i<water.length; i++) {
+                water[i].value = { item: "water", nutrients: { "nutrition.water": water[i].value } };
+                water[i].unit = "nutrition";
+            }
+            data.concat(water);
+            data = data.concat(water);
+            data.sort(function(a,b){
+                return a.startDate - b.startDate;
+            })
+            onSuccess(data);
+        }, onError)
+      } else {
+        onSuccess(data);
+      }
     }, onError, "health", "query", [opts]);
   }
 };
@@ -87,8 +105,18 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
         data.startDate = new Date(data.startDate);
         data.endDate = new Date(data.endDate);
       }
-      onSuccess(data);
-    }, onError, "health", "queryAggregated", [opts]);
+
+      // if nutrition, add water
+      if(opts.dataType == 'nutrition'){
+        opts.dataType ='nutrition.water';
+        navigator.health.queryAggregated(opts, function(water){
+            data.value['nutrition.water'] = water.value;
+            onSuccess(data);
+        }, onError)
+      } else {
+          onSuccess(data);
+      }
+    }, onError, 'health', 'queryAggregated', [opts]);
   }
 };
 

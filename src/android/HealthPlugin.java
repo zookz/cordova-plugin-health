@@ -512,7 +512,7 @@ public class HealthPlugin extends CordovaPlugin {
                     } else if (DT.equals(DataType.TYPE_HYDRATION)) {
                         float distance = datapoint.getValue(Field.FIELD_VOLUME).asFloat();
                         obj.put("value", distance);
-                        obj.put("unit", "l");
+                        obj.put("unit", "ml");// documentation says it's litres, but from experiments I get ml
                     } else if (DT.equals(DataType.TYPE_NUTRITION)) {
                         if(datatype.equalsIgnoreCase("nutrition")) {
                             JSONObject dob = new JSONObject();
@@ -747,6 +747,8 @@ public class HealthPlugin extends CordovaPlugin {
             builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else if (datatype.equalsIgnoreCase("activity")) {
             builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
+        } else if (datatype.equalsIgnoreCase("nutrition.water")) {
+            builder.aggregate(DataType.TYPE_HYDRATION, DataType.AGGREGATE_HYDRATION);
         } else if (nutritiondatatypes.get(datatype) != null) {
             builder.aggregate(DataType.TYPE_NUTRITION, DataType.AGGREGATE_NUTRITION_SUMMARY);
         } else {
@@ -807,6 +809,8 @@ public class HealthPlugin extends CordovaPlugin {
                 } else if (datatype.equalsIgnoreCase("activity")) {
                     retBucket.put("value", new JSONObject());
                     retBucket.put("unit", "activitySummary");
+                } else if (datatype.equalsIgnoreCase("nutrition.water")) {
+                    retBucket.put("unit", "ml");
                 } else  if(datatype.equalsIgnoreCase("nutrition")) {
                     retBucket.put("value", new JSONObject());
                     retBucket.put("unit", "nutrition");
@@ -846,6 +850,8 @@ public class HealthPlugin extends CordovaPlugin {
                         } else if (datatype.equalsIgnoreCase("activity")) {
                             retBucket.put("value", new JSONObject());
                             retBucket.put("unit", "activitySummary");
+                        } else if (datatype.equalsIgnoreCase("nutrition.water")) {
+                            retBucket.put("unit", "ml");
                         } else  if(datatype.equalsIgnoreCase("nutrition")) {
                             retBucket.put("value", new JSONObject());
                             retBucket.put("unit", "nutrition");
@@ -878,7 +884,11 @@ public class HealthPlugin extends CordovaPlugin {
                             float ncal = datapoint.getValue(Field.FIELD_AVERAGE).asFloat();
                             double ocal = retBucket.getDouble("value");
                             retBucket.put("value", ocal + ncal);
-                        } else  if(datatype.equalsIgnoreCase("nutrition")) {
+                        } else if(datatype.equalsIgnoreCase("nutrition.water")) {
+                            float nwat = datapoint.getValue(Field.FIELD_VOLUME).asFloat();
+                            double owat = retBucket.getDouble("value");
+                            retBucket.put("value", owat + nwat);
+                        } else if(datatype.equalsIgnoreCase("nutrition")) {
                             JSONObject nutrsob = retBucket.getJSONObject("value");
                             if(datapoint.getValue(Field.FIELD_NUTRIENTS) != null){
                                 nutrsob = getNutrients(datapoint.getValue(Field.FIELD_NUTRIENTS), nutrsob);
