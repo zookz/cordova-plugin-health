@@ -39,7 +39,7 @@ Some more detailed instructions are provided [here](https://github.com/2dvisio/c
 As HealthKit does not allow adding custom data types, only a subset of data types supported by HealthKit has been chosen.
 Google Fit is limited to fitness data and, for health, custom data types are defined with the suffix of the package name of your project.
 
-| data type       | Unit  |    HealthKit equivalent (unit)                |  Google Fit equivalent                   |
+| data type       | Unit  |    HealthKit equivalent                       |  Google Fit equivalent                   |
 |-----------------|-------|-----------------------------------------------|------------------------------------------|
 | steps           | count | HKQuantityTypeIdentifierStepCount             | TYPE_STEP_COUNT_DELTA                    |
 | distance        | m     | HKQuantityTypeIdentifierDistanceWalkingRunning + HKQuantityTypeIdentifierDistanceCycling | TYPE_DISTANCE_DELTA |
