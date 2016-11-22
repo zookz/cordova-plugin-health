@@ -160,7 +160,7 @@ Quirks of query()
 - while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
 - when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 - when querying for activities, calories and distance are also provided in HealthKit (units are kcal and metres) and never in Google Fit
-- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. As the conversion is not simple, it's not done automatically.
+- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. The conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
 ### queryAggregated()
 
@@ -194,7 +194,7 @@ The following table shows what types are supported and examples of aggregated da
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
 | activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in metres and calories in kcal) |
-| nutrition       | { startDate: Date, endDate: Date, value: {}, unit: 'nutrition' } |
+| nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' } |
 | nutrition.X     | { startDate: Date, endDate: Date, value: 23, unit: 'mg'} |
 
 Quirks of queryAggregated()
@@ -203,7 +203,7 @@ Quirks of queryAggregated()
 - in Android, the start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
 - when bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00
 - weeks start on Monday
-- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit.
+- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. The conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
 ### store()
 

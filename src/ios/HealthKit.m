@@ -1557,6 +1557,8 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 
                 // common indices
                 entry[HKPluginKeyUUID] = sample.UUID.UUIDString;
+                entry[HKPluginKeySourceName] = sample.source.name;
+                entry[HKPluginKeySourceBundleId] = sample.source.bundleIdentifier;
                 if (sample.metadata == nil || ![NSJSONSerialization isValidJSONObject:sample.metadata]) {
                     entry[HKPluginKeyMetadata] = @{};
                 } else {
