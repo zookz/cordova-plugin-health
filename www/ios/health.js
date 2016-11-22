@@ -55,13 +55,12 @@ units['nutrition.carbs.total'] = 'g';
 units['nutrition.dietary_fiber'] = 'g';
 units['nutrition.sugar'] = 'g';
 units['nutrition.protein'] = 'g';
-units['nutrition.vitamin_a'] = 'ug'; // should be IU!!
+units['nutrition.vitamin_a'] = 'mcg';
 units['nutrition.vitamin_c'] = 'mg';
 units['nutrition.calcium'] = 'mg';
 units['nutrition.iron'] = 'mg';
 units['nutrition.water'] = 'ml';
 units['nutrition.caffeine'] = 'g';
-
 
 Health.prototype.isAvailable = function (success, error) {
   window.plugins.healthkit.available(success, error);
@@ -71,7 +70,12 @@ Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
   var HKdatatypes = [];
   for (var i = 0; i < dts.length; i++) {
     if ((dts[i] !== 'gender') && (dts[i] !== 'date_of_birth')) { // ignore gender and DOB
-      if (dataTypes[dts[i]]) {
+      if(dts[i] === 'nutrition') {
+        // add all nutrition stuff
+        for(var datatype in dataTypes){
+          if (datatype.startsWith('nutrition')) HKdatatypes.push(dataTypes[datatype]);
+        }
+      } else if (dataTypes[dts[i]]) {
         HKdatatypes.push(dataTypes[dts[i]]);
         if (dts[i] === 'distance') HKdatatypes.push('HKQuantityTypeIdentifierDistanceCycling');
         if (dts[i] === 'activity') HKdatatypes.push('HKCategoryTypeIdentifierSleepAnalysis');
@@ -157,6 +161,46 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         onSuccess(result);
       }, onError);
     }, onError);
+  } else if (opts.dataType === 'nutrition') {
+
+    var convertFromGrams = function(toUnit, q) {
+      if(toUnit == 'mcg') return q * 1000000;
+      if(toUnit == 'mg') return q * 1000;
+      if(toUnit == 'g') return q;
+      if(toUnit == 'kg') return q / 1000;
+      return q;
+    }
+
+    var result = [];
+    window.plugins.healthkit.queryCorrelationType({
+          startDate: opts.startDate,
+          endDate: opts.endDate,
+          correlationType: 'HKCorrelationTypeIdentifierFood',
+          units: ['g', 'ml', 'kcal']
+        }, function (data) {
+          for(var i=0; i<data.length; i++) {
+            var res = {};
+            res.startDate = new Date(data[i].startDate);
+            res.endDate = new Date(data[i].endDate);
+            if(data[i].sourceName) res.sourceName = data[i].sourceName;
+            if(data[i].sourceBundleId) res.sourceBundleId = data[i].sourceBundleId;
+            res.value = {};
+            if(data[i].metadata && data[i].metadata.item) res.value.item = data[i].metadata.item;
+            if(data[i].metadata && data[i].metadata.meal_type) res.value.meal_type = data[i].metadata.meal_type;
+            res.value.nutrients = {};
+            for(var j=0; j<data[i].samples.length; j++){
+              var sample = data[i].samples[j];
+              for(var dataname in dataTypes){
+                if (dataTypes[dataname] === sample.sampleType) {
+                  res.value.nutrients[dataname] = convertFromGrams(units[dataname], sample.value);
+                  break;
+                }
+              }
+            }
+            result.push(res);
+          }
+          onSuccess(result);
+        }, onError );
   } else if (dataTypes[ opts.dataType ]) {
     opts.sampleType = dataTypes[ opts.dataType ];
     if (units[ opts.dataType ]) {

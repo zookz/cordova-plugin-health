@@ -68,7 +68,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | nutrition.dietary_fiber | HKQuantityTypeIdentifierDietaryFiber (g) | TYPE_NUTRITION, NUTRIENT_DIETARY_FIBER |
 | nutrition.sugar | HKQuantityTypeIdentifierDietarySugar (g) | TYPE_NUTRITION, NUTRIENT_SUGAR |
 | nutrition.protein | HKQuantityTypeIdentifierDietaryProtein (g) | TYPE_NUTRITION, NUTRIENT_PROTEIN |
-| nutrition.vitamin_a | HKQuantityTypeIdentifierDietaryVitaminA (IU) | TYPE_NUTRITION, NUTRIENT_VITAMIN_A |
+| nutrition.vitamin_a | HKQuantityTypeIdentifierDietaryVitaminA (mcg) | TYPE_NUTRITION, NUTRIENT_VITAMIN_A |
 | nutrition.vitamin_c | HKQuantityTypeIdentifierDietaryVitaminC (mg) | TYPE_NUTRITION, NUTRIENT_VITAMIN_C |
 | nutrition.calcium | HKQuantityTypeIdentifierDietaryCalcium (mg) | TYPE_NUTRITION, NUTRIENT_CALCIUM |
 | nutrition.iron | HKQuantityTypeIdentifierDietaryIron (mg) | TYPE_NUTRITION, NUTRIENT_IRON |
@@ -160,7 +160,7 @@ Quirks of query()
 - while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
 - when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
 - when querying for activities, calories and distance are also provided in HealthKit (units are kcal and metres) and never in Google Fit
-
+- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. As the conversion is not simple, it's not done automatically.
 
 ### queryAggregated()
 
@@ -203,6 +203,7 @@ Quirks of queryAggregated()
 - in Android, the start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
 - when bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00
 - weeks start on Monday
+- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit.
 
 ### store()
 
