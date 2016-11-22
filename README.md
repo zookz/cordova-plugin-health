@@ -39,41 +39,41 @@ Some more detailed instructions are provided [here](https://github.com/2dvisio/c
 As HealthKit does not allow adding custom data types, only a subset of data types supported by HealthKit has been chosen.
 Google Fit is limited to fitness data and, for health, custom data types are defined with the suffix of the package name of your project.
 
-| data type       |      HealthKit equivalent (unit)                        |  Google Fit equivalent                   |
-|-----------------|---------------------------------------------------------|------------------------------------------|
-| steps           | HKQuantityTypeIdentifierStepCount (count)               | TYPE_STEP_COUNT_DELTA                    |
-| distance        | HKQuantityTypeIdentifierDistanceWalkingRunning (m) + HKQuantityTypeIdentifierDistanceCycling (m) | TYPE_DISTANCE_DELTA |
-| calories        | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned(kcal) | TYPE_CALORIES_EXPENDED |
-| calories.active | HKQuantityTypeIdentifierActiveEnergyBurned (kcal)       | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
-| calories.basal  | HKQuantityTypeIdentifierBasalEnergyBurned (kcal)        | TYPE_BASAL_METABOLIC_RATE * time window  |
-| activity        | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT            |
-| height          | HKQuantityTypeIdentifierHeight (m)                      | TYPE_HEIGHT                              |
-| weight          | HKQuantityTypeIdentifierBodyMass (kg)                   | TYPE_WEIGHT                              |
-| heart_rate      | HKQuantityTypeIdentifierHeartRate (count/min)           | TYPE_HEART_RATE_BPM                      |
-| fat_percentage  | HKQuantityTypeIdentifierBodyFatPercentage (%)           | TYPE_BODY_FAT_PERCENTAGE                 |
-| gender          | HKCharacteristicTypeIdentifierBiologicalSex             | custom (YOUR_PACKAGE_NAME.gender)        |
-| date_of_birth   | HKCharacteristicTypeIdentifierDateOfBirth               | custom (YOUR_PACKAGE_NAME.date_of_birth) |
-| nutrition       | HKCorrelationTypeIdentifierFood                         | TYPE_NUTRITION                           |
-| nutrition.calories | HKQuantityTypeIdentifierDietaryEnergyConsumed (kcal) | TYPE_NUTRITION, NUTRIENT_CALORIES |
-| nutrition.fat.total | HKQuantityTypeIdentifierDietaryFatTotal (g) | TYPE_NUTRITION, NUTRIENT_TOTAL_FAT |
-| nutrition.fat.saturated | HKQuantityTypeIdentifierDietaryFatSaturated (g) | TYPE_NUTRITION, NUTRIENT_SATURATED_FAT |
-| nutrition.fat.unsaturated | NA (g)  | TYPE_NUTRITION, NUTRIENT_UNSATURATED_FAT |
-| nutrition.fat.polyunsaturated | HKQuantityTypeIdentifierDietaryFatPolyunsaturated (g) | TYPE_NUTRITION, NUTRIENT_POLYUNSATURATED_FAT |
-| nutrition.fat.monounsaturated | HKQuantityTypeIdentifierDietaryFatMonounsaturated (g) | TYPE_NUTRITION, NUTRIENT_MONOUNSATURATED_FAT |
-| nutrition.fat.trans | NA (g) | TYPE_NUTRITION, NUTRIENT_TRANS_FAT |
-| nutrition.cholesterol | HKQuantityTypeIdentifierDietaryCholesterol (mg) | TYPE_NUTRITION, NUTRIENT_CHOLESTEROL |
-| nutrition.sodium | HKQuantityTypeIdentifierDietarySodium (mg) | TYPE_NUTRITION, NUTRIENT_SODIUM |
-| nutrition.potassium | HKQuantityTypeIdentifierDietaryPotassium (mg) | TYPE_NUTRITION, NUTRIENT_POTASSIUM |
-| nutrition.carbs.total | HKQuantityTypeIdentifierDietaryCarbohydrates (g) | TYPE_NUTRITION, NUTRIENT_TOTAL_CARBS |
-| nutrition.dietary_fiber | HKQuantityTypeIdentifierDietaryFiber (g) | TYPE_NUTRITION, NUTRIENT_DIETARY_FIBER |
-| nutrition.sugar | HKQuantityTypeIdentifierDietarySugar (g) | TYPE_NUTRITION, NUTRIENT_SUGAR |
-| nutrition.protein | HKQuantityTypeIdentifierDietaryProtein (g) | TYPE_NUTRITION, NUTRIENT_PROTEIN |
-| nutrition.vitamin_a | HKQuantityTypeIdentifierDietaryVitaminA (mcg) | TYPE_NUTRITION, NUTRIENT_VITAMIN_A |
-| nutrition.vitamin_c | HKQuantityTypeIdentifierDietaryVitaminC (mg) | TYPE_NUTRITION, NUTRIENT_VITAMIN_C |
-| nutrition.calcium | HKQuantityTypeIdentifierDietaryCalcium (mg) | TYPE_NUTRITION, NUTRIENT_CALCIUM |
-| nutrition.iron | HKQuantityTypeIdentifierDietaryIron (mg) | TYPE_NUTRITION, NUTRIENT_IRON |
-| nutrition.water | HKQuantityTypeIdentifierDietaryWater (ml) | TYPE_HYDRATION |
-| nutrition.caffeine | HKQuantityTypeIdentifierDietaryCaffeine (g) | NA |
+| data type       | Unit  |    HealthKit equivalent (unit)                |  Google Fit equivalent                   |
+|-----------------|-------|-----------------------------------------------|------------------------------------------|
+| steps           | count | HKQuantityTypeIdentifierStepCount             | TYPE_STEP_COUNT_DELTA                    |
+| distance        | m     | HKQuantityTypeIdentifierDistanceWalkingRunning + HKQuantityTypeIdentifierDistanceCycling | TYPE_DISTANCE_DELTA |
+| calories        |  kcal | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned   | TYPE_CALORIES_EXPENDED |
+| calories.active |  kcal | HKQuantityTypeIdentifierActiveEnergyBurned    | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
+| calories.basal  |  kcal | HKQuantityTypeIdentifierBasalEnergyBurned     | TYPE_BASAL_METABOLIC_RATE * time window  |
+| activity        |       | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT            |
+| height          |  m    | HKQuantityTypeIdentifierHeight                | TYPE_HEIGHT                              |
+| weight          |  kg   | HKQuantityTypeIdentifierBodyMass              | TYPE_WEIGHT                              |
+| heart_rate      | count/min|  HKQuantityTypeIdentifierHeartRate         | TYPE_HEART_RATE_BPM                      |
+| fat_percentage  | %     | HKQuantityTypeIdentifierBodyFatPercentage     | TYPE_BODY_FAT_PERCENTAGE                 |
+| gender          |       | HKCharacteristicTypeIdentifierBiologicalSex   | custom (YOUR_PACKAGE_NAME.gender)        |
+| date_of_birth   |       | HKCharacteristicTypeIdentifierDateOfBirth     | custom (YOUR_PACKAGE_NAME.date_of_birth) |
+| nutrition       |       | HKCorrelationTypeIdentifierFood               | TYPE_NUTRITION                           |
+| nutrition.calories | kcal | HKQuantityTypeIdentifierDietaryEnergyConsumed | TYPE_NUTRITION, NUTRIENT_CALORIES |
+| nutrition.fat.total | g | HKQuantityTypeIdentifierDietaryFatTotal | TYPE_NUTRITION, NUTRIENT_TOTAL_FAT |
+| nutrition.fat.saturated | g | HKQuantityTypeIdentifierDietaryFatSaturated | TYPE_NUTRITION, NUTRIENT_SATURATED_FAT |
+| nutrition.fat.unsaturated | g | NA  | TYPE_NUTRITION, NUTRIENT_UNSATURATED_FAT |
+| nutrition.fat.polyunsaturated | g | HKQuantityTypeIdentifierDietaryFatPolyunsaturated | TYPE_NUTRITION, NUTRIENT_POLYUNSATURATED_FAT |
+| nutrition.fat.monounsaturated | g | HKQuantityTypeIdentifierDietaryFatMonounsaturated | TYPE_NUTRITION, NUTRIENT_MONOUNSATURATED_FAT |
+| nutrition.fat.trans | g | NA | TYPE_NUTRITION, NUTRIENT_TRANS_FAT (g) |
+| nutrition.cholesterol | mg | HKQuantityTypeIdentifierDietaryCholesterol | TYPE_NUTRITION, NUTRIENT_CHOLESTEROL |
+| nutrition.sodium | mg | HKQuantityTypeIdentifierDietarySodium  | TYPE_NUTRITION, NUTRIENT_SODIUM |
+| nutrition.potassium | mg | HKQuantityTypeIdentifierDietaryPotassium | TYPE_NUTRITION, NUTRIENT_POTASSIUM |
+| nutrition.carbs.total | g | HKQuantityTypeIdentifierDietaryCarbohydrates | TYPE_NUTRITION, NUTRIENT_TOTAL_CARBS |
+| nutrition.dietary_fiber | g | HKQuantityTypeIdentifierDietaryFiber | TYPE_NUTRITION, NUTRIENT_DIETARY_FIBER |
+| nutrition.sugar | g | HKQuantityTypeIdentifierDietarySugar | TYPE_NUTRITION, NUTRIENT_SUGAR |
+| nutrition.protein | g | HKQuantityTypeIdentifierDietaryProtein | TYPE_NUTRITION, NUTRIENT_PROTEIN |
+| nutrition.vitamin_a | mcg | HKQuantityTypeIdentifierDietaryVitaminA | TYPE_NUTRITION, NUTRIENT_VITAMIN_A |
+| nutrition.vitamin_c | mg | HKQuantityTypeIdentifierDietaryVitaminC | TYPE_NUTRITION, NUTRIENT_VITAMIN_C |
+| nutrition.calcium | mg | HKQuantityTypeIdentifierDietaryCalcium | TYPE_NUTRITION, NUTRIENT_CALCIUM |
+| nutrition.iron | mg | HKQuantityTypeIdentifierDietaryIron | TYPE_NUTRITION, NUTRIENT_IRON |
+| nutrition.water | ml | HKQuantityTypeIdentifierDietaryWater | TYPE_HYDRATION |
+| nutrition.caffeine | g | HKQuantityTypeIdentifierDietaryCaffeine | NA |
 
 Note: units of measurements are fixed !
 
