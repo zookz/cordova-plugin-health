@@ -77,14 +77,23 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 
 Note: units of measurements are fixed !
 
-Returned objects can be of different types, see examples below:
+Returned objects contain a set of fixed fields:
+
+- startDate: {type: Date} a date indicating when the data point starts
+- endDate: {type: Date} a date indicating when the data point ends
+- sourceBundleId: {type: String} the identifier of the app that produced the data
+- sourceName: {type: String} the name of the app that produced the data (as it appears to the user)
+- unit: {type: String} the unit of measurement
+- value: the actual value
+
+value can be of different types, see examples below:
 
 | data type      | value                             |
 |----------------|-----------------------------------|
 | steps          | 34                                |
 | distance       | 101.2                             |
 | calories       | 245.3                             |
-| activity       | "walking"  (note: recognised activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md)) |
+| activity       | "walking"  (note: recognized activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md)) |
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
@@ -114,9 +123,9 @@ Quirks of isAvailable()
 ### requestAuthorization()
 
 Requests read and write access to a set of data types.
-It is recommendable to always explain why the app needs access to the data before asking the user to authorise it.
+It is recommendable to always explain why the app needs access to the data before asking the user to authorize it.
 
-This function must be called before using the query and store functions, even if the authorisation has already been given at some point in the past.
+This function must be called before using the query and store functions, even if the authorization has already been given at some point in the past.
 
 ```
 navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
@@ -128,8 +137,8 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 
 Quirks of requestAuthorization()
 
-- In Android, it will try to get authorisation from the Google Fit APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
-- In Android, be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the autorisation will ensure that the app is connected again.
+- In Android, it will try to get authorization from the Google Fit APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
+- In Android, be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the autorization will ensure that the app is connected again.
 - In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
 
 ### query()
@@ -149,7 +158,7 @@ navigator.health.query({
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: String}, the data type to be queried (see above)
-- successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', sourceName: '', sourceBundleId: '' }
+- successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', sourceName: 'aaaa', sourceBundleId: 'bbbb' }
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 
@@ -194,7 +203,7 @@ The following table shows what types are supported and examples of aggregated da
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
 | activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in metres and calories in kcal) |
-| nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' } |
+| nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' } (note: units of measurement for nutrients are fixed according to the table at the beginning of this readme) |
 | nutrition.X     | { startDate: Date, endDate: Date, value: 23, unit: 'mg'} |
 
 Quirks of queryAggregated()
@@ -240,7 +249,7 @@ Quirks of store()
 
 * HealthKit includes medical data (eg blood glucose), Google Fit is only related to fitness data
 * HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types
-* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when quiered, Google Fit uses fixed units of measurement
+* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when queried, Google Fit uses fixed units of measurement
 * HealthKit automatically counts steps and distance when you carry your phone with you and if your phone has the CoreMotion chip, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
 * HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also
 
@@ -260,7 +269,7 @@ short term
 - get steps from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
 - add support for HKCategory samples in HealthKit
 - extend the datatypes
- - blood pressure  (KCorrelationTypeIdentifierBloodPressure, custom data type)
+ - blood pressure (KCorrelationTypeIdentifierBloodPressure, custom data type)
  - blood glucose
  - location (NA, TYPE_LOCATION)
 
@@ -274,6 +283,5 @@ long term
 
 Any help is more than welcome!
 I don't know Objectve C and I am not interested into learning it now, so I would particularly appreciate someone who can give me a hand with the iOS part.
-Particularly, I'd like to allow support for HKCategory.
 Also, I would love to know from you if the plugin is currently used in any app actually available online.
 Just send me an email to my_username at gmail.com
