@@ -285,8 +285,7 @@ short term
 
 - add store of nutrition
 - add delete
-- get steps from the "polished" Google Fit data source (see https://plus.google.com/104895513165544578271/posts/a8P62A6ejQy)
-- add support for HKCategory samples in HealthKit
+- add support for storing HKCategory samples in HealthKit
 - extend the datatypes
  - blood pressure (KCorrelationTypeIdentifierBloodPressure, custom data type)
  - blood glucose
