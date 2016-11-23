@@ -179,11 +179,12 @@ navigator.health.query({
 
 Quirks of query()
 
-- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more)
-- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is 7)
-- while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input
-- when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app
-- when querying for activities, calories and distance are also provided in HealthKit (units are kcal and metres) and never in Google Fit
+- in Android one can query for steps as filtered by the Google Fit app, in that case `filtered: true` must be put in the query object.
+- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more).
+- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is 7).
+- while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input.
+- when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app.
+- when querying for activities, calories and distance are also provided in HealthKit (units are kcal and metres) and never in Google Fit.
 - when querying for nutrition, Google Fit always returns all the nutrition elements it has, while HealthKit returns only those that are stored as correlation. To be sure one gets all stored the quantities (regardless of they are stored as correlation or not), it's beter to query single nutrients.
 - nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. The conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
@@ -224,6 +225,7 @@ The following table shows what types are supported and examples of aggregated da
 
 Quirks of queryAggregated()
 
+- in Android, to query for steps as filtered by the Google Fit app, the flag `filtered: true` must be added into the query object.
 - when querying for activities, calories and distance are provided when available in HealthKit and never in Google Fit
 - in Android, the start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
 - when bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00

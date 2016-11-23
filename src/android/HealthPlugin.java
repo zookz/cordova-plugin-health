@@ -488,11 +488,27 @@ public class HealthPlugin extends CordovaPlugin {
             }
         }
 
+        DataReadRequest readRequest = null;
+        if (DT.equals(DataType.TYPE_STEP_COUNT_DELTA) && args.getJSONObject(0).has("filtered") && args.getJSONObject(0).getBoolean("filtered")) {
+            // exceptional case for filtered steps
+            DataSource filteredStepsSource = new DataSource.Builder()
+                    .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                    .setType(DataSource.TYPE_DERIVED)
+                    .setStreamName("estimated_steps")
+                    .setAppPackageName("com.google.android.gms")
+                    .build();
 
-        DataReadRequest readRequest = new DataReadRequest.Builder()
-                .setTimeRange(st, et, TimeUnit.MILLISECONDS)
-                .read(dt)
-                .build();
+            readRequest = new DataReadRequest.Builder()
+                    .setTimeRange(st, et, TimeUnit.MILLISECONDS)
+                    .read(filteredStepsSource)
+                    .build();
+        } else {
+            readRequest = new DataReadRequest.Builder()
+                    .setTimeRange(st, et, TimeUnit.MILLISECONDS)
+                    .read(dt)
+                    .build();
+        }
+
 
         DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
@@ -507,9 +523,9 @@ public class HealthPlugin extends CordovaPlugin {
                     DataSource dataSource = datapoint.getOriginalDataSource();
                     if (dataSource != null) {
                         String sourceName = dataSource.getName();
-                        obj.put("sourceName", sourceName);
+                        if(sourceName != null) obj.put("sourceName", sourceName);
                         String sourceBundleId = dataSource.getAppPackageName();
-                        obj.put("sourceBundleId", sourceBundleId);
+                        if(sourceBundleId != null) obj.put("sourceBundleId", sourceBundleId);
                     }
 
                     //reference for fields: https://developers.google.com/android/reference/com/google/android/gms/fitness/data/Field.html
@@ -745,12 +761,24 @@ public class HealthPlugin extends CordovaPlugin {
             }
         }
 
+
         DataReadRequest.Builder builder = new DataReadRequest.Builder();
         builder.setTimeRange(st, et, TimeUnit.MILLISECONDS);
         int allms = (int) (et - st);
 
         if (datatype.equalsIgnoreCase("steps")) {
-            builder.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA);
+            if (args.getJSONObject(0).has("filtered") && args.getJSONObject(0).getBoolean("filtered")){
+                // exceptional case for filtered steps
+                DataSource filteredStepsSource = new DataSource.Builder()
+                        .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                        .setType(DataSource.TYPE_DERIVED)
+                        .setStreamName("estimated_steps")
+                        .setAppPackageName("com.google.android.gms")
+                        .build();
+                builder.aggregate(filteredStepsSource, DataType.AGGREGATE_STEP_COUNT_DELTA);
+            } else {
+                builder.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA);
+            }
         } else if (datatype.equalsIgnoreCase("distance")) {
             builder.aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA);
         } else if (datatype.equalsIgnoreCase("calories")) {
