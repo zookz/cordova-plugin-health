@@ -7,6 +7,8 @@ This work is based on [cordova plugin googlefit](https://github.com/2dvisio/cord
 
 For an introduction about Google Fit versus HealthKit see [this very good article](https://yalantis.com/blog/how-can-healthkit-and-googlefit-help-you-develop-healthcare-and-fitness-apps/).
 
+This plugin is kept up to date and requires a recent version of cordova (6 and on) and recent iOS and Android SDKs.
+
 ## Warning
 
 This plugin stores health data in Google Fit, practice that is [discouraged by Google](https://developers.google.com/fit/terms).

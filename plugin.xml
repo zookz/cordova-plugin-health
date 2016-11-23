@@ -20,7 +20,7 @@
   <issue>https://github.com/dariosalvi78/cordova-plugin-health/issues</issue>
 
   <engines>
-    <engine name="cordova" version=">=3.0.0"/>
+    <engine name="cordova" version=">=6.0.0"/>
   </engines>
 
 
