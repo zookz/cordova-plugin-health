@@ -415,8 +415,8 @@ var prepareNutrition = function (data) {
   };
   if (data.sourceName) res.sourceName = data.sourceName;
   if (data.sourceBundleId) res.sourceBundleId = data.sourceBundleId;
-  if (data.metadata && data.metadata.item) res.value.item = data.metadata.item;
-  if (data.metadata && data.metadata.meal_type) res.value.meal_type = data.metadata.meal_type;
+  if (data.metadata && data.metadata.HKFoodType) res.value.item = data.metadata.HKFoodType;
+  if (data.metadata && data.metadata.HKFoodMeal) res.value.meal_type = data.metadata.HKFoodMeal;
   res.value.nutrients = {};
   for (var j=0; j<data.samples.length; j++) {
     var sample = data.samples[j];
