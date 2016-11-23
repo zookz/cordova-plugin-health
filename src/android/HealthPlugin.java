@@ -260,6 +260,9 @@ public class HealthPlugin extends CordovaPlugin {
         if ("isAvailable".equals(action)) {
             isAvailable(callbackContext);
             return true;
+        } else if("promptInstallFit".equals(action)) {
+            promptInstall(callbackContext);
+            return true;
         } else if ("requestAuthorization".equals(action)) {
             requestAuthorization(args, callbackContext);
             return true;
@@ -295,15 +298,32 @@ public class HealthPlugin extends CordovaPlugin {
         return false;
     }
 
-
     private void isAvailable(final CallbackContext callbackContext) {
-        //first check that the Google APIs are available
+        // first check that the Google APIs are available
+        GoogleApiAvailability gapi = GoogleApiAvailability.getInstance();
+        int apiresult = gapi.isGooglePlayServicesAvailable(this.cordova.getActivity());
+        if (apiresult == ConnectionResult.SUCCESS) {
+            // then check that Google Fit is actually installed
+            PackageManager pm = cordova.getActivity().getApplicationContext().getPackageManager();
+            try {
+                pm.getPackageInfo("com.google.android.apps.fitness", PackageManager.GET_ACTIVITIES);
+                // Success return object
+                PluginResult result;
+                result = new PluginResult(PluginResult.Status.OK, true);
+                callbackContext.sendPluginResult(result);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.d(TAG, "Google Fit not installed");
+            }
+        }
+        PluginResult result;
+        result = new PluginResult(PluginResult.Status.OK, false);
+        callbackContext.sendPluginResult(result);
+    }
+
+    private void promptInstall(final CallbackContext callbackContext) {
         GoogleApiAvailability gapi = GoogleApiAvailability.getInstance();
         int apiresult = gapi.isGooglePlayServicesAvailable(this.cordova.getActivity());
         if (apiresult != ConnectionResult.SUCCESS) {
-            PluginResult result;
-            result = new PluginResult(PluginResult.Status.OK, false);
-            callbackContext.sendPluginResult(result);
             if (gapi.isUserResolvableError(apiresult)) {
                 // show the dialog, but no action is performed afterwards
                 gapi.showErrorDialogFragment(this.cordova.getActivity(), apiresult, 1000);
@@ -313,25 +333,17 @@ public class HealthPlugin extends CordovaPlugin {
             PackageManager pm = cordova.getActivity().getApplicationContext().getPackageManager();
             try {
                 pm.getPackageInfo("com.google.android.apps.fitness", PackageManager.GET_ACTIVITIES);
-                // Success return object
-                PluginResult result;
-                result = new PluginResult(PluginResult.Status.OK, true);
-                callbackContext.sendPluginResult(result);
             } catch (PackageManager.NameNotFoundException e) {
                 //show popup for downloading app
                 //code from http://stackoverflow.com/questions/11753000/how-to-open-the-google-play-store-directly-from-my-android-application
-
                 try {
                     cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.fitness")));
                 } catch (android.content.ActivityNotFoundException anfe) {
                     cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.fitness")));
                 }
-
-                PluginResult result;
-                result = new PluginResult(PluginResult.Status.OK, false);
-                callbackContext.sendPluginResult(result);
             }
         }
+        callbackContext.success();
     }
 
     private void requestAuthorization(final JSONArray args, final CallbackContext callbackContext) throws JSONException {

@@ -116,9 +116,24 @@ navigator.health.isAvailable(successCallback, errorCallback)
 - successCallback: {type: function(available)}, if available a true is passed as argument, false otherwise
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
-Quirks of isAvailable()
 
-- In Android, it checks both if recent Google Play Services and Google Fit are installed. If the play services are not installed, or are obsolete, it will show a pop-up suggesting to download them. If Google Fit is not installed, it will open the Play Store at the location of the Google Fit app. The plugin does not wait until the missing packages are installed, it will return immediately.
+### promptInstallFit() (Android only)
+
+Only available on Android.
+
+Checks if recent Google Play Services and Google Fit are installed.
+If the play services are not installed, or are obsolete, it will show a pop-up suggesting to download them.
+If Google Fit is not installed, it will open the Play Store at the location of the Google Fit app.
+The plugin does not wait until the missing packages are installed, it will return immediately.
+If both Play Services and Google Fit are available, this function just returns without any visible effect.
+
+```
+navigator.health.promptInstallFit(successCallback, errorCallback)
+```
+
+- successCallback: {type: function()}, called if the function was called
+- errorCallback: {type: function(err)}, called if something went wrong
+
 
 ### requestAuthorization()
 

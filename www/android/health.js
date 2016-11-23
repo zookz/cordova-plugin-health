@@ -8,6 +8,10 @@ Health.prototype.isAvailable = function (onSuccess, onError) {
   exec(onSuccess, onError, "health", "isAvailable", []);
 };
 
+Health.prototype.promptInstallFit = function (onSuccess, onError) {
+  exec(onSuccess, onError, "health", "promptInstallFit", []);
+};
+
 Health.prototype.requestAuthorization = function (datatypes, onSuccess, onError) {
   exec(onSuccess, onError, "health", "requestAuthorization", datatypes);
 };
