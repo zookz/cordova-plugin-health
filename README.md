@@ -121,13 +121,14 @@ navigator.health.isAvailable(successCallback, errorCallback)
 
 ### promptInstallFit() (Android only)
 
-Only available on Android.
-
 Checks if recent Google Play Services and Google Fit are installed.
 If the play services are not installed, or are obsolete, it will show a pop-up suggesting to download them.
 If Google Fit is not installed, it will open the Play Store at the location of the Google Fit app.
 The plugin does not wait until the missing packages are installed, it will return immediately.
 If both Play Services and Google Fit are available, this function just returns without any visible effect.
+
+This function is only available on Android.
+
 
 ```
 navigator.health.promptInstallFit(successCallback, errorCallback)
@@ -155,14 +156,14 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 Quirks of requestAuthorization()
 
 - In Android, it will try to get authorization from the Google Fit APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
-- In Android, be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the autorization will ensure that the app is connected again.
+- In Android, be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the authorization will ensure that the app is connected again.
 - In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
 
 ### query()
 
 Gets all the records of a certain data type within a certain time window.
 
-Warning: it can generate long arrays!
+Warning: if the time span is big, it can generate long arrays!
 
 ```
 navigator.health.query({
@@ -181,14 +182,14 @@ navigator.health.query({
 
 Quirks of query()
 
-- in Android one can query for steps as filtered by the Google Fit app, in that case `filtered: true` must be put in the query object.
-- in Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more).
-- in Google Fit calories.active is computed by subtracting the basal from the total, as basal an average of the a number of days before endDate is taken (the actual number is 7).
-- while Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input.
-- when querying for activities, Google Fit is able to determine some activities automatically, while HealthKit only relies on the input of the user or of some external app.
-- when querying for activities, calories and distance are also provided in HealthKit (units are kcal and metres) and never in Google Fit.
-- when querying for nutrition, Google Fit always returns all the nutrition elements it has, while HealthKit returns only those that are stored as correlation. To be sure one gets all stored the quantities (regardless of they are stored as correlation or not), it's beter to query single nutrients.
-- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. The conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
+- In Android it is possible to query for "raw" steps or to select those as filtered by the Google Fit app. In the latter case the query object must contain the field `filtered: true`.
+- In Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more).
+- In Google Fit calories.active is computed by subtracting the basal calories from the total. As basal energy expenditure, an average is computed from the week before endDate.
+- While Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input.
+- When querying for activities, Google Fit is able to determine some activities automatically (still, walking, running, biking, in vehicle), while HealthKit only relies on the input of the user or of some external app.
+- When querying for activities, calories and distance are also provided in HealthKit (units are kcal and meters) and never in Google Fit.
+- When querying for nutrition, Google Fit always returns all the nutrition elements it has, while HealthKit returns only those that are stored as correlation. To be sure to get all stored the quantities (regardless of they are stored as correlation or not), it's better to query single nutrients.
+- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. This is because conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
 ### queryAggregated()
 
@@ -208,11 +209,11 @@ navigator.health.queryAggregated({
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: String}, the data type to be queried (see below for supported data types)
 - bucket: {type: String}, if specified, aggregation is grouped an array of "buckets" (windows of time), supported values are: 'hour', 'day', 'week', 'month', 'year'
-- successCallback: {type: function(data)}, called if all OK, data contains the result of the query, see below for returned data types
+- successCallback: {type: function(data)}, called if all OK, data contains the result of the query, see below for returned data types. If no buckets is specified, the result is an object. If a bucketing strategy is specified, the result is an array.
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 Not all data types are supported for aggregated queries.
-The following table shows what types are supported and examples of aggregated data:
+The following table shows what types are supported and examples of the returned object:
 
 | data type       | example of returned object |
 |-----------------|----------------------------|
@@ -227,13 +228,13 @@ The following table shows what types are supported and examples of aggregated da
 
 Quirks of queryAggregated()
 
-- in Android, to query for steps as filtered by the Google Fit app, the flag `filtered: true` must be added into the query object.
-- when querying for activities, calories and distance are provided when available in HealthKit and never in Google Fit
-- in Android, the start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
-- when bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00
-- weeks start on Monday
-- when querying for nutrition, HealthKit returns only those that are stored as correlation. To be sure one gets all the stored quantities, it's beter to query single nutrients.
-- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. The conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
+- In Android, to query for steps as filtered by the Google Fit app, the flag `filtered: true` must be added into the query object.
+- When querying for activities, calories and distance are provided when available in HealthKit and never in Google Fit.
+- In Android, the start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
+- When bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00.
+- Weeks start on Monday.
+- When querying for nutrition, HealthKit returns only those that are stored as correlation. To be sure to get all the stored quantities, it's better to query single nutrients.
+- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit.
 
 ### store()
 
@@ -261,43 +262,50 @@ navigator.health.store({
 
 Quirks of store()
 
-- in iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
-- in Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
-- in iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
-- in iOS storing the sleep activities is not supported at the moment.
+- In iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
+- In Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
+- In iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
+- In iOS storing the sleep activities is not supported at the moment.
+- Storing of nutrients is not supported at the moment.
 
 ## Differences between HealthKit and Google Fit
 
-* HealthKit includes medical data (eg blood glucose), Google Fit is only related to fitness data
-* HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types
-* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when queried, Google Fit uses fixed units of measurement
-* HealthKit automatically counts steps and distance when you carry your phone with you and if your phone has the CoreMotion chip, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle)
-* HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also
+* HealthKit includes medical data (eg blood glucose), Google Fit is only related to fitness data.
+* HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types.
+* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when queried, Google Fit uses fixed units of measurement.
+* HealthKit automatically counts steps and distance when you carry your phone with you and if your phone has the CoreMotion chip, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle).
+* HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also.
 
 ## External Resources
 
-* The official Apple documentation for [HealthKit can be found here](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Framework/index.html#//apple_ref/doc/uid/TP40014707).
+* The official Apple documentation for HealthKit [can be found here](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Framework/index.html#//apple_ref/doc/uid/TP40014707).
 * For functions that require the `unit` attribute, you can find the comprehensive list of possible units from the [Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
-* [HealthKit constants](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Constants/index.html), used throughout the code
-* Google Fit [supported data types](https://developers.google.com/fit/android/data-types)
+* [HealthKit constants](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Constants/index.html), used throughout the code.
+* Google Fit [supported data types](https://developers.google.com/fit/android/data-types).
 
 ## Roadmap
 
-short term
+short term:
 
-- add store of nutrition
-- add delete
+- add storing of nutrition
+- allow deletion of data points
 - add support for storing HKCategory samples in HealthKit
-- extend the datatypes
- - blood pressure (KCorrelationTypeIdentifierBloodPressure, custom data type)
+- add more datatypes
+ - body fat percentage
+ - oxygen saturation
+ - blood pressure
  - blood glucose
- - location (NA, TYPE_LOCATION)
+ - temperature
+ - respiratory rate
 
-long term
+long term:
 
-- add registration to updates (in Fit:  HistoryApi#registerDataUpdateListener() )
-- store vital signs on an encrypted DB in the case of Android and remove custom datatypes. Possible choice: [sqlcipher](https://www.zetetic.net/sqlcipher/sqlcipher-for-android/). The file would be stored on shared drive, and it would be shared among apps through a service. You could more simply share the file, but then how would you share the password? If shared through a service, all apps would have the same service because it's part of the plugin, so the service should not auto-start until the first app tries to bind it (see [this](http://stackoverflow.com/questions/31506177/the-same-android-service-instance-for-two-apps) for suggestions). This is sub-optimal, as all apps would have the same copy of the service (although lightweight). A better approach would be requiring an extra app, but this creates other issues like "who would publish it?", "why the user would be needed to download another app?" etc.
-- add also Samsung Health as a health record for Android
+- add registration to updates (in Fit:  HistoryApi#registerDataUpdateListener()).
+- store custom data types and vital signs on an encrypted DB in the case of Android.
+Possible choice: [sqlcipher](https://www.zetetic.net/sqlcipher/sqlcipher-for-android/).
+The file would be stored on shared drive, and it would be shared among apps through a service.
+All apps would have the same service because it's part of the plugin, so the service should not auto-start until the first app tries to bind it (see [this](http://stackoverflow.com/questions/31506177/the-same-android-service-instance-for-two-apps) for suggestions).
+- add also Samsung Health as a health record for Android.
 
 ## Contributions
 
