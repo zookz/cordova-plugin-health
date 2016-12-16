@@ -261,6 +261,7 @@ navigator.health.store({
 
 Quirks of store()
 
+- Google Fit doesn't allow you to overwrite data points that overlap with others already stored of the same type (see [here](https://developers.google.com/fit/android/history#manageConflicting)). At the moment there is no support for [update](https://developers.google.com/fit/android/history#updateData) nor delete.
 - In iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
 - In Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
 - In iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
