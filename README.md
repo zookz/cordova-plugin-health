@@ -195,6 +195,8 @@ navigator.health.query({
 
 Quirks of query()
 
+- In iOS, the amount of datapoints is limited to 1000 by default. You can override this by adding a `limit: xxx` to your query object.
+- In iOS, datapoints are ordered in an descending fashion (from newer to older). You can revert this behaviour by adding `ascending: true` to your query object.
 - In Android it is possible to query for "raw" steps or to select those as filtered by the Google Fit app. In the latter case the query object must contain the field `filtered: true`.
 - In Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more).
 - In Google Fit calories.active is computed by subtracting the basal calories from the total. As basal energy expenditure, an average is computed from the week before endDate.
