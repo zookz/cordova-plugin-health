@@ -158,6 +158,20 @@ Quirks of requestAuthorization()
 - In Android, be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the authorization will ensure that the app is connected again.
 - In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
 
+### isAuthorized()
+
+Check if the app has authorization to read/write a set of datatypes.
+This function is similar to requestAuthorization() and has similar quirks.
+
+```
+navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
+```
+
+- datatypes: {type: Array of String}, a list of data types you want to be granted access to
+- successCallback: {type: function(authorized)}, if the argument is true, the app is authorized
+- errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
+
+
 ### query()
 
 Gets all the records of a certain data type within a certain time window.
