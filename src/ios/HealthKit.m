@@ -570,7 +570,13 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     // if a user grants/denies read access, *only* write access.
     NSMutableDictionary *args = command.arguments[0];
     NSString *checkType = args[HKPluginKeyType];
-    HKObjectType *type = [HealthKit getHKObjectType:checkType];
+    HKObjectType *type;
+
+    if ([checkType isEqual:@"HKWorkoutTypeIdentifier"]) {
+        type = [HKObjectType workoutType];
+    } else {
+        type = [HealthKit getHKObjectType:checkType];
+    }
 
     __block HealthKit *bSelf = self;
     [self checkAuthStatusWithCallbackId:command.callbackId forType:type andCompletion:^(CDVPluginResult *result, NSString *callbackId) {

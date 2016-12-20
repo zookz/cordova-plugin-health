@@ -68,7 +68,7 @@ Health.prototype.isAvailable = function (success, error) {
   window.plugins.healthkit.available(success, error);
 };
 
-Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
+var prepareDatatype4Auth = function (dts, success, error) {
   var HKdatatypes = [];
   for (var i = 0; i < dts.length; i++) {
     if ((dts[i] !== 'gender') && (dts[i] !== 'date_of_birth')) { // ignore gender and DOB
@@ -83,18 +83,41 @@ Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
         if (dts[i] === 'activity') HKdatatypes.push('HKCategoryTypeIdentifierSleepAnalysis');
         if (dts[i] === 'calories') HKdatatypes.push('HKQuantityTypeIdentifierBasalEnergyBurned');
       } else {
-        onError('unknown data type ' + dts[i]);
+        error('unknown data type ' + dts[i]);
         return;
       }
     }
   }
-  if (HKdatatypes.length) {
-    window.plugins.healthkit.requestAuthorization({
-      'readTypes': HKdatatypes,
-      'writeTypes': HKdatatypes
-    }, onSuccess, onError);
-  } else onSuccess();
+  success(HKdatatypes);
+}
+
+Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
+  prepareDatatype4Auth(dts, function (HKdatatypes) {
+    if (HKdatatypes.length) {
+      window.plugins.healthkit.requestAuthorization({
+        'readTypes': HKdatatypes,
+        'writeTypes': HKdatatypes
+      }, onSuccess, onError);
+    } else onSuccess();
+  }, onError);
 };
+
+Health.prototype.isAuthorized = function(dts, onSuccess, onError) {
+  prepareDatatype4Auth(dts, function (HKdatatypes) {
+    var check = function () {
+      if (HKdatatypes.length > 0) {
+        var dt = HKdatatypes.shift();
+        window.plugins.healthkit.checkAuthStatus({
+          type: dt
+        }, function (auth) {
+          if (auth === 'authorized') check();
+          else onSuccess(false);
+        }, onError);
+      } else onSuccess(true);
+    }
+    check();
+  }, onError);
+}
 
 Health.prototype.query = function (opts, onSuccess, onError) {
   var startD = opts.startDate;
