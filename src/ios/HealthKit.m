@@ -1266,7 +1266,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:[args[HKPluginKeyEndDate] longValue]];
     NSString *sampleTypeString = args[HKPluginKeySampleType];
     NSString *unitString = args[HKPluginKeyUnit];
-    NSUInteger limit = ((args[@"limit"] != nil) ? [args[@"limit"] unsignedIntegerValue] : 100);
+    NSUInteger limit = ((args[@"limit"] != nil) ? [args[@"limit"] unsignedIntegerValue] : 1000);
     BOOL ascending = (args[@"ascending"] != nil && [args[@"ascending"] boolValue]);
 
     HKSampleType *type = [HealthKit getHKSampleType:sampleTypeString];
