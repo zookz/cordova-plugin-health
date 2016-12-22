@@ -271,12 +271,25 @@ public class HealthPlugin extends CordovaPlugin {
         } else if ("promptInstallFit".equals(action)) {
             promptInstall(callbackContext);
             return true;
-        } else if ("checkAuthorization".equals(action)) {
+            
+        } else if ("requestAuthorization".equals(action)) {
             cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         checkAuthorization(args, callbackContext, true);
+                    } catch (Exception ex) {
+                        callbackContext.error(ex.getMessage());
+                    }
+                }
+            });
+            return true;
+        } else if ("checkAuthorization".equals(action)) {
+            cordova.getThreadPool().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        checkAuthorization(args, callbackContext, false);
                     } catch (Exception ex) {
                         callbackContext.error(ex.getMessage());
                     }
