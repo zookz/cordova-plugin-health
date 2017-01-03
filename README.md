@@ -25,15 +25,15 @@ cordova plugin add cordova-plugin-health
 
 * Make sure your app id has the 'HealthKit' entitlement when this plugin is installed (see iOS dev center).
 * Also, make sure your app and AppStore description complies with these Apple review guidelines: https://developer.apple.com/app-store/review/guidelines/#healthkit
-* There are [two keys](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW48) to the info.plist file, `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription` that are assigned with an empty string by default by the plugin. You may want to put a better description there.
+* There are [two keys](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW48) to be added to the info.plist file: `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription`. These are assigned with a default string by the plugin, but you may want to contextualise them for your app.
 
 ## Requirements for Android apps
 
-* You need to have the Google Services API downloaded in your SDK
-* Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-api-key) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin)
-* If you are wondering what key your compiled app is using, you can type `keytool -list -printcert -jarfile yourapp.apk`
+* You need to have the Google Services API downloaded in your SDK.
+* Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-api-key) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin).
+* If you are wondering what key your compiled app is using, you can type `keytool -list -printcert -jarfile yourapp.apk`.
 * You can use the Google Fitness API even if the user doesn't have Google Fit installed, but there has to be some other fitness app putting data into the Fitness API otherwise your queries will always be empty. See the [the original documentation](https://developers.google.com/fit/overview).
-* This plugin is set to use the latest version of the Google Play Services API (`<framework src="com.google.android.gms:play-services-fitness:+" />`). This is done to likely guarantee the compatibility with other plugins using Google Play Services, but bear in mind that a) the plugin was tested until version 9.4.0 of the APIs and b) other plugins may be using a different version of the API. If you run into an issue, check the generated gradle file (build.gradle) under `dependencies` between `// SUB-PROJECT DEPENDENCIES START` and `// SUB-PROJECT DEPENDENCIES END` and amke sure that all versions of the `com.google.android.gms:play-services-xxxx` are the same.
+* This plugin is set to use the latest version of the Google Play Services API (`<framework src="com.google.android.gms:play-services-fitness:+" />`). This is done to likely guarantee the compatibility with other plugins using Google Play Services, but bear in mind that a) the plugin was tested until version 9.8.0 of the APIs and b) other plugins may be using a different version of the API. If you run into an issue, check the generated gradle file (build.gradle) under `dependencies` between `// SUB-PROJECT DEPENDENCIES START` and `// SUB-PROJECT DEPENDENCIES END` and make sure that all versions of the `com.google.android.gms:play-services-xxxx` are the same.
 
 ## Supported data types
 
