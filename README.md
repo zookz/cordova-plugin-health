@@ -164,7 +164,7 @@ Check if the app has authorization to read/write a set of datatypes.
 This function is similar to requestAuthorization() and has similar quirks.
 
 ```
-navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
+navigator.health.isAuthorized(datatypes, successCallback, errorCallback)
 ```
 
 - datatypes: {type: Array of String}, a list of data types you want to be granted access to
@@ -174,7 +174,7 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 
 ### query()
 
-Gets all the records of a certain data type within a certain time window.
+Gets all the data points of a certain data type within a certain time window.
 
 Warning: if the time span is big, it can generate long arrays!
 
@@ -197,14 +197,14 @@ Quirks of query()
 
 - In iOS, the amount of datapoints is limited to 1000 by default. You can override this by adding a `limit: xxx` to your query object.
 - In iOS, datapoints are ordered in an descending fashion (from newer to older). You can revert this behaviour by adding `ascending: true` to your query object.
-- In Android it is possible to query for "raw" steps or to select those as filtered by the Google Fit app. In the latter case the query object must contain the field `filtered: true`.
-- In Google Fit calories.basal is returned as an average per day, and usually is not available in all days (may be not available in time windows smaller than 5 days or more).
-- In Google Fit calories.active is computed by subtracting the basal calories from the total. As basal energy expenditure, an average is computed from the week before endDate.
-- While Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input.
+- In Android, it is possible to query for "raw" steps or to select those as filtered by the Google Fit app. In the latter case the query object must contain the field `filtered: true`.
+- In Google Fit, calories.basal is returned as an average per day, and usually is not available in all days.
+- In Google Fit, calories.active is computed by subtracting the basal calories from the total. As basal energy expenditure, an average is computed from the week before endDate.
+- While Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input from some app.
 - When querying for activities, Google Fit is able to determine some activities automatically (still, walking, running, biking, in vehicle), while HealthKit only relies on the input of the user or of some external app.
 - When querying for activities, calories and distance are also provided in HealthKit (units are kcal and meters) and never in Google Fit.
 - When querying for nutrition, Google Fit always returns all the nutrition elements it has, while HealthKit returns only those that are stored as correlation. To be sure to get all stored the quantities (regardless of they are stored as correlation or not), it's better to query single nutrients.
-- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. This is because conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
+- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. Automatic conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
 ### queryAggregated()
 
