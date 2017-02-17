@@ -69,7 +69,6 @@ public class HealthPlugin extends CordovaPlugin {
     //Scope for read/write access to activity-related data types in Google Fit.
     //These include activity type, calories consumed and expended, step counts, and others.
     public static Map<String, DataType> activitydatatypes = new HashMap<String, DataType>();
-
     static {
         activitydatatypes.put("steps", DataType.TYPE_STEP_COUNT_DELTA);
         activitydatatypes.put("calories", DataType.TYPE_CALORIES_EXPENDED);
@@ -79,7 +78,6 @@ public class HealthPlugin extends CordovaPlugin {
 
     //Scope for read/write access to biometric data types in Google Fit. These include heart rate, height, and weight.
     public static Map<String, DataType> bodydatatypes = new HashMap<String, DataType>();
-
     static {
         bodydatatypes.put("height", DataType.TYPE_HEIGHT);
         bodydatatypes.put("weight", DataType.TYPE_WEIGHT);
@@ -89,7 +87,6 @@ public class HealthPlugin extends CordovaPlugin {
 
     //Scope for read/write access to location-related data types in Google Fit. These include location, distance, and speed.
     public static Map<String, DataType> locationdatatypes = new HashMap<String, DataType>();
-
     static {
         locationdatatypes.put("distance", DataType.TYPE_DISTANCE_DELTA);
     }
@@ -851,7 +848,12 @@ public class HealthPlugin extends CordovaPlugin {
         } else if (datatype.equalsIgnoreCase("calories.basal")) {
             builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else if (datatype.equalsIgnoreCase("activity")) {
-            builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
+            if(hasbucket) {
+                builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
+            }  else {
+                builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
+                //here we could also get the distance: builder.aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA);
+            }
         } else if (datatype.equalsIgnoreCase("nutrition.water")) {
             builder.aggregate(DataType.TYPE_HYDRATION, DataType.AGGREGATE_HYDRATION);
         } else if (nutritiondatatypes.get(datatype) != null) {
@@ -871,7 +873,11 @@ public class HealthPlugin extends CordovaPlugin {
                 builder.bucketByTime(1, TimeUnit.DAYS);
             }
         } else {
-            builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+            if (datatype.equalsIgnoreCase("activity")) {
+                builder.bucketByActivityType(1, TimeUnit.MILLISECONDS);
+            } else {
+                builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+            }
         }
 
         DataReadRequest readRequest = builder.build();
@@ -925,6 +931,28 @@ public class HealthPlugin extends CordovaPlugin {
             }
 
             for (Bucket bucket : dataReadResult.getBuckets()) {
+
+                // special case of the activity without time buckets
+                // here the buckets contain activities and the datapoints contain calories
+                if(datatype.equalsIgnoreCase("activity") && !hasbucket){
+                    String activity = bucket.getActivity();
+                    float calories = 0;
+                    int duration = (int) (bucket.getEndTime(TimeUnit.MILLISECONDS) - bucket.getStartTime(TimeUnit.MILLISECONDS));
+                    for (DataSet dataset : bucket.getDataSets()) {
+                        for (DataPoint datapoint : dataset.getDataPoints()) {
+                            calories += datapoint.getValue(Field.FIELD_CALORIES).asFloat();
+                        }
+                    }
+                    JSONObject actobj = retBucket.getJSONObject("value");
+                    JSONObject summary = new JSONObject();
+                    summary.put("duration", duration);
+                    summary.put("calories", calories);
+                    actobj.put(activity, summary);
+                    retBucket.put("value", actobj);
+                    // jump to the next iteration
+                    continue;
+                }
+
                 if (hasbucket) {
                     if (customBuckets) {
                         //find the bucket among customs
@@ -968,6 +996,7 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                     }
                 }
+
                 // aggregate data points over the bucket
                 boolean atleastone = false;
                 for (DataSet dataset : bucket.getDataSets()) {
@@ -1009,9 +1038,9 @@ public class HealthPlugin extends CordovaPlugin {
                             }
                         } else if (datatype.equalsIgnoreCase("activity")) {
                             String activity = datapoint.getValue(Field.FIELD_ACTIVITY).asActivity();
+                            int ndur = datapoint.getValue(Field.FIELD_DURATION).asInt();
                             JSONObject actobj = retBucket.getJSONObject("value");
                             JSONObject summary;
-                            int ndur = datapoint.getValue(Field.FIELD_DURATION).asInt();
                             if (actobj.has(activity)) {
                                 summary = actobj.getJSONObject(activity);
                                 int odur = summary.getInt("duration");
@@ -1041,11 +1070,6 @@ public class HealthPlugin extends CordovaPlugin {
                     }
                 }
             } // end of buckets loop
-            for (int i = 0; i < retBucketsArr.length(); i++) {
-                long _sss = retBucketsArr.getJSONObject(i).getLong("startDate");
-                long _eee = retBucketsArr.getJSONObject(i).getLong("endDate");
-                Log.d(TAG, "Bucket: " + new Date(_sss) + " " + new Date(_eee));
-            }
             if (hasbucket) callbackContext.success(retBucketsArr);
             else callbackContext.success(retBucket);
         } else {
