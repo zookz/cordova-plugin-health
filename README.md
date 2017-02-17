@@ -244,7 +244,7 @@ The following table shows what types are supported and examples of the returned 
 Quirks of queryAggregated()
 
 - In Android, to query for steps as filtered by the Google Fit app, the flag `filtered: true` must be added into the query object.
-- When querying for activities, calories and distance are provided when available in HealthKit and never in Google Fit.
+- When querying for activities, calories and distance are provided when available in HealthKit. In Google Fit only calories are provided and only when no bucket is specified.
 - In Android, the start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
 - When bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00.
 - Weeks start on Monday.
