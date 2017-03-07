@@ -11,7 +11,8 @@ This plugin is kept up to date and requires a recent version of cordova (6 and o
 
 ## Warning
 
-This plugin stores health data in Google Fit, practice that is [discouraged by Google](https://developers.google.com/fit/terms).
+Google discourages from using Google Fit for medical apps.
+See the [official terms](https://developers.google.com/fit/terms).
 
 ## Installation
 
@@ -20,6 +21,8 @@ Just execute this line in your project's folder:
 ```
 cordova plugin add cordova-plugin-health
 ```
+
+this will install the latest release.
 
 ## Requirements for iOS apps
 
@@ -317,15 +320,15 @@ short term:
 long term:
 
 - add registration to updates (in Fit:  HistoryApi#registerDataUpdateListener()).
-- store custom data types and vital signs on an encrypted DB in the case of Android.
-Possible choice: [sqlcipher](https://www.zetetic.net/sqlcipher/sqlcipher-for-android/).
-The file would be stored on shared drive, and it would be shared among apps through a service.
-All apps would have the same service because it's part of the plugin, so the service should not auto-start until the first app tries to bind it (see [this](http://stackoverflow.com/questions/31506177/the-same-android-service-instance-for-two-apps) for suggestions).
 - add also Samsung Health as a health record for Android.
 
 ## Contributions
 
 Any help is more than welcome!
+
 I don't know Objectve C and I am not interested into learning it now, so I would particularly appreciate someone who can give me a hand with the iOS part.
 Also, I would love to know from you if the plugin is currently used in any app actually available online.
-Just send me an email to my_username at gmail.com
+Just send me an email to my_username at gmail.com.
+For donations, I have a PayPal account at the same email address.
+
+Thanks!
