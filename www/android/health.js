@@ -16,10 +16,9 @@ Health.prototype.requestAuthorization = function (datatypes, onSuccess, onError)
   exec(onSuccess, onError, "health", "requestAuthorization", datatypes);
 };
 
-Health.prototype.isAuthorized = function (onSuccess, onError) {
-  exec(onSuccess, onError, "health", "isAuthorized", []);
+Health.prototype.isAuthorized = function (datatypes, onSuccess, onError) {
+  exec(onSuccess, onError, "health", "isAuthorized", datatypes);
 };
-
 
 Health.prototype.query = function (opts, onSuccess, onError) {
   //calories.active is done by asking all calories and subtracting the basal
