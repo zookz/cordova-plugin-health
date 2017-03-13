@@ -398,6 +398,23 @@ Health.prototype.store = function (data, onSuccess, onError) {
   }
 };
 
+
+Health.prototype.delete = function (data, onSuccess, onError) {
+  if (data.dataType === 'gender') {
+    onError('Gender is not writeable');
+  } else if (data.dataType === 'date_of_birth') {
+    onError('Date of birth is not writeable');
+  } else if (dataTypes[ data.dataType ]) {
+    data.sampleType = dataTypes[ data.dataType ];
+    if ((data.dataType === 'distance') && data.cycling) {
+      data.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
+    }
+    window.plugins.healthkit.deleteSamples(data, onSuccess, onError);
+  } else {
+    onError('unknown data type ' + data.dataType);
+  }
+};
+
 cordova.addConstructor(function () {
   navigator.health = new Health();
   return navigator.health;
