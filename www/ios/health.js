@@ -401,18 +401,20 @@ Health.prototype.store = function (data, onSuccess, onError) {
 
 Health.prototype.delete = function (data, onSuccess, onError) {
   if (data.dataType === 'gender') {
-    onError('Gender is not writeable');
+    onError('Gender is not deletable');
   } else if (data.dataType === 'date_of_birth') {
-    onError('Date of birth is not writeable');
+    onError('Date of birth is not deletable');
+  } else if ((data.dataType === 'activity') && (data.value.lastIndexOf('sleep', 0) === 0)) {
+      data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
+  } else if ((data.dataType === 'distance') && data.cycling) {
+    data.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
   } else if (dataTypes[ data.dataType ]) {
     data.sampleType = dataTypes[ data.dataType ];
-    if ((data.dataType === 'distance') && data.cycling) {
-      data.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
-    }
-    window.plugins.healthkit.deleteSamples(data, onSuccess, onError);
   } else {
     onError('unknown data type ' + data.dataType);
+    return;
   }
+  window.plugins.healthkit.deleteSamples(data, onSuccess, onError);
 };
 
 cordova.addConstructor(function () {
