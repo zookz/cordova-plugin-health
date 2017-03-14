@@ -14,6 +14,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
@@ -24,6 +25,7 @@ import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.data.Value;
+import com.google.android.gms.fitness.request.DataDeleteRequest;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.request.DataTypeCreateRequest;
 import com.google.android.gms.fitness.result.DataReadResult;
@@ -334,6 +336,18 @@ public class HealthPlugin extends CordovaPlugin {
                 public void run() {
                     try {
                         store(args, callbackContext);
+                    } catch (Exception ex) {
+                        callbackContext.error(ex.getMessage());
+                    }
+                }
+            });
+            return true;
+        } else if("delete".equals(action)){
+            cordova.getThreadPool().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        delete(args, callbackContext);
                     } catch (Exception ex) {
                         callbackContext.error(ex.getMessage());
                     }
@@ -1240,5 +1254,69 @@ public class HealthPlugin extends CordovaPlugin {
         } else {
             callbackContext.success();
         }
+    }
+
+    private void delete(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        if (!args.getJSONObject(0).has("startDate")) {
+            callbackContext.error("Missing argument startDate");
+            return;
+        }
+        final long st = args.getJSONObject(0).getLong("startDate");
+        if (!args.getJSONObject(0).has("endDate")) {
+            callbackContext.error("Missing argument endDate");
+            return;
+        }
+        final long et = args.getJSONObject(0).getLong("endDate");
+        if (!args.getJSONObject(0).has("dataType")) {
+            callbackContext.error("Missing argument dataType");
+            return;
+        }
+        final String datatype = args.getJSONObject(0).getString("dataType");
+        if (!args.getJSONObject(0).has("value")) {
+            callbackContext.error("Missing argument value");
+            return;
+        }
+
+        DataType dt = null;
+        if (bodydatatypes.get(datatype) != null)
+            dt = bodydatatypes.get(datatype);
+        if (activitydatatypes.get(datatype) != null)
+            dt = activitydatatypes.get(datatype);
+        if (locationdatatypes.get(datatype) != null)
+            dt = locationdatatypes.get(datatype);
+        if (nutritiondatatypes.get(datatype) != null)
+            dt = nutritiondatatypes.get(datatype);
+        if (customdatatypes.get(datatype) != null)
+            dt = customdatatypes.get(datatype);
+        if (dt == null) {
+            callbackContext.error("Datatype " + datatype + " not supported");
+            return;
+        }
+
+        if ((mClient == null) || (!mClient.isConnected())) {
+            if (!lightConnect()) {
+                callbackContext.error("Cannot connect to Google Fit");
+                return;
+            }
+        }
+
+        DataDeleteRequest request = new DataDeleteRequest.Builder()
+                .setTimeInterval(st, et, TimeUnit.MILLISECONDS)
+                .addDataType(dt)
+                .build();
+
+        Fitness.HistoryApi.deleteData(mClient, request)
+                .setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        if (status.isSuccess()) {
+                            callbackContext.success();
+                        } else {
+                            Log.e(TAG, "Cannot delete samples of " + datatype + ", status code "
+                                    + status.getStatusCode() + ", message " + status.getStatusMessage());
+                            callbackContext.error(status.getStatusMessage());
+                        }
+                    }
+                });
     }
 }

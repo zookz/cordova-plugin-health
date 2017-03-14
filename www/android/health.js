@@ -146,6 +146,25 @@ Health.prototype.store = function (data, onSuccess, onError) {
   exec(onSuccess, onError, "health", "store", [data]);
 };
 
+Health.prototype.delete = function (data, onSuccess, onError) {
+  if(data.dataType =='calories.basal'){
+    onError('basal calories cannot be deleted in Android');
+    return;
+  }
+  if(data.dataType =='calories.active'){
+    //rename active calories to total calories
+    data.dataType ='calories';
+  }
+  if(data.startDate && (typeof data.startDate == 'object'))
+  data.startDate = data.startDate.getTime();
+  if(data.endDate && (typeof data.endDate == 'object'))
+  data.endDate = data.endDate.getTime();
+  if(data.dataType =='activity'){
+    data.value = navigator.health.toFitActivity(data.value);
+  }
+  exec(onSuccess, onError, "health", "delete", [data]);
+};
+
 Health.prototype.toFitActivity = function (act) {
   if (act === 'core_training') return 'strength_training';
   if (act === 'flexibility') return 'gymnastics';
