@@ -688,6 +688,12 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                                 });
                             }
                         }];
+                    } else {
+                      // no samples, all OK then!
+                      dispatch_sync(dispatch_get_main_queue(), ^{
+                          CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+                          [bSelf.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+                      });
                     }
                 } else {
                     dispatch_sync(dispatch_get_main_queue(), ^{
