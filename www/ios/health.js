@@ -404,8 +404,10 @@ Health.prototype.delete = function (data, onSuccess, onError) {
     onError('Gender is not deletable');
   } else if (data.dataType === 'date_of_birth') {
     onError('Date of birth is not deletable');
-  } else if ((data.dataType === 'activity') && (data.value.lastIndexOf('sleep', 0) === 0)) {
+  } else if ((data.dataType === 'activity') && (data.dataType.lastIndexOf('sleep', 0) === 0)) {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
+  } else if(data.dataType === 'activity') {
+    data.sampleType = 'workoutType';
   } else if ((data.dataType === 'distance') && data.cycling) {
     data.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
   } else if (dataTypes[ data.dataType ]) {

@@ -663,7 +663,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
             [[HealthKit sharedHealthStore] saveObject:workout withCompletion:^(BOOL success_save, NSError *innerError) {
                 if (success_save) {
                     // now store the samples, so it shows up in the health app as well (pass this in as an option?)
-                    if (energy != nil) {
+                    if (energy != nil || distance != nil) {
                         HKQuantitySample *sampleActivity = [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:
                                         quantityType]
                                                                                            quantity:nrOfDistanceUnits
