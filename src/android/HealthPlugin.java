@@ -1272,10 +1272,6 @@ public class HealthPlugin extends CordovaPlugin {
             return;
         }
         final String datatype = args.getJSONObject(0).getString("dataType");
-        if (!args.getJSONObject(0).has("value")) {
-            callbackContext.error("Missing argument value");
-            return;
-        }
 
         DataType dt = null;
         if (bodydatatypes.get(datatype) != null)
