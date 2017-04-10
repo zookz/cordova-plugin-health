@@ -43,6 +43,7 @@ import org.json.JSONObject;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,8 @@ public class HealthPlugin extends CordovaPlugin {
     private boolean authAutoresolve = false;
     private static final LinkedList<String> dynPerms = new LinkedList<String>();
     private static final int REQUEST_DYN_PERMS = 2;
+    private static final int READ_PERMS = 1;
+    private static final int READ_WRITE_PERMS = 2;
 
     //Scope for read/write access to activity-related data types in Google Fit.
     //These include activity type, calories consumed and expended, step counts, and others.
@@ -342,7 +345,7 @@ public class HealthPlugin extends CordovaPlugin {
                 }
             });
             return true;
-        } else if("delete".equals(action)){
+        } else if ("delete".equals(action)) {
             cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -413,35 +416,90 @@ public class HealthPlugin extends CordovaPlugin {
         authAutoresolve = autoresolve;
 
         //reset scopes
-        boolean bodyscope = false;
-        boolean activityscope = false;
-        boolean locationscope = false;
-        boolean nutritionscope = false;
+        int bodyscope = 0;
+        int activityscope = 0;
+        int locationscope = 0;
+        int nutritionscope = 0;
+
+        HashSet<String> readWriteTypes = new HashSet<String>();
+        HashSet<String> readTypes = new HashSet<String>();
 
         for (int i = 0; i < args.length(); i++) {
-            String type = args.getString(i);
-            if (bodydatatypes.get(type) != null)
-                bodyscope = true;
-            if (activitydatatypes.get(type) != null)
-                activityscope = true;
-            if (locationdatatypes.get(type) != null)
-                locationscope = true;
-            if (nutritiondatatypes.get(type) != null)
-                nutritionscope = true;
+            Object object = args.get(i);
+            if (object instanceof JSONObject) {
+                JSONObject readWriteObj = (JSONObject) object;
+                if (readWriteObj.has("read")) {
+                    JSONArray readArray = readWriteObj.getJSONArray("read");
+                    for (int j = 0; j < readArray.length(); j++) {
+                        readTypes.add(readArray.getString(j));
+                    }
+                }
+                if (readWriteObj.has("write")) {
+                    JSONArray writeArray = readWriteObj.getJSONArray("write");
+                    for (int j = 0; j < writeArray.length(); j++) {
+                        readWriteTypes.add(writeArray.getString(j));
+                    }
+                }
+            } else if (object instanceof String) {
+                readWriteTypes.add(String.valueOf(object));
+            }
         }
+
+        readTypes.removeAll(readWriteTypes);
+
+        for (String readType : readTypes) {
+            if (bodydatatypes.get(readType) != null)
+                bodyscope = READ_PERMS;
+            if (activitydatatypes.get(readType) != null)
+                activityscope = READ_PERMS;
+            if (locationdatatypes.get(readType) != null)
+                locationscope = READ_PERMS;
+            if (nutritiondatatypes.get(readType) != null)
+                nutritionscope = READ_PERMS;
+        }
+
+        for (String readWriteType : readWriteTypes) {
+            if (bodydatatypes.get(readWriteType) != null)
+                bodyscope = READ_WRITE_PERMS;
+            if (activitydatatypes.get(readWriteType) != null)
+                activityscope = READ_WRITE_PERMS;
+            if (locationdatatypes.get(readWriteType) != null)
+                locationscope = READ_WRITE_PERMS;
+            if (nutritiondatatypes.get(readWriteType) != null)
+                nutritionscope = READ_WRITE_PERMS;
+        }
+
         dynPerms.clear();
-        if (locationscope) dynPerms.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        if (bodyscope) dynPerms.add(Manifest.permission.BODY_SENSORS);
+        if (locationscope == READ_PERMS || locationscope == READ_WRITE_PERMS)
+            dynPerms.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        if (bodyscope == READ_PERMS || bodyscope == READ_WRITE_PERMS)
+            dynPerms.add(Manifest.permission.BODY_SENSORS);
 
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this.cordova.getActivity());
         builder.addApi(Fitness.HISTORY_API);
         builder.addApi(Fitness.CONFIG_API);
         builder.addApi(Fitness.SESSIONS_API);
         //scopes: https://developers.google.com/android/reference/com/google/android/gms/common/Scopes.html
-        if (bodyscope) builder.addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE));
-        if (activityscope) builder.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE));
-        if (locationscope) builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ_WRITE));
-        if (nutritionscope) builder.addScope(new Scope(Scopes.FITNESS_NUTRITION_READ_WRITE));
+        if (bodyscope == READ_PERMS) {
+            builder.addScope(new Scope(Scopes.FITNESS_BODY_READ));
+        } else if (bodyscope == READ_WRITE_PERMS) {
+            builder.addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE));
+        }
+        if (activityscope == READ_PERMS) {
+            builder.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ));
+        } else if (activityscope == READ_WRITE_PERMS) {
+            builder.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE));
+        }
+        if (locationscope == READ_PERMS) {
+            builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ));
+        } else if (locationscope == READ_WRITE_PERMS) {
+            builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ_WRITE));
+        }
+        if (nutritionscope == READ_PERMS) {
+            builder.addScope(new Scope(Scopes.FITNESS_NUTRITION_READ));
+        } else if (nutritionscope == READ_WRITE_PERMS) {
+            builder.addScope(new Scope(Scopes.FITNESS_NUTRITION_READ_WRITE));
+        }
 
         builder.addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
             @Override
@@ -862,9 +920,9 @@ public class HealthPlugin extends CordovaPlugin {
         } else if (datatype.equalsIgnoreCase("calories.basal")) {
             builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else if (datatype.equalsIgnoreCase("activity")) {
-            if(hasbucket) {
+            if (hasbucket) {
                 builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
-            }  else {
+            } else {
                 builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
                 //here we could also get the distance: builder.aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA);
             }
@@ -948,7 +1006,7 @@ public class HealthPlugin extends CordovaPlugin {
 
                 // special case of the activity without time buckets
                 // here the buckets contain activities and the datapoints contain calories
-                if(datatype.equalsIgnoreCase("activity") && !hasbucket){
+                if (datatype.equalsIgnoreCase("activity") && !hasbucket) {
                     String activity = bucket.getActivity();
                     float calories = 0;
                     int duration = (int) (bucket.getEndTime(TimeUnit.MILLISECONDS) - bucket.getStartTime(TimeUnit.MILLISECONDS));
