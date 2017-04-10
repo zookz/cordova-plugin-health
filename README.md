@@ -19,7 +19,7 @@ See the [official terms](https://developers.google.com/fit/terms).
 Just execute this line in your project's folder:
 
 ```
-cordova plugin add cordova-plugin-health
+cordova plugin add cordova-plugin-health --variable HEALTH_READ_PERMISSION='App needs read access' --variable HEALTH_WRITE_PERMISSION='App needs write access'
 ```
 
 this will install the latest release.
