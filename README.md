@@ -151,7 +151,16 @@ This function must be called before using the query and store functions, even if
 navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 ```
 
-- datatypes: {type: Array of String}, a list of data types you want to be granted access to
+- datatypes: {type: Mixed array}, a list of data types you want to be granted access to. You can also specify read or write only permissions.
+```javascript
+[
+  'calories', 'distance',   //read and write permissions
+  {
+    read : ['steps'],       //read only permission
+    write : ['height', 'weight']  //write only permission
+  }
+]
+```
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
