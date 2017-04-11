@@ -710,7 +710,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                     // now store the samples, so it shows up in the health app as well (pass this in as an option?)
                     if (energy != nil || distance != nil) {
                         HKQuantitySample *sampleActivity = [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:
-                                        quantityType]
+                                        HKQuantityTypeIdentifierDistanceWalkingRunning]
                                                                                            quantity:nrOfDistanceUnits
                                                                                           startDate:startDate
                                                                                             endDate:endDate];

@@ -180,7 +180,7 @@ This function is similar to requestAuthorization() and has similar quirks.
 navigator.health.isAuthorized(datatypes, successCallback, errorCallback)
 ```
 
-- datatypes: {type: Array of String}, a list of data types you want to be granted access to
+- datatypes: {type: Mixed array}, a list of data types you want to check access of, same as in requestAuthorization
 - successCallback: {type: function(authorized)}, if the argument is true, the app is authorized
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
@@ -250,7 +250,7 @@ The following table shows what types are supported and examples of the returned 
 | calories        | { startDate: Date, endDate: Date, value: 25698.1, unit: 'kcal' } |
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
-| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in metres and calories in kcal) |
+| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in meters and calories in kcal) |
 | nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' } (note: units of measurement for nutrients are fixed according to the table at the beginning of this readme) |
 | nutrition.X     | { startDate: Date, endDate: Date, value: 23, unit: 'mg'} |
 
@@ -281,9 +281,16 @@ navigator.health.store({
 - startDate: {type: Date}, start date from which the new data starts
 - endDate: {type: Date}, end date to which he new data ends
 - dataType: {type: a String}, the data type
-- value: {type: a number or an Object}, the value, depending on the actual data type
+- value: {type: a number or an Object}, the value, depending on the actual data type. In the case of activity, the value must be set as the activity name. In iOS calories and distance can also be added.
+Example:
+```javascript
+dataType: 'activity',
+value: 'walking',
+calories: 20,
+distance: 15
+```
 - sourceName: {type: String}, the source that produced this data. In iOS this is ignored and set automatically to the name of your app.
-- sourceBundleId: {type: String}, the complete package of the source that produced this data. In Android, if not specified, it's assigned to the package of the App. In iOS this is ignored and set automatically to the bunde id of the app.
+- sourceBundleId: {type: String}, the complete package of the source that produced this data. In Android, if not specified, it's assigned to the package of the App. In iOS this is ignored and set automatically to the bundle id of the app.
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
@@ -294,8 +301,7 @@ Quirks of store()
 - In iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
 - In Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
 - In iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
-- In iOS storing the sleep activities is not supported at the moment.
-- Storing of nutrients is not supported at the moment.
+- Storing of nutrients is not supported at the moment in Android.
 
 ### delete()
 
@@ -345,8 +351,6 @@ Quirks of delete()
 short term:
 
 - add storing of nutrition
-- allow deletion of data points
-- add support for storing HKCategory samples in HealthKit
 - add more datatypes
  - body fat percentage
  - oxygen saturation

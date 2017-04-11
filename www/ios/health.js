@@ -406,11 +406,11 @@ Health.prototype.store = function (data, onSuccess, onError) {
       (data.value === 'sleep.deep') ||
       (data.value === 'sleep.rem')) {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
-      data.amount = 1; // amount or value??
+      data.value = 'HKCategoryValueSleepAnalysisAsleep';
       window.plugins.healthkit.saveSample(data, onSuccess, onError);
     } else if (data.value === 'sleep.awake') {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
-      data.amount = 0; // amount or value??
+      data.value = 'HKCategoryValueSleepAnalysisInBed';
       window.plugins.healthkit.saveSample(data, onSuccess, onError);
     } else {
       // some other kind of workout
