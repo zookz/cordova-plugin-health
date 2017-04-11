@@ -174,7 +174,6 @@ Quirks of requestAuthorization()
 ### isAuthorized()
 
 Check if the app has authorization to read/write a set of datatypes.
-This function is similar to requestAuthorization() and has similar quirks.
 
 ```
 navigator.health.isAuthorized(datatypes, successCallback, errorCallback)
@@ -186,7 +185,7 @@ navigator.health.isAuthorized(datatypes, successCallback, errorCallback)
 
 Quirks of isAuthorized()
 
-- In iOS, this funciton will only check authorization status for writeable data. Read-only data will always be considered as not authorized.
+- In iOS, this function will only check authorization status for writeable data. Read-only data will always be considered as not authorized.
 This is [an intended behaviour of HealthKit](https://developer.apple.com/reference/healthkit/hkhealthstore/1614154-authorizationstatus).
 
 ### query()
