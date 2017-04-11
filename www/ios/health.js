@@ -18,6 +18,7 @@ dataTypes['activity'] = 'HKWorkoutTypeIdentifier'; // and HKCategoryTypeIdentifi
 dataTypes['nutrition'] = 'HKCorrelationTypeIdentifierFood';
 dataTypes['nutrition.calories'] = 'HKQuantityTypeIdentifierDietaryEnergyConsumed';
 dataTypes['nutrition.fat.total'] = 'HKQuantityTypeIdentifierDietaryFatTotal';
+dataTypes['nutrition.fat.saturated'] = 'HKQuantityTypeIdentifierDietaryFatSaturated';
 dataTypes['nutrition.fat.polyunsaturated'] = 'HKQuantityTypeIdentifierDietaryFatPolyunsaturated';
 dataTypes['nutrition.fat.monounsaturated'] = 'HKQuantityTypeIdentifierDietaryFatMonounsaturated';
 dataTypes['nutrition.cholesterol'] = 'HKQuantityTypeIdentifierDietaryCholesterol';
@@ -75,7 +76,7 @@ var getHKDataTypes = function (dtArr) {
       if (dtArr[i] === 'nutrition') {
         // add all nutrition stuff
         for (var dataType in dataTypes) {
-          if (dataType.startsWith('nutrition')) HKDataTypes.push(dataTypes[dataType]);
+          if (dataType.startsWith('nutrition.')) HKDataTypes.push(dataTypes[dataType]);
         }
       } else if (dataTypes[dtArr[i]]) {
         HKDataTypes.push(dataTypes[dtArr[i]]);
@@ -289,9 +290,9 @@ Health.prototype.query = function (opts, onSuccess, onError) {
 
 Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   if ((opts.dataType !== 'steps') && (opts.dataType !== 'distance') &&
-    (opts.dataType !== 'calories') && (opts.dataType !== 'calories.active') &&
-    (opts.dataType !== 'calories.basal') && (opts.dataType !== 'activity') &&
-    (!opts.dataType.startsWith('nutrition'))) {
+  (opts.dataType !== 'calories') && (opts.dataType !== 'calories.active') &&
+  (opts.dataType !== 'calories.basal') && (opts.dataType !== 'activity') &&
+  (!opts.dataType.startsWith('nutrition'))) {
     // unsupported datatype
     onError('Datatype ' + opts.dataType + ' not supported in queryAggregated');
     return;
@@ -402,9 +403,9 @@ Health.prototype.store = function (data, onSuccess, onError) {
   } else if (data.dataType === 'activity') {
     // sleep activity, needs a different call than workout
     if ((data.value === 'sleep') ||
-      (data.value === 'sleep.light') ||
-      (data.value === 'sleep.deep') ||
-      (data.value === 'sleep.rem')) {
+    (data.value === 'sleep.light') ||
+    (data.value === 'sleep.deep') ||
+    (data.value === 'sleep.rem')) {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
       data.value = 'HKCategoryValueSleepAnalysisAsleep';
       window.plugins.healthkit.saveSample(data, onSuccess, onError);
@@ -425,6 +426,29 @@ Health.prototype.store = function (data, onSuccess, onError) {
       }
       window.plugins.healthkit.saveWorkout(data, onSuccess, onError);
     }
+  } else if (data.dataType === 'nutrition') {
+    data.correlationType = 'HKCorrelationTypeIdentifierFood';
+    if (!data.metadata) data.metadata = {};
+    if (data.value.item) data.metadata.HKFoodType = data.value.item;
+    if (data.value.meal_type) data.metadata.HKFoodMeal = data.value.meal_type;
+    data.samples = [];
+    for (var nutrientName in data.value.nutrients) {
+      var unit = units[nutrientName];
+      var sampletype = dataTypes[nutrientName];
+      if(! sampletype) {
+        onError('Cannot recognise nutrition item ' + nutrientName);
+        return;
+      }
+      var sample = {
+        'startDate': data.startDate,
+        'endDate': data.endDate,
+        'sampleType': sampletype,
+        'unit': unit,
+        'amount': convertToGrams(unit, data.value.nutrients[nutrientName])
+      };
+      data.samples.push(sample)
+    }
+    window.plugins.healthkit.saveCorrelation(data, onSuccess, onError);
   } else if (dataTypes[data.dataType]) {
     // generic case
     data.sampleType = dataTypes[data.dataType];
@@ -476,6 +500,14 @@ var convertFromGrams = function (toUnit, q) {
   if (toUnit === 'mcg') return q * 1000000;
   if (toUnit === 'mg') return q * 1000;
   if (toUnit === 'kg') return q / 1000;
+  return q;
+}
+
+// converts to grams from another unit
+var convertToGrams = function (fromUnit, q) {
+  if (fromUnit === 'mcg') return q / 1000000;
+  if (fromUnit === 'mg') return q / 1000;
+  if (fromUnit === 'kg') return q * 1000;
   return q;
 }
 
