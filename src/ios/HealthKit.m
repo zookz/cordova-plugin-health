@@ -58,7 +58,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 
 + (HKSampleType *)getHKSampleType:(NSString *)elem;
 
-- (HKQuantitySample *)loadHKQuantitySampleFromInputDictionary:(NSDictionary *)inputDictionary error:(NSError **)error;
+- (HKQuantitySample *)loadHKSampleFromInputDictionary:(NSDictionary *)inputDictionary error:(NSError **)error;
 
 - (HKCorrelation *)loadHKCorrelationFromInputDictionary:(NSDictionary *)inputDictionary error:(NSError **)error;
 
@@ -236,37 +236,51 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 }
 
 /**
- * Parse out a quantity sample from a dictionary and perform error checking
+ * Parse out a sample from a dictionary and perform error checking
  *
  * @param inputDictionary   *NSDictionary
  * @param error             **NSError
  * @return                  *HKQuantitySample
  */
-- (HKQuantitySample *)loadHKQuantitySampleFromInputDictionary:(NSDictionary *)inputDictionary error:(NSError **)error {
+- (HKSample *)loadHKSampleFromInputDictionary:(NSDictionary *)inputDictionary error:(NSError **)error {
     //Load quantity sample from args to command
 
-    if (![inputDictionary hasAllRequiredKeys:@[HKPluginKeyStartDate, HKPluginKeyEndDate, HKPluginKeySampleType, HKPluginKeyUnit, HKPluginKeyAmount] error:error]) {
+    if (![inputDictionary hasAllRequiredKeys:@[HKPluginKeyStartDate, HKPluginKeyEndDate, HKPluginKeySampleType] error:error]) {
         return nil;
     }
 
     NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:[inputDictionary[HKPluginKeyStartDate] longValue]];
     NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:[inputDictionary[HKPluginKeyEndDate] longValue]];
     NSString *sampleTypeString = inputDictionary[HKPluginKeySampleType];
-    NSString *unitString = inputDictionary[HKPluginKeyUnit];
 
     //Load optional metadata key
     NSDictionary *metadata = inputDictionary[HKPluginKeyMetadata];
     if (metadata == nil) {
-        metadata = @{};
+      metadata = @{};
     }
 
-    return [HealthKit getHKQuantitySampleWithStartDate:startDate
-                                               endDate:endDate
-                                      sampleTypeString:sampleTypeString
-                                        unitTypeString:unitString
-                                                 value:[inputDictionary[HKPluginKeyAmount] doubleValue]
-                                              metadata:metadata error:error];
-}
+    if ([inputDictionary objectForKey:HKPluginKeyUnit]) {
+        if (![inputDictionary hasAllRequiredKeys:@[HKPluginKeyUnit] error:error]) return nil;
+            NSString *unitString = [inputDictionary objectForKey:HKPluginKeyUnit];
+
+            return [HealthKit getHKQuantitySampleWithStartDate:startDate
+                                                   endDate:endDate
+                                          sampleTypeString:sampleTypeString
+                                            unitTypeString:unitString
+                                                     value:[inputDictionary[HKPluginKeyAmount] doubleValue]
+                                                  metadata:metadata error:error];
+    } else {
+            if (![inputDictionary hasAllRequiredKeys:@[HKPluginKeyValue] error:error]) return nil;
+            NSString *categoryString = [inputDictionary objectForKey:HKPluginKeyValue];
+
+            return [self getHKCategorySampleWithStartDate:startDate
+                                                       endDate:endDate
+                                              sampleTypeString:sampleTypeString
+                                                categoryString:categoryString
+                                                      metadata:metadata
+                                                         error:error];
+        }
+  }
 
 /**
  * Parse out a correlation from a dictionary and perform error checking
@@ -289,7 +303,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 
     NSMutableSet *objects = [NSMutableSet set];
     for (NSDictionary *objectDictionary in objectDictionaries) {
-        HKQuantitySample *sample = [self loadHKQuantitySampleFromInputDictionary:objectDictionary error:error];
+        HKSample *sample = [self loadHKSampleFromInputDictionary:objectDictionary error:error];
         if (sample == nil) {
             return nil;
         }
@@ -364,6 +378,37 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     }
 
     return [HKQuantitySample quantitySampleWithType:type quantity:quantity startDate:startDate endDate:endDate metadata:metadata];
+}
+
+// Helper to handle the functionality with HealthKit to get a category sample
+- (HKCategorySample*) getHKCategorySampleWithStartDate:(NSDate*) startDate endDate:(NSDate*) endDate sampleTypeString:(NSString*) sampleTypeString categoryString:(NSString*) categoryString metadata:(NSDictionary*) metadata error:(NSError**) error {
+    HKCategoryType *type = [HKCategoryType categoryTypeForIdentifier:sampleTypeString];
+    if (type==nil) {
+      *error = [NSError errorWithDomain:HKPluginError code:0 userInfo:@{NSLocalizedDescriptionKey:@"quantity type string was invalid"}];
+      return nil;
+    }
+    NSNumber* value = [self getCategoryValueByName:categoryString type:type];
+    if (value == nil) {
+      *error = [NSError errorWithDomain:HKPluginError code:0 userInfo:@{NSLocalizedDescriptionKey:[NSString stringWithFormat:@"%@,%@,%@",@"category value was not compatible with category",type.identifier,categoryString]}];
+      return nil;
+    }
+
+    return [HKCategorySample categorySampleWithType:type value:[value integerValue] startDate:startDate endDate:endDate];
+}
+
+- (NSNumber*) getCategoryValueByName:(NSString *) categoryValue type:(HKCategoryType*) type {
+    NSDictionary * map = @{
+      @"HKCategoryTypeIdentifierSleepAnalysis":@{
+        @"HKCategoryValueSleepAnalysisInBed":@(HKCategoryValueSleepAnalysisInBed),
+        @"HKCategoryValueSleepAnalysisAsleep":@(HKCategoryValueSleepAnalysisAsleep)
+      }
+    };
+
+    NSDictionary * valueMap = map[type.identifier];
+    if (!valueMap) {
+      return HKCategoryValueNotApplicable;
+    }
+    return valueMap[categoryValue];
 }
 
 /**
@@ -1647,16 +1692,16 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 }
 
 /**
- * Save quantity sample data
+ * Save sample data
  *
  * @param command *CDVInvokedUrlCommand
  */
-- (void)saveQuantitySample:(CDVInvokedUrlCommand *)command {
+- (void)saveSample:(CDVInvokedUrlCommand *)command {
     NSDictionary *args = command.arguments[0];
 
     //Use helper method to create quantity sample
     NSError *error = nil;
-    HKQuantitySample *sample = [self loadHKQuantitySampleFromInputDictionary:args error:&error];
+    HKSample *sample = [self loadHKSampleFromInputDictionary:args error:&error];
 
     //If error in creation, return plugin result
     if (error) {

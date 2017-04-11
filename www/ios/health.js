@@ -407,11 +407,11 @@ Health.prototype.store = function (data, onSuccess, onError) {
       (data.value === 'sleep.rem')) {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
       data.amount = 1; // amount or value??
-      window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
+      window.plugins.healthkit.saveSample(data, onSuccess, onError);
     } else if (data.value === 'sleep.awake') {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
       data.amount = 0; // amount or value??
-      window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
+      window.plugins.healthkit.saveSample(data, onSuccess, onError);
     } else {
       // some other kind of workout
       data.activityType = data.value;
@@ -435,7 +435,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
     if (units[data.dataType]) {
       data.unit = units[data.dataType];
     }
-    window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
+    window.plugins.healthkit.saveSample(data, onSuccess, onError);
   } else {
     onError('unknown data type ' + data.dataType);
   }

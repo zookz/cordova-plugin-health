@@ -115,7 +115,7 @@ define('querySampleTypeAggregated', {required: 'sampleType'}, hasValidDates);
 define('deleteSamples', {required: 'sampleType'}, hasValidDates);
 
 define('queryCorrelationType', {required: 'correlationType'}, hasValidDates);
-define('saveQuantitySample', {required: 'sampleType'}, hasValidDates);
+define('saveSample', {required: 'sampleType'}, hasValidDates);
 
 define('saveCorrelation', {required: ['correlationType', 'samples']}, function(options) {
   hasValidDates(options);

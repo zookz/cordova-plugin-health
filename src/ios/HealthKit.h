@@ -123,11 +123,11 @@
 - (void) querySampleTypeAggregated:(CDVInvokedUrlCommand*)command;
 
 /**
- * Save quantity sample data
+ * Save sample data
  *
  * @param command *CDVInvokedUrlCommand
  */
-- (void) saveQuantitySample:(CDVInvokedUrlCommand*)command;
+- (void) saveSample:(CDVInvokedUrlCommand*)command;
 
 /**
  * Save correlation data
