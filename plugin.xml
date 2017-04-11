@@ -47,11 +47,13 @@
     </config-file>
 
 	<!-- Usage description of Health, mandatory since iOS 10 -->
+    <preference name="HEALTH_READ_PERMISSION" default=" " />
+    <preference name="HEALTH_WRITE_PERMISSION" default=" " />
     <config-file target="*-Info.plist" parent="NSHealthShareUsageDescription">
-      <string>This app needs to access read your health data</string>
+      <string>$HEALTH_READ_PERMISSION</string>
     </config-file>
     <config-file target="*-Info.plist" parent="NSHealthUpdateUsageDescription">
-      <string>This app needs to access update your health data</string>
+      <string>$HEALTH_WRITE_PERMISSION</string>
     </config-file>
 
     <header-file src="src/ios/WorkoutActivityConversion.h"/>

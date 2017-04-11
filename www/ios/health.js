@@ -68,45 +68,88 @@ Health.prototype.isAvailable = function (success, error) {
   window.plugins.healthkit.available(success, error);
 };
 
-var prepareDatatype4Auth = function (dts, success, error) {
-  var HKdatatypes = [];
-  for (var i = 0; i < dts.length; i++) {
-    if ((dts[i] !== 'gender') && (dts[i] !== 'date_of_birth')) { // ignore gender and DOB
-      if(dts[i] === 'nutrition') {
+var getHKDataTypes = function (dtArr) {
+  var HKDataTypes = [];
+  for (var i = 0; i < dtArr.length; i++) {
+    if ((dtArr[i] !== 'gender') && (dtArr[i] !== 'date_of_birth')) { // ignore gender and DOB
+      if (dtArr[i] === 'nutrition') {
         // add all nutrition stuff
-        for(var datatype in dataTypes){
-          if (datatype.startsWith('nutrition')) HKdatatypes.push(dataTypes[datatype]);
+        for (var dataType in dataTypes) {
+          if (dataType.startsWith('nutrition')) HKDataTypes.push(dataTypes[dataType]);
         }
-      } else if (dataTypes[dts[i]]) {
-        HKdatatypes.push(dataTypes[dts[i]]);
-        if (dts[i] === 'distance') HKdatatypes.push('HKQuantityTypeIdentifierDistanceCycling');
-        if (dts[i] === 'activity') HKdatatypes.push('HKCategoryTypeIdentifierSleepAnalysis');
-        if (dts[i] === 'calories') HKdatatypes.push('HKQuantityTypeIdentifierBasalEnergyBurned');
+      } else if (dataTypes[dtArr[i]]) {
+        HKDataTypes.push(dataTypes[dtArr[i]]);
+        if (dtArr[i] === 'distance') HKDataTypes.push('HKQuantityTypeIdentifierDistanceCycling');
+        if (dtArr[i] === 'activity') HKDataTypes.push('HKCategoryTypeIdentifierSleepAnalysis');
+        if (dtArr[i] === 'calories') HKDataTypes.push('HKQuantityTypeIdentifierBasalEnergyBurned');
       } else {
-        error('unknown data type ' + dts[i]);
-        return;
+        // return the not found dataType instead of array
+        return dtArr[i];
       }
     }
   }
-  success(HKdatatypes);
-}
+  return HKDataTypes;
+};
+
+var getReadWriteTypes = function (dts, success, error) {
+  var readTypes = [];
+  var writeTypes = [];
+  for (var i = 0; i < dts.length; i++) {
+    var HKDataTypes = [];
+    if (typeof dts[i] === 'string') {
+      HKDataTypes = getHKDataTypes([dts[i]]);
+      if (Array.isArray(HKDataTypes)) {
+        readTypes = readTypes.concat(HKDataTypes);
+        writeTypes = writeTypes.concat(HKDataTypes);
+      } else {
+        error('unknown data type - ' + HKDataTypes);
+        return;
+      }
+    } else {
+      if (dts[i]['read']) {
+        HKDataTypes = getHKDataTypes(dts[i]['read']);
+        if (Array.isArray(HKDataTypes)) {
+          readTypes = readTypes.concat(HKDataTypes);
+        } else {
+          error('unknown read data type - ' + HKDataTypes);
+          return;
+        }
+      }
+      if (dts[i]['write']) {
+        HKDataTypes = getHKDataTypes(dts[i]['write']);
+        if (Array.isArray(HKDataTypes)) {
+          writeTypes = writeTypes.concat(HKDataTypes);
+        } else {
+          error('unknown write data type - ' + HKDataTypes);
+          return;
+        }
+      }
+    }
+  }
+  success(dedupe(readTypes), dedupe(writeTypes));
+};
+
+var dedupe = function (arr) {
+  return arr.filter(function (el, i, arr) {
+    return arr.indexOf(el) === i;
+  });
+};
 
 Health.prototype.requestAuthorization = function (dts, onSuccess, onError) {
-  prepareDatatype4Auth(dts, function (HKdatatypes) {
-    if (HKdatatypes.length) {
-      window.plugins.healthkit.requestAuthorization({
-        'readTypes': HKdatatypes,
-        'writeTypes': HKdatatypes
-      }, onSuccess, onError);
-    } else onSuccess();
+  getReadWriteTypes(dts, function (readTypes, writeTypes) {
+    window.plugins.healthkit.requestAuthorization({
+      'readTypes': readTypes,
+      'writeTypes': writeTypes
+    }, onSuccess, onError);
   }, onError);
 };
 
-Health.prototype.isAuthorized = function(dts, onSuccess, onError) {
-  prepareDatatype4Auth(dts, function (HKdatatypes) {
+Health.prototype.isAuthorized = function (dts, onSuccess, onError) {
+  getReadWriteTypes(dts, function (readTypes, writeTypes) {
+    var HKDataTypes = dedupe(readTypes.concat(writeTypes));
     var check = function () {
-      if (HKdatatypes.length > 0) {
-        var dt = HKdatatypes.shift();
+      if (HKDataTypes.length > 0) {
+        var dt = HKDataTypes.shift();
         window.plugins.healthkit.checkAuthStatus({
           type: dt
         }, function (auth) {
@@ -114,10 +157,10 @@ Health.prototype.isAuthorized = function(dts, onSuccess, onError) {
           else onSuccess(false);
         }, onError);
       } else onSuccess(true);
-    }
+    };
     check();
   }, onError);
-}
+};
 
 Health.prototype.query = function (opts, onSuccess, onError) {
   var startD = opts.startDate;
@@ -144,7 +187,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       res[0] = {
         startDate: opts.startDate,
         endDate: opts.endDate,
-        value: { day: date.getDate(), month: date.getMonth() + 1, year: date.getFullYear() },
+        value: {day: date.getDate(), month: date.getMonth() + 1, year: date.getFullYear()},
         sourceName: 'Health',
         sourceBundleId: 'com.apple.Health'
       };
@@ -194,15 +237,15 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       correlationType: 'HKCorrelationTypeIdentifierFood',
       units: ['g', 'ml', 'kcal']
     }, function (data) {
-      for(var i=0; i<data.length; i++) {
+      for (var i = 0; i < data.length; i++) {
         result.push(prepareNutrition(data[i]));
       }
       onSuccess(result);
-    }, onError );
-  } else if (dataTypes[ opts.dataType ]) {
-    opts.sampleType = dataTypes[ opts.dataType ];
-    if (units[ opts.dataType ]) {
-      opts.unit = units[ opts.dataType ];
+    }, onError);
+  } else if (dataTypes[opts.dataType]) {
+    opts.sampleType = dataTypes[opts.dataType];
+    if (units[opts.dataType]) {
+      opts.unit = units[opts.dataType];
     }
     window.plugins.healthkit.querySampleType(opts, function (data) {
       var result = [];
@@ -246,17 +289,17 @@ Health.prototype.query = function (opts, onSuccess, onError) {
 
 Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   if ((opts.dataType !== 'steps') && (opts.dataType !== 'distance') &&
-  (opts.dataType !== 'calories') && (opts.dataType !== 'calories.active') &&
-  (opts.dataType !== 'calories.basal') && (opts.dataType !== 'activity') &&
-  (! opts.dataType.startsWith('nutrition'))) {
+    (opts.dataType !== 'calories') && (opts.dataType !== 'calories.active') &&
+    (opts.dataType !== 'calories.basal') && (opts.dataType !== 'activity') &&
+    (!opts.dataType.startsWith('nutrition'))) {
     // unsupported datatype
     onError('Datatype ' + opts.dataType + ' not supported in queryAggregated');
     return;
   }
   var startD = opts.startDate;
   var endD = opts.endDate;
-  opts.sampleType = dataTypes[ opts.dataType ];
-  if (units[ opts.dataType ]) opts.unit = units[ opts.dataType ];
+  opts.sampleType = dataTypes[opts.dataType];
+  if (units[opts.dataType]) opts.unit = units[opts.dataType];
   if (opts.bucket) {
     // ----- with buckets
     opts.aggregation = opts.bucket;
@@ -303,7 +346,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
         // manually aggregate by activity
         onSuccess(aggregateIntoResult(data, 'activitySummary', mergeActivitySamples));
       }, onError);
-    } else if(opts.dataType === 'nutrition') {
+    } else if (opts.dataType === 'nutrition') {
       // manually aggregate by nutrition
       navigator.health.query(opts, function (data) {
         onSuccess(aggregateIntoResult(data, 'nutrition', mergeNutritionSamples));
@@ -359,9 +402,9 @@ Health.prototype.store = function (data, onSuccess, onError) {
   } else if (data.dataType === 'activity') {
     // sleep activity, needs a different call than workout
     if ((data.value === 'sleep') ||
-    (data.value === 'sleep.light') ||
-    (data.value === 'sleep.deep') ||
-    (data.value === 'sleep.rem')) {
+      (data.value === 'sleep.light') ||
+      (data.value === 'sleep.deep') ||
+      (data.value === 'sleep.rem')) {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
       data.amount = 1; // amount or value??
       window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
@@ -382,15 +425,15 @@ Health.prototype.store = function (data, onSuccess, onError) {
       }
       window.plugins.healthkit.saveWorkout(data, onSuccess, onError);
     }
-  } else if (dataTypes[ data.dataType ]) {
+  } else if (dataTypes[data.dataType]) {
     // generic case
-    data.sampleType = dataTypes[ data.dataType ];
+    data.sampleType = dataTypes[data.dataType];
     if ((data.dataType === 'distance') && data.cycling) {
       data.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
     }
     data.amount = data.value;
-    if (units[ data.dataType ]) {
-      data.unit = units[ data.dataType ];
+    if (units[data.dataType]) {
+      data.unit = units[data.dataType];
     }
     window.plugins.healthkit.saveQuantitySample(data, onSuccess, onError);
   } else {
@@ -405,13 +448,13 @@ Health.prototype.delete = function (data, onSuccess, onError) {
   } else if (data.dataType === 'date_of_birth') {
     onError('Date of birth is not deletable');
   } else if ((data.dataType === 'activity') && (data.dataType.lastIndexOf('sleep', 0) === 0)) {
-      data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
-  } else if(data.dataType === 'activity') {
+    data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
+  } else if (data.dataType === 'activity') {
     data.sampleType = 'workoutType';
   } else if ((data.dataType === 'distance') && data.cycling) {
     data.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
-  } else if (dataTypes[ data.dataType ]) {
-    data.sampleType = dataTypes[ data.dataType ];
+  } else if (dataTypes[data.dataType]) {
+    data.sampleType = dataTypes[data.dataType];
   } else {
     onError('unknown data type ' + data.dataType);
     return;
@@ -429,10 +472,10 @@ cordova.addConstructor(function () {
 
 // converts from grams into another unit
 // if the unit is not specified or is not weight, then the original quantity is returned
-var convertFromGrams = function(toUnit, q) {
-  if(toUnit == 'mcg') return q * 1000000;
-  if(toUnit == 'mg') return q * 1000;
-  if(toUnit == 'kg') return q / 1000;
+var convertFromGrams = function (toUnit, q) {
+  if (toUnit === 'mcg') return q * 1000000;
+  if (toUnit === 'mg') return q * 1000;
+  if (toUnit === 'kg') return q / 1000;
   return q;
 }
 
@@ -462,7 +505,7 @@ var prepareNutrition = function (data) {
   if (data.metadata && data.metadata.HKFoodType) res.value.item = data.metadata.HKFoodType;
   if (data.metadata && data.metadata.HKFoodMeal) res.value.meal_type = data.metadata.HKFoodMeal;
   res.value.nutrients = {};
-  for (var j=0; j<data.samples.length; j++) {
+  for (var j = 0; j < data.samples.length; j++) {
     var sample = data.samples[j];
     for (var dataname in dataTypes) {
       if (dataTypes[dataname] === sample.sampleType) {
@@ -477,7 +520,7 @@ var prepareNutrition = function (data) {
 // merges activity (workout) samples
 // fromObj is formatted as returned by query
 var mergeActivitySamples = function (fromObj, intoObj) {
-  if(!intoObj.value) intoObj.value = {};
+  if (!intoObj.value) intoObj.value = {};
   var dur = (fromObj.endDate - fromObj.startDate);
   var dist = fromObj.distance;
   var cals = fromObj.calories;
@@ -496,7 +539,7 @@ var mergeActivitySamples = function (fromObj, intoObj) {
 
 // merges nutrition samples
 var mergeNutritionSamples = function (fromObj, intoObj) {
-  if(!intoObj.value) intoObj.value = {};
+  if (!intoObj.value) intoObj.value = {};
   for (var dataname in fromObj.value.nutrients) {
     if (!intoObj.value[dataname]) intoObj.value[dataname] = fromObj.value.nutrients[dataname];
     else intoObj.value[dataname] += fromObj.value.nutrients[dataname];
@@ -518,7 +561,7 @@ var aggregateIntoResult = function (data, unit, merge) {
     merge(data[i], res);
   }
   return res;
-}
+};
 
 // takes the result of a query (data) and transforms them, also merges with (unprocessed) results of another query
 var prepareResults = function (data, unit, mergeWith) {
