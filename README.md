@@ -184,6 +184,10 @@ navigator.health.isAuthorized(datatypes, successCallback, errorCallback)
 - successCallback: {type: function(authorized)}, if the argument is true, the app is authorized
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
+Quirks of isAuthorized()
+
+- In iOS, this funciton will only check authorization status for writeable data. Read-only data will always be considered as not authorized.
+This is [an intended behaviour of HealthKit](https://developer.apple.com/reference/healthkit/hkhealthstore/1614154-authorizationstatus).
 
 ### query()
 
