@@ -54,25 +54,31 @@ import java.util.concurrent.TimeUnit;
  * MIT licensed.
  */
 public class HealthPlugin extends CordovaPlugin {
-    //logger tag
+    // logger tag
     private static final String TAG = "cordova-plugin-health";
 
-    //calling activity
+    // calling activity
     private CordovaInterface cordova;
 
-    //actual Google API client
+    // actual Google API client
     private GoogleApiClient mClient;
 
-    private static final int REQUEST_OAUTH = 1;
+    // instance of the call back when requesting or checking authorisation
     private CallbackContext authReqCallbackCtx;
+
+    // if true, when checking authorisation, tries to get it from user
     private boolean authAutoresolve = false;
+
+    // list of OS level dynamic permissions needed (if any)
     private static final LinkedList<String> dynPerms = new LinkedList<String>();
+
+    private static final int REQUEST_OAUTH = 1;
     private static final int REQUEST_DYN_PERMS = 2;
     private static final int READ_PERMS = 1;
     private static final int READ_WRITE_PERMS = 2;
 
-    //Scope for read/write access to activity-related data types in Google Fit.
-    //These include activity type, calories consumed and expended, step counts, and others.
+    // Scope for read/write access to activity-related data types in Google Fit.
+    // These include activity type, calories consumed and expended, step counts, and others.
     public static Map<String, DataType> activitydatatypes = new HashMap<String, DataType>();
     static {
         activitydatatypes.put("steps", DataType.TYPE_STEP_COUNT_DELTA);
@@ -81,7 +87,7 @@ public class HealthPlugin extends CordovaPlugin {
         activitydatatypes.put("activity", DataType.TYPE_ACTIVITY_SEGMENT);
     }
 
-    //Scope for read/write access to biometric data types in Google Fit. These include heart rate, height, and weight.
+    // Scope for read/write access to biometric data types in Google Fit. These include heart rate, height, and weight.
     public static Map<String, DataType> bodydatatypes = new HashMap<String, DataType>();
     static {
         bodydatatypes.put("height", DataType.TYPE_HEIGHT);
@@ -90,12 +96,13 @@ public class HealthPlugin extends CordovaPlugin {
         bodydatatypes.put("fat_percentage", DataType.TYPE_BODY_FAT_PERCENTAGE);
     }
 
-    //Scope for read/write access to location-related data types in Google Fit. These include location, distance, and speed.
+    // Scope for read/write access to location-related data types in Google Fit. These include location, distance, and speed.
     public static Map<String, DataType> locationdatatypes = new HashMap<String, DataType>();
     static {
         locationdatatypes.put("distance", DataType.TYPE_DISTANCE_DELTA);
     }
 
+    // Helper class used for storing nutrients information (name and unit of measurement)
     private static class NutrientFieldInfo {
         public String field;
         public String unit;
@@ -106,7 +113,7 @@ public class HealthPlugin extends CordovaPlugin {
         }
     }
 
-    //Lookup for nutrition fields and units
+    // Lookup for nutrition fields and units
     public static Map<String, NutrientFieldInfo> nutrientFields = new HashMap<String, NutrientFieldInfo>();
 
     static {
@@ -130,7 +137,7 @@ public class HealthPlugin extends CordovaPlugin {
         nutrientFields.put("nutrition.iron", new NutrientFieldInfo(Field.NUTRIENT_IRON, "mg"));
     }
 
-    //Scope for read/write access to nutrition data types in Google Fit.
+    // Scope for read/write access to nutrition data types in Google Fit.
     public static Map<String, DataType> nutritiondatatypes = new HashMap<String, DataType>();
 
     static {
@@ -147,13 +154,15 @@ public class HealthPlugin extends CordovaPlugin {
     public HealthPlugin() {
     }
 
+    // general initalisation
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         this.cordova = cordova;
     }
 
-
+    // called once authorisation is completed
+    // creates custom data types
     private void authReqSuccess() {
         //Create custom data types
         cordova.getThreadPool().execute(new Runnable() {
@@ -197,6 +206,8 @@ public class HealthPlugin extends CordovaPlugin {
         });
     }
 
+    // called once custom data types have been created
+    // asks for dynamic permissions on Android 6 and more
     private void requestDynamicPermissions() {
         if (dynPerms.isEmpty()) {
             // nothing to be done
@@ -214,13 +225,16 @@ public class HealthPlugin extends CordovaPlugin {
             } else {
                 if (authAutoresolve) {
                     cordova.requestPermissions(this, REQUEST_DYN_PERMS, perms.toArray(new String[perms.size()]));
+                    // the request results will be taken care of by onRequestPermissionResult()
                 } else {
+                    // if should not autoresolve, and there are dynamic permissions needed, send a fail
                     authReqCallbackCtx.sendPluginResult(new PluginResult(PluginResult.Status.OK, false));
                 }
             }
         }
     }
 
+    // called when the dynamic permissions are asked
     @Override
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
         if (requestCode == REQUEST_DYN_PERMS) {
@@ -234,11 +248,12 @@ public class HealthPlugin extends CordovaPlugin {
                     return;
                 }
             }
-            //all accepted!
+            // all accepted!
             authReqCallbackCtx.success();
         }
     }
 
+    // called when access to Google API is answered
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == REQUEST_OAUTH) {
@@ -247,6 +262,7 @@ public class HealthPlugin extends CordovaPlugin {
                 if (!mClient.isConnected() && !mClient.isConnecting()) {
                     Log.d(TAG, "Re-trying connection with Fit");
                     mClient.connect();
+                    // the connection success / failure will be taken care of by ConnectionCallbacks in checkAuthorization()
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // The user cancelled the login dialog before selecting any action.
@@ -302,7 +318,7 @@ public class HealthPlugin extends CordovaPlugin {
                 @Override
                 public void run() {
                     try {
-                        checkAuthorization(args, callbackContext, false);
+                        checkAuthorization(args, callbackContext, false); // without autoresolve
                     } catch (Exception ex) {
                         callbackContext.error(ex.getMessage());
                     }
@@ -362,6 +378,7 @@ public class HealthPlugin extends CordovaPlugin {
         return false;
     }
 
+    // detects if a) Google APIs are available, b) Google Fit is actually installed
     private void isAvailable(final CallbackContext callbackContext) {
         // first check that the Google APIs are available
         GoogleApiAvailability gapi = GoogleApiAvailability.getInstance();
@@ -384,6 +401,7 @@ public class HealthPlugin extends CordovaPlugin {
         callbackContext.sendPluginResult(result);
     }
 
+    // prompts to install GooglePlayServices if not available then Google Fit if not available
     private void promptInstall(final CallbackContext callbackContext) {
         GoogleApiAvailability gapi = GoogleApiAvailability.getInstance();
         int apiresult = gapi.isGooglePlayServicesAvailable(this.cordova.getActivity());
@@ -398,8 +416,8 @@ public class HealthPlugin extends CordovaPlugin {
             try {
                 pm.getPackageInfo("com.google.android.apps.fitness", PackageManager.GET_ACTIVITIES);
             } catch (PackageManager.NameNotFoundException e) {
-                //show popup for downloading app
-                //code from http://stackoverflow.com/questions/11753000/how-to-open-the-google-play-store-directly-from-my-android-application
+                // show popup for downloading app
+                // code from http://stackoverflow.com/questions/11753000/how-to-open-the-google-play-store-directly-from-my-android-application
                 try {
                     cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.fitness")));
                 } catch (android.content.ActivityNotFoundException anfe) {
@@ -410,12 +428,15 @@ public class HealthPlugin extends CordovaPlugin {
         callbackContext.success();
     }
 
+    // check if the app is authorised to use Google fitness APIs
+    // if autoresolve is set, it will try to get authorisation from the user
+    // also includes some OS dynamic permissions if needed (eg location)
     private void checkAuthorization(final JSONArray args, final CallbackContext callbackContext, final boolean autoresolve) throws JSONException {
         this.cordova.setActivityResultCallback(this);
         authReqCallbackCtx = callbackContext;
         authAutoresolve = autoresolve;
 
-        //reset scopes
+        // reset scopes
         int bodyscope = 0;
         int activityscope = 0;
         int locationscope = 0;
@@ -479,7 +500,7 @@ public class HealthPlugin extends CordovaPlugin {
         builder.addApi(Fitness.HISTORY_API);
         builder.addApi(Fitness.CONFIG_API);
         builder.addApi(Fitness.SESSIONS_API);
-        //scopes: https://developers.google.com/android/reference/com/google/android/gms/common/Scopes.html
+        // scopes: https://developers.google.com/android/reference/com/google/android/gms/common/Scopes.html
         if (bodyscope == READ_PERMS) {
             builder.addScope(new Scope(Scopes.FITNESS_BODY_READ));
         } else if (bodyscope == READ_WRITE_PERMS) {
@@ -558,7 +579,7 @@ public class HealthPlugin extends CordovaPlugin {
         mClient.connect();
     }
 
-
+    // helper function, connects to fitness APIs assuming that authorisation was granted
     private boolean lightConnect() {
         this.cordova.setActivityResultCallback(this);
 
@@ -577,6 +598,7 @@ public class HealthPlugin extends CordovaPlugin {
         }
     }
 
+    // queries for datapoints
     private void query(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (!args.getJSONObject(0).has("startDate")) {
             callbackContext.error("Missing argument startDate");
@@ -756,6 +778,7 @@ public class HealthPlugin extends CordovaPlugin {
         }
     }
 
+    // utility function, gets nutrients from a Value and merges the value inside a json object
     private JSONObject getNutrients(Value nutrientsMap, JSONObject mergewith) throws JSONException {
         JSONObject nutrients;
         if (mergewith != null) {
@@ -785,6 +808,7 @@ public class HealthPlugin extends CordovaPlugin {
         return nutrients;
     }
 
+    // utility function, merges a nutrient in an json object
     private void mergeNutrient(String f, Value nutrientsMap, JSONObject nutrients) throws JSONException {
         if (nutrientsMap.getKeyValue(f) != null) {
             String n = null;
@@ -804,6 +828,7 @@ public class HealthPlugin extends CordovaPlugin {
         }
     }
 
+    // queries and aggregates data
     private void queryAggregated(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (!args.getJSONObject(0).has("startDate")) {
             callbackContext.error("Missing argument startDate");
@@ -1149,6 +1174,7 @@ public class HealthPlugin extends CordovaPlugin {
         }
     }
 
+    // utility function that gets the basal metabolic rate averaged over a week
     private float getBasalAVG(long _et) throws Exception {
         float basalAVG = 0;
         Calendar cal = java.util.Calendar.getInstance();
@@ -1184,7 +1210,7 @@ public class HealthPlugin extends CordovaPlugin {
         } else throw new Exception(dataReadResult.getStatus().getStatusMessage());
     }
 
-
+    // stores a data point
     private void store(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (!args.getJSONObject(0).has("startDate")) {
             callbackContext.error("Missing argument startDate");
@@ -1314,6 +1340,7 @@ public class HealthPlugin extends CordovaPlugin {
         }
     }
 
+    // deletes data points in a given time window
     private void delete(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (!args.getJSONObject(0).has("startDate")) {
             callbackContext.error("Missing argument startDate");

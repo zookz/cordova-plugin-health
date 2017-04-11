@@ -23,6 +23,7 @@ cordova plugin add cordova-plugin-health --variable HEALTH_READ_PERMISSION='App 
 ```
 
 this will install the latest release.
+`HEALTH_READ_PERMISSION` and `HEALTH_WRITE_PERMISSION` are shown when the app tries to grant access to data in HealthKit.
 
 ## Requirements for iOS apps
 
@@ -166,7 +167,7 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 
 Quirks of requestAuthorization()
 
-- In Android, it will try to get authorization from the Google Fit APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
+- In Android, it will try to get authorization from the Google fitness APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
 - In Android, be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the authorization will ensure that the app is connected again.
 - In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
 
