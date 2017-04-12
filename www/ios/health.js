@@ -444,7 +444,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
         'endDate': data.endDate,
         'sampleType': sampletype,
         'unit': unit,
-        'amount': convertToGrams(unit, data.value.nutrients[nutrientName])
+        'amount': data.value.nutrients[nutrientName]
       };
       data.samples.push(sample)
     }
