@@ -945,12 +945,7 @@ public class HealthPlugin extends CordovaPlugin {
         } else if (datatype.equalsIgnoreCase("calories.basal")) {
             builder.aggregate(DataType.TYPE_BASAL_METABOLIC_RATE, DataType.AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY);
         } else if (datatype.equalsIgnoreCase("activity")) {
-            if (hasbucket) {
-                builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
-            } else {
-                builder.aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED);
-                //here we could also get the distance: builder.aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA);
-            }
+            builder.aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY);
         } else if (datatype.equalsIgnoreCase("nutrition.water")) {
             builder.aggregate(DataType.TYPE_HYDRATION, DataType.AGGREGATE_HYDRATION);
         } else if (nutritiondatatypes.get(datatype) != null) {
@@ -1028,27 +1023,6 @@ public class HealthPlugin extends CordovaPlugin {
             }
 
             for (Bucket bucket : dataReadResult.getBuckets()) {
-
-                // special case of the activity without time buckets
-                // here the buckets contain activities and the datapoints contain calories
-                if (datatype.equalsIgnoreCase("activity") && !hasbucket) {
-                    String activity = bucket.getActivity();
-                    float calories = 0;
-                    int duration = (int) (bucket.getEndTime(TimeUnit.MILLISECONDS) - bucket.getStartTime(TimeUnit.MILLISECONDS));
-                    for (DataSet dataset : bucket.getDataSets()) {
-                        for (DataPoint datapoint : dataset.getDataPoints()) {
-                            calories += datapoint.getValue(Field.FIELD_CALORIES).asFloat();
-                        }
-                    }
-                    JSONObject actobj = retBucket.getJSONObject("value");
-                    JSONObject summary = new JSONObject();
-                    summary.put("duration", duration);
-                    summary.put("calories", calories);
-                    actobj.put(activity, summary);
-                    retBucket.put("value", actobj);
-                    // jump to the next iteration
-                    continue;
-                }
 
                 if (hasbucket) {
                     if (customBuckets) {
