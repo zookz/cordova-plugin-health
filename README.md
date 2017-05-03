@@ -284,14 +284,7 @@ navigator.health.store({
 - startDate: {type: Date}, start date from which the new data starts
 - endDate: {type: Date}, end date to which he new data ends
 - dataType: {type: a String}, the data type
-- value: {type: a number or an Object}, the value, depending on the actual data type. In the case of activity, the value must be set as the activity name. In iOS calories and distance can also be added.
-Example:
-```javascript
-dataType: 'activity',
-value: 'walking',
-calories: 20,
-distance: 15
-```
+- value: {type: a number or an Object}, the value, depending on the actual data type. In the case of activity, the value must be set as the activity name.
 - sourceName: {type: String}, the source that produced this data. In iOS this is ignored and set automatically to the name of your app.
 - sourceBundleId: {type: String}, the complete package of the source that produced this data. In Android, if not specified, it's assigned to the package of the App. In iOS this is ignored and set automatically to the bundle id of the app.
 - successCallback: {type: function}, called if all OK
@@ -305,6 +298,7 @@ Quirks of store()
 - In Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
 - In iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
 - Storing of nutrients is not supported at the moment in Android.
+- In iOS, when storing an activity, you can also specify calories (active, in kcal) and distance (walked or run, in meters). For example: `dataType: 'activity', value: 'walking', calories: 20, distance: 520`. Be aware, though, that you need permission to write calories and distance first, or the call will fail.
 
 ### delete()
 
