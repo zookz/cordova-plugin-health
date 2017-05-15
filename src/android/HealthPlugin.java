@@ -44,6 +44,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1280,6 +1281,44 @@ public class HealthPlugin extends CordovaPlugin {
         } else if (dt.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
             String value = args.getJSONObject(0).getString("value");
             datapoint.getValue(Field.FIELD_ACTIVITY).setActivity(value);
+        } else if (dt.equals(DataType.TYPE_NUTRITION)) {
+            if(datatype.startsWith("nutrition.")){
+                //it's a single nutrient
+                NutrientFieldInfo nuf = nutrientFields.get(datatype);
+                float nuv = (float) args.getJSONObject(0).getDouble("value");
+                datapoint.getValue(Field.FIELD_NUTRIENTS).setKeyValue(nuf.field, nuv);
+            } else {
+                // it's a nutrition object
+                JSONObject nutrobj = args.getJSONObject(0).getJSONObject("value");
+                String mealtype = nutrobj.getString("meal_type");
+                if(mealtype!=null && !mealtype.isEmpty()) {
+                    if(mealtype.equalsIgnoreCase("breakfast"))
+                        datapoint.getValue(Field.FIELD_MEAL_TYPE).setInt(Field.MEAL_TYPE_BREAKFAST);
+                    else if(mealtype.equalsIgnoreCase("lunch"))
+                        datapoint.getValue(Field.FIELD_MEAL_TYPE).setInt(Field.MEAL_TYPE_LUNCH);
+                    else if(mealtype.equalsIgnoreCase("snack"))
+                        datapoint.getValue(Field.FIELD_MEAL_TYPE).setInt(Field.MEAL_TYPE_SNACK);
+                    else if(mealtype.equalsIgnoreCase("dinner"))
+                        datapoint.getValue(Field.FIELD_MEAL_TYPE).setInt(Field.MEAL_TYPE_DINNER);
+                    else datapoint.getValue(Field.FIELD_MEAL_TYPE).setInt(Field.MEAL_TYPE_UNKNOWN);
+                }
+                String item = nutrobj.getString("item");
+                if(item!=null && !item.isEmpty()) {
+                    datapoint.getValue(Field.FIELD_FOOD_ITEM).setString(item);
+                }
+                JSONObject nutrientsobj = nutrobj.getJSONObject("nutrients");
+                if(nutrientsobj!=null){
+                    Iterator<String> nutrients = nutrientsobj.keys();
+                    while(nutrients.hasNext()) {
+                        String nutrientname = nutrients.next();
+                        NutrientFieldInfo nuf = nutrientFields.get(nutrientname);
+                        if(nuf != null){
+                            float nuv = (float) nutrientsobj.getDouble(nutrientname);
+                            datapoint.getValue(Field.FIELD_NUTRIENTS).setKeyValue(nuf.field, nuv);
+                        }
+                    }
+                }
+            }
         } else if (dt.equals(customdatatypes.get("gender"))) {
             String value = args.getJSONObject(0).getString("value");
             for (Field f : customdatatypes.get("gender").getFields()) {
