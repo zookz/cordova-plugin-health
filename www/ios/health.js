@@ -431,6 +431,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
     if (!data.metadata) data.metadata = {};
     if (data.value.item) data.metadata.HKFoodType = data.value.item;
     if (data.value.meal_type) data.metadata.HKFoodMeal = data.value.meal_type;
+    if (data.value.brand_name) data.metadata.HKFoodBrandName = data.value.brand_name;
     data.samples = [];
     for (var nutrientName in data.value.nutrients) {
       var unit = units[nutrientName];
@@ -536,6 +537,7 @@ var prepareNutrition = function (data) {
   if (data.sourceBundleId) res.sourceBundleId = data.sourceBundleId;
   if (data.metadata && data.metadata.HKFoodType) res.value.item = data.metadata.HKFoodType;
   if (data.metadata && data.metadata.HKFoodMeal) res.value.meal_type = data.metadata.HKFoodMeal;
+  if (data.metadata && data.metadata.HKFoodBrandName) res.value.brand_name = data.metadata.HKFoodBrandName;
   res.value.nutrients = {};
   for (var j = 0; j < data.samples.length; j++) {
     var sample = data.samples[j];
