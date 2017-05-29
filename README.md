@@ -98,14 +98,14 @@ value can be of different types, see examples below:
 | steps          | 34                                |
 | distance       | 101.2                             |
 | calories       | 245.3                             |
-| activity       | "walking"  (note: recognized activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md)) |
+| activity       | "walking"<br />**Note**: recognized activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md) |
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
 | fat_percentage | 31.2                              |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
-| nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } } |
+| nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } }<br />**Note**: `meal_type` and `brand_name` properties are only available on iOS |
 | nutrition.X    | 12.4                              |
 
 ## Methods
