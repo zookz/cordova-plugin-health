@@ -34,6 +34,7 @@ dataTypes['nutrition.calcium'] = 'HKQuantityTypeIdentifierDietaryCalcium';
 dataTypes['nutrition.iron'] = 'HKQuantityTypeIdentifierDietaryIron';
 dataTypes['nutrition.water'] = 'HKQuantityTypeIdentifierDietaryWater';
 dataTypes['nutrition.caffeine'] = 'HKQuantityTypeIdentifierDietaryCaffeine';
+dataTypes['blood_glucose'] = 'HKQuantityTypeIdentifierBloodGlucose';
 
 var units = [];
 units['steps'] = 'count';
