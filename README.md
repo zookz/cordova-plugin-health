@@ -7,7 +7,7 @@ This work is based on [cordova plugin googlefit](https://github.com/2dvisio/cord
 
 For an introduction about Google Fit versus HealthKit see [this very good article](https://yalantis.com/blog/how-can-healthkit-and-googlefit-help-you-develop-healthcare-and-fitness-apps/).
 
-This plugin is kept up to date and requires a recent version of cordova (6 and on) and recent iOS and Android SDKs.
+This plugin is kept up to date and requires a recent version of cordova (6 and on) as well as recent iOS and Android SDKs.
 
 ## Warning
 
@@ -16,22 +16,39 @@ See the [official terms](https://developers.google.com/fit/terms).
 
 ## Installation
 
-Just execute this line in your project's folder:
+In Cordova:
 
 ```
 cordova plugin add cordova-plugin-health --variable HEALTH_READ_PERMISSION='App needs read access' --variable HEALTH_WRITE_PERMISSION='App needs write access'
 ```
 
-this will install the latest release.
 `HEALTH_READ_PERMISSION` and `HEALTH_WRITE_PERMISSION` are shown when the app tries to grant access to data in HealthKit.
 
-## Requirements for iOS apps
+Phonegap Build `config.xml`:
+
+```
+<!-- Health plugin -->
+<plugin name="cordova-plugin-health" source="npm">
+
+<!-- Only if iOS -->
+
+<!-- Read access -->
+<config-file platform="ios" parent="NSHealthShareUsageDescription">
+  <string>App needs read access</string>
+</config-file>
+<!-- Write access -->
+<config-file platform="ios" parent="NSHealthUpdateUsageDescription">
+  <string>App needs write access</string>
+</config-file>
+```
+
+## iOS requirements
 
 * Make sure your app id has the 'HealthKit' entitlement when this plugin is installed (see iOS dev center).
-* Also, make sure your app and AppStore description complies with these Apple review guidelines: https://developer.apple.com/app-store/review/guidelines/#healthkit
+* Also, make sure your app and App Store description comply with the [Apple review guidelines](https://developer.apple.com/app-store/review/guidelines/#healthkit).
 * There are [two keys](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW48) to be added to the info.plist file: `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription`. These are assigned with a default string by the plugin, but you may want to contextualise them for your app.
 
-## Requirements for Android apps
+## Android requirements
 
 * You need to have the Google Services API downloaded in your SDK.
 * Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-api-key) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin).
@@ -44,18 +61,19 @@ this will install the latest release.
 As HealthKit does not allow adding custom data types, only a subset of data types supported by HealthKit has been chosen.
 Google Fit is limited to fitness data and, for health, custom data types are defined with the suffix of the package name of your project.
 
-| data type       | Unit  |    HealthKit equivalent                       |  Google Fit equivalent                   |
+| Data type       | Unit  |    HealthKit equivalent                       |  Google Fit equivalent                   |
 |-----------------|-------|-----------------------------------------------|------------------------------------------|
 | steps           | count | HKQuantityTypeIdentifierStepCount             | TYPE_STEP_COUNT_DELTA                    |
 | distance        | m     | HKQuantityTypeIdentifierDistanceWalkingRunning + HKQuantityTypeIdentifierDistanceCycling | TYPE_DISTANCE_DELTA |
-| calories        |  kcal | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned   | TYPE_CALORIES_EXPENDED |
-| calories.active |  kcal | HKQuantityTypeIdentifierActiveEnergyBurned    | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
-| calories.basal  |  kcal | HKQuantityTypeIdentifierBasalEnergyBurned     | TYPE_BASAL_METABOLIC_RATE * time window  |
+| calories        | kcal  | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned   | TYPE_CALORIES_EXPENDED |
+| calories.active | kcal  | HKQuantityTypeIdentifierActiveEnergyBurned    | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
+| calories.basal  | kcal  | HKQuantityTypeIdentifierBasalEnergyBurned     | TYPE_BASAL_METABOLIC_RATE * time window  |
 | activity        |       | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT  |
 | height          |  m    | HKQuantityTypeIdentifierHeight                | TYPE_HEIGHT                              |
 | weight          |  kg   | HKQuantityTypeIdentifierBodyMass              | TYPE_WEIGHT                              |
-| heart_rate      | count/min|  HKQuantityTypeIdentifierHeartRate         | TYPE_HEART_RATE_BPM                      |
+| heart_rate      | count/min | HKQuantityTypeIdentifierHeartRate         | TYPE_HEART_RATE_BPM                      |
 | fat_percentage  | %     | HKQuantityTypeIdentifierBodyFatPercentage     | TYPE_BODY_FAT_PERCENTAGE                 |
+| blood_glucose   | mmol/L | HKQuantityTypeIdentifierBloodGlucose| NA                                       |
 | gender          |       | HKCharacteristicTypeIdentifierBiologicalSex   | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth   |       | HKCharacteristicTypeIdentifierDateOfBirth     | custom (YOUR_PACKAGE_NAME.date_of_birth) |
 | nutrition       |       | HKCorrelationTypeIdentifierFood               | TYPE_NUTRITION                           |
@@ -80,7 +98,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | nutrition.water | ml | HKQuantityTypeIdentifierDietaryWater | TYPE_HYDRATION |
 | nutrition.caffeine | g | HKQuantityTypeIdentifierDietaryCaffeine | NA |
 
-Note: units of measurements are fixed !
+**Note**: units of measurement are fixed !
 
 Returned objects contain a set of fixed fields:
 
@@ -91,18 +109,19 @@ Returned objects contain a set of fixed fields:
 - unit: {type: String} the unit of measurement
 - value: the actual value
 
-value can be of different types, see examples below:
+Example values:
 
-| data type      | value                             |
+| Data type      | Value                             |
 |----------------|-----------------------------------|
 | steps          | 34                                |
 | distance       | 101.2                             |
 | calories       | 245.3                             |
-| activity       | "walking"<br />**Note**: recognized activities and their mapping to Fit / HealthKit equivalents are listed in [this file](activities_map.md) |
+| activity       | "walking"<br />**Note**: recognized activities and their mappings in Google Fit / HealthKit can be found [here](activities_map.md) |
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
 | fat_percentage | 31.2                              |
+| blood_glucose  | 5.5<br />**Note**: to convert to mg/dL, multiply by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose)). |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
 | nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } }<br />**Note**: the `brand_name` property is only available on iOS |
@@ -122,7 +141,7 @@ navigator.health.isAvailable(successCallback, errorCallback)
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 
-### promptInstallFit() (Android only)
+### promptInstallFit() - Android only
 
 Checks if recent Google Play Services and Google Fit are installed.
 If the play services are not installed, or are obsolete, it will show a pop-up suggesting to download them.
@@ -146,7 +165,7 @@ navigator.health.promptInstallFit(successCallback, errorCallback)
 Requests read and write access to a set of data types.
 It is recommendable to always explain why the app needs access to the data before asking the user to authorize it.
 
-This function must be called before using the query and store functions, even if the authorization has already been given at some point in the past.
+**Important:** this method must be called before using the query and store methods, even if the authorization has already been given at some point in the past. Failure to do so may cause your app to crash, or in the case of Android, Google Fit may not be ready.
 
 ```
 navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
@@ -155,20 +174,20 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 - datatypes: {type: Mixed array}, a list of data types you want to be granted access to. You can also specify read or write only permissions.
 ```javascript
 [
-  'calories', 'distance',   //read and write permissions
+  'calories', 'distance',   // Read and write permissions
   {
-    read : ['steps'],       //read only permission
-    write : ['height', 'weight']  //write only permission
+    read : ['steps'],       // Read only permission
+    write : ['height', 'weight']  // Write only permission
   }
 ]
 ```
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
-Quirks of requestAuthorization()
+#### Android quirks
 
-- In Android, it will try to get authorization from the Google fitness APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
-- In Android, be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the authorization will ensure that the app is connected again.
+- It will try to get authorization from the Google fitness APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
+- Be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the authorization will ensure that the app is connected again.
 - In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
 
 ### isAuthorized()
@@ -183,9 +202,9 @@ navigator.health.isAuthorized(datatypes, successCallback, errorCallback)
 - successCallback: {type: function(authorized)}, if the argument is true, the app is authorized
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
-Quirks of isAuthorized()
+#### iOS quirks
 
-- In iOS, this function will only check authorization status for writeable data. Read-only data will always be considered as not authorized.
+- This method will only check authorization status for writeable data. Read-only data will always be considered as not authorized.
 This is [an intended behaviour of HealthKit](https://developer.apple.com/reference/healthkit/hkhealthstore/1614154-authorizationstatus).
 
 ### query()
@@ -196,10 +215,10 @@ Warning: if the time span is big, it can generate long arrays!
 
 ```
 navigator.health.query({
-        startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
-        endDate: new Date(), // now
-        dataType: 'height'
-        }, successCallback, errorCallback)
+  startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
+  endDate: new Date(), // now
+  dataType: 'height'
+}, successCallback, errorCallback)
 ```
 
 - startDate: {type: Date}, start date from which to get data
@@ -208,19 +227,25 @@ navigator.health.query({
 - successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', sourceName: 'aaaa', sourceBundleId: 'bbbb' }
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
+#### iOS quirks
 
-Quirks of query()
+- The amount of datapoints is limited to 1000 by default. You can override this by adding a `limit: xxx` to your query object.
+- Datapoints are ordered in an descending fashion (from newer to older). You can revert this behaviour by adding `ascending: true` to your query object.
+- HealthKit does not calculate active and basal calories - these must be inputted from an app
+- HealthKit does not detect specific activities - these must be inputted from an app
+- Activities in HealthKit may include two extra fields: calories (kcal) and distance (m)
+- When querying for nutrition, HealthKit only returns those stored as correlation. To be sure to get all stored quantities, it's better to query nutrients individually (e.g. MyFitnessPal doesn't store meals as correlations).
+- nutrition.vitamin_a is given in micrograms. Automatic conversion to international units is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
-- In iOS, the amount of datapoints is limited to 1000 by default. You can override this by adding a `limit: xxx` to your query object.
-- In iOS, datapoints are ordered in an descending fashion (from newer to older). You can revert this behaviour by adding `ascending: true` to your query object.
-- In Android, it is possible to query for "raw" steps or to select those as filtered by the Google Fit app. In the latter case the query object must contain the field `filtered: true`.
-- In Google Fit, calories.basal is returned as an average per day, and usually is not available in all days.
-- In Google Fit, calories.active is computed by subtracting the basal calories from the total. As basal energy expenditure, an average is computed from the week before endDate.
-- While Google Fit calculates basal and active calories automatically, HealthKit needs an explicit input from some app.
-- When querying for activities, Google Fit is able to determine some activities automatically (still, walking, running, biking, in vehicle), while HealthKit only relies on the input of the user or of some external app.
-- When querying for activities, calories and distance are also provided in HealthKit (units are kcal and meters) and never in Google Fit.
-- When querying for nutrition, Google Fit always returns all the nutrition elements it has, while HealthKit returns only those that are stored as correlation. To be sure to get all stored the quantities (regardless of they are stored as correlation or not), it's better to query single nutrients.
-- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit. Automatic conversion is not trivial and depends on the actual substance (see [this](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
+#### Android quirks
+
+- It is possible to query for "raw" steps or to select those as filtered by the Google Fit app. In the latter case the query object must contain the field `filtered: true`.
+- calories.basal is returned as an average per day, and usually is not available in all days.
+- calories.active is computed by subtracting the basal calories from the total. As basal energy expenditure, an average is computed from the week before endDate.
+- Active and basal calories can be automatically calculated
+- Some activities can be determined automatically (still, walking, running, biking, in vehicle)
+- When querying for nutrition, Google Fit always returns all the nutrition elements it has.
+- nutrition.vitamin_a is given in international units. Automatic conversion to micrograms is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
 ### queryAggregated()
 
@@ -229,11 +254,11 @@ Usually the sum is returned for the given quantity.
 
 ```
 navigator.health.queryAggregated({
-        startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
-        endDate: new Date(), // now
-        dataType: 'steps',
-        bucket: 'day'
-        }, successCallback, errorCallback)
+  startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
+  endDate: new Date(), // now
+  dataType: 'steps',
+  bucket: 'day'
+}, successCallback, errorCallback)
 ```
 
 - startDate: {type: Date}, start date from which to get data
@@ -246,26 +271,33 @@ navigator.health.queryAggregated({
 Not all data types are supported for aggregated queries.
 The following table shows what types are supported and examples of the returned object:
 
-| data type       | example of returned object |
+| Data type       | Example of returned object |
 |-----------------|----------------------------|
 | steps           | { startDate: Date, endDate: Date, value: 5780, unit: 'count' } |
 | distance        | { startDate: Date, endDate: Date, value: 12500.0, unit: 'm' } |
 | calories        | { startDate: Date, endDate: Date, value: 25698.1, unit: 'kcal' } |
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
-| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in meters and calories in kcal) |
-| nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' } (note: units of measurement for nutrients are fixed according to the table at the beginning of this readme) |
-| nutrition.X     | { startDate: Date, endDate: Date, value: 23, unit: 'mg'} |
+| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' }<br />**Note:** duration is expressed in milliseconds, distance in meters and calories in kcal |
+| nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' }<br />**Note:** units of measurement for nutrients are fixed according to the table at the beginning of this README |
+| nutrition.x     | { startDate: Date, endDate: Date, value: 23, unit: 'mg'} |
 
-Quirks of queryAggregated()
+#### Quirks
 
-- In Android, to query for steps as filtered by the Google Fit app, the flag `filtered: true` must be added into the query object.
-- When querying for activities, calories and distance are provided, when available, in HealthKit. In Google Fit they are not provided.
-- In Android, the start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
+- The start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
 - When bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00.
 - Weeks start on Monday.
-- When querying for nutrition, HealthKit returns only those that are stored as correlation. To be sure to get all the stored quantities, it's better to query single nutrients.
-- nutrition.vitamin_a is given in micrograms in HealthKit and International Unit in Google Fit.
+
+#### iOS quirks
+
+- Activities in HealthKit may include two extra fields: calories (kcal) and distance (m)
+- When querying for nutrition, HealthKit only returns those stored as correlation. To be sure to get all stored quantities, it's better to query nutrients individually (e.g. MyFitnessPal doesn't store meals as correlations).
+- nutrition.vitamin_a is given in micrograms. Automatic conversion to international units is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
+
+#### Android quirks
+
+- To query for steps as filtered by the Google Fit app, the flag `filtered: true` must be added into the query object.
+- nutrition.vitamin_a is given in international units. Automatic conversion to micrograms is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
 ### store()
 
@@ -278,7 +310,8 @@ navigator.health.store({
 	dataType: 'steps',
 	value: 180,
 	sourceName: 'my_app',
-	sourceBundleId: 'com.example.my_app' }, successCallback, errorCallback)
+	sourceBundleId: 'com.example.my_app'
+}, successCallback, errorCallback)
 ```
 
 - startDate: {type: Date}, start date from which the new data starts
@@ -290,15 +323,17 @@ navigator.health.store({
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
+#### iOS quirks
 
-Quirks of store()
+- In iOS, when storing an activity, you can also specify calories (active, in kcal) and distance (walked or run, in meters). For example: `dataType: 'activity', value: 'walking', calories: 20, distance: 520`. Be aware, though, that you need permission to write calories and distance first, or the call will fail.
+- In iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
+- In iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field `cycling: true`.
+
+#### Android quirks
 
 - Google Fit doesn't allow you to overwrite data points that overlap with others already stored of the same type (see [here](https://developers.google.com/fit/android/history#manageConflicting)). At the moment there is no support for [update](https://developers.google.com/fit/android/history#updateData).
-- In iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
-- In Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
-- In iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
 - Storing of nutrients is not supported at the moment in Android.
-- In iOS, when storing an activity, you can also specify calories (active, in kcal) and distance (walked or run, in meters). For example: `dataType: 'activity', value: 'walking', calories: 20, distance: 520`. Be aware, though, that you need permission to write calories and distance first, or the call will fail.
+- In Android you can only store active calories, as the basal are estimated automatically. If you store total calories, these will be treated as active.
 
 ### delete()
 
@@ -309,7 +344,7 @@ navigator.health.delete({
 	startDate:  new Date(new Date().getTime() - 3 * 60 * 1000), // three minutes ago
 	endDate: new Date(),
 	dataType: 'steps'
-  }, successCallback, errorCallback)
+}, successCallback, errorCallback)
 ```
 
 - startDate: {type: Date}, start date from which to delete data
@@ -318,25 +353,26 @@ navigator.health.delete({
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
+#### iOS quirks
 
-Quirks of delete()
+- You cannot delete the total calories, you need to specify either basal or active. If you use total calories, the active ones will be delete.
+- Distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field `cycling: true`.
+- Deleting sleep activities is not supported at the moment.
 
-- Google Fit doesn't allow you to delete data points that were generated by an app different than yours.
-- In Android you can only delete active calories, as the basal are estimated automatically. If you try to delete total calories, these will be treated as active.
-- In iOS you cannot delete the total calories, you need to specify either basal or active. If you use total calories, the active ones will be delete.
-- In iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field ` cycling: true `.
-- In iOS deleting sleep activities is not supported at the moment.
+#### Android quirks
 
+- Google Fit doesn't allow you to delete data points that were generated by other apps
+- You can only delete active calories, as the basal are estimated automatically. If you try to delete total calories, these will be treated as active.
 
 ## Differences between HealthKit and Google Fit
 
-* HealthKit includes medical data (eg blood glucose), Google Fit is only related to fitness data.
-* HealthKit provides a data model that is not extensible, Google Fit allows defining custom data types.
-* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when queried, Google Fit uses fixed units of measurement.
-* HealthKit automatically counts steps and distance when you carry your phone with you and if your phone has the CoreMotion chip, Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle).
-* HealthKit automatically computes the distance only for running/walking activities, Google Fit includes bicycle also.
+* HealthKit includes medical data (e.g. blood glucose), whereas Google Fit is only meant for fitness data (although now supports some medical data).
+* HealthKit provides a data model that is not extensible, whereas Google Fit allows defining custom data types.
+* HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when queried, whereas Google Fit uses fixed units of measurement.
+* HealthKit automatically counts steps and distance when you carry your phone with you and if your phone has the CoreMotion chip, whereas Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle).
+* HealthKit can only compute distance for running/walking activities, whereas Google Fit can also do so for bicycle events.
 
-## External Resources
+## External resources
 
 * The official Apple documentation for HealthKit [can be found here](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HealthKit_Framework/index.html#//apple_ref/doc/uid/TP40014707).
 * For functions that require the `unit` attribute, you can find the comprehensive list of possible units from the [Apple Developers documentation](https://developer.apple.com/library/ios/documentation/HealthKit/Reference/HKUnit_Class/index.html#//apple_ref/doc/uid/TP40014727-CH1-SW2).
@@ -345,27 +381,28 @@ Quirks of delete()
 
 ## Roadmap
 
-short term:
+Short term:
 
-- add storing of nutrition
-- add more datatypes
- - body fat percentage
- - oxygen saturation
- - blood pressure
- - blood glucose
- - temperature
- - respiratory rate
+- Add storing of nutrition
+- Add more datatypes
+- Body fat percentage
+- Oxygen saturation
+- Blood pressure
+- Storing of blood glucose on iOS
+- Blood glucose on Android
+- Temperature
+- Respiratory rate
 
-long term:
+Long term:
 
-- add registration to updates (in Fit:  HistoryApi#registerDataUpdateListener()).
-- add also Samsung Health as a health record for Android.
+- Add registration to updates (e.g. in Google Fit:  HistoryApi#registerDataUpdateListener()).
+- Add support for Samsung Health as an alternate health record for Android.
 
 ## Contributions
 
 Any help is more than welcome!
 
-I don't know Objectve C and I am not interested into learning it now, so I would particularly appreciate someone who can give me a hand with the iOS part.
+I don't know Objective C and I am not interested in learning it now, so I would particularly appreciate someone who could give me a hand with the iOS part.
 Also, I would love to know from you if the plugin is currently used in any app actually available online.
 Just send me an email to my_username at gmail.com.
 For donations, I have a PayPal account at the same email address.
