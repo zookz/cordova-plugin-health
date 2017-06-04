@@ -1327,12 +1327,17 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     }
     HKUnit *unit = nil;
     if (unitString != nil) {
-        // issue 51
-        // @see https://github.com/Telerik-Verified-Plugins/HealthKit/issues/51
-        if ([unitString isEqualToString:@"percent"]) {
-            unitString = @"%";
+        if ([unitString isEqualToString:@"mmol/L"]) {
+            // @see https://stackoverflow.com/a/30196642/1214598
+            unit = [[HKUnit moleUnitWithMetricPrefix:HKMetricPrefixMilli molarMass:HKUnitMolarMassBloodGlucose] unitDividedByUnit:[HKUnit literUnit]];
+        } else {
+            // issue 51
+            // @see https://github.com/Telerik-Verified-Plugins/HealthKit/issues/51
+            if ([unitString isEqualToString:@"percent"]) {
+                unitString = @"%";
+            }
+            unit = [HKUnit unitFromString:unitString];
         }
-        unit = [HKUnit unitFromString:unitString];
     }
     // TODO check that unit is compatible with sampleType if sample type of HKQuantityType
     NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
