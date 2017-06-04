@@ -65,7 +65,7 @@ units['nutrition.calcium'] = 'mg';
 units['nutrition.iron'] = 'mg';
 units['nutrition.water'] = 'ml';
 units['nutrition.caffeine'] = 'g';
-units['blood_glucose'] = 'mg/dL';
+units['blood_glucose'] = 'mmol/L';
 
 Health.prototype.isAvailable = function (success, error) {
   window.plugins.healthkit.available(success, error);

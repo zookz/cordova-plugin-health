@@ -73,7 +73,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | weight          |  kg   | HKQuantityTypeIdentifierBodyMass              | TYPE_WEIGHT                              |
 | heart_rate      | count/min | HKQuantityTypeIdentifierHeartRate         | TYPE_HEART_RATE_BPM                      |
 | fat_percentage  | %     | HKQuantityTypeIdentifierBodyFatPercentage     | TYPE_BODY_FAT_PERCENTAGE                 |
-| blood_glucose   | mg/dL | HKQuantityTypeIdentifierBloodGlucose| NA                                       |
+| blood_glucose   | mmol/L | HKQuantityTypeIdentifierBloodGlucose| NA                                       |
 | gender          |       | HKCharacteristicTypeIdentifierBiologicalSex   | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth   |       | HKCharacteristicTypeIdentifierDateOfBirth     | custom (YOUR_PACKAGE_NAME.date_of_birth) |
 | nutrition       |       | HKCorrelationTypeIdentifierFood               | TYPE_NUTRITION                           |
@@ -121,7 +121,7 @@ Example values:
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
 | fat_percentage | 31.2                              |
-| blood_glucose  | 132<br />**Note**: to convert to mmol/L, divide by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose)). |
+| blood_glucose  | 5.5<br />**Note**: to convert to mg/dL, multiply by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose)). |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
 | nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } }<br />**Note**: the `brand_name` property is only available on iOS |
@@ -165,7 +165,7 @@ navigator.health.promptInstallFit(successCallback, errorCallback)
 Requests read and write access to a set of data types.
 It is recommendable to always explain why the app needs access to the data before asking the user to authorize it.
 
-This function must be called before using the query and store functions, even if the authorization has already been given at some point in the past.
+**Important:** this method must be called before using the query and store methods, even if the authorization has already been given at some point in the past. Failure to do so may cause your app to crash, or in the case of Android, Google Fit may not be ready.
 
 ```
 navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
@@ -278,8 +278,8 @@ The following table shows what types are supported and examples of the returned 
 | calories        | { startDate: Date, endDate: Date, value: 25698.1, unit: 'kcal' } |
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
-| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' } (note: duration is expressed in milliseconds, distance in meters and calories in kcal) |
-| nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' } (note: units of measurement for nutrients are fixed according to the table at the beginning of this readme) |
+| activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' }<br />**Note:** duration is expressed in milliseconds, distance in meters and calories in kcal |
+| nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' }<br />**Note:** units of measurement for nutrients are fixed according to the table at the beginning of this README |
 | nutrition.x     | { startDate: Date, endDate: Date, value: 23, unit: 'mg'} |
 
 #### Quirks
