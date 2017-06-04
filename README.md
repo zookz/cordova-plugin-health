@@ -56,7 +56,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | weight          |  kg   | HKQuantityTypeIdentifierBodyMass              | TYPE_WEIGHT                              |
 | heart_rate      | count/min | HKQuantityTypeIdentifierHeartRate         | TYPE_HEART_RATE_BPM                      |
 | fat_percentage  | %     | HKQuantityTypeIdentifierBodyFatPercentage     | TYPE_BODY_FAT_PERCENTAGE                 |
-| blood_glucose   | mg/dL or mmol/L | HKQuantityTypeIdentifierBloodGlucose| NA                                       |
+| blood_glucose   | mg/dL | HKQuantityTypeIdentifierBloodGlucose| NA                                       |
 | gender          |       | HKCharacteristicTypeIdentifierBiologicalSex   | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth   |       | HKCharacteristicTypeIdentifierDateOfBirth     | custom (YOUR_PACKAGE_NAME.date_of_birth) |
 | nutrition       |       | HKCorrelationTypeIdentifierFood               | TYPE_NUTRITION                           |
@@ -81,7 +81,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | nutrition.water | ml | HKQuantityTypeIdentifierDietaryWater | TYPE_HYDRATION |
 | nutrition.caffeine | g | HKQuantityTypeIdentifierDietaryCaffeine | NA |
 
-**Note**: with the exception of `blood_glucose` events, units are fixed!
+**Note**: units of measurement are fixed !
 
 Returned objects contain a set of fixed fields:
 
@@ -104,7 +104,7 @@ value can be of different types, see examples below:
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
 | fat_percentage | 31.2                              |
-| blood_glucose  | 132 (mg/dL) or 5.4 (mmol/L)       |
+| blood_glucose  | 132<br />**Note**: to convert to mmol/L, divide by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose)). |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
 | nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } }<br />**Note**: the `brand_name` property is only available on iOS |
