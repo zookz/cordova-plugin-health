@@ -385,16 +385,17 @@ Short term:
 
 - Add storing of nutrition
 - Add more datatypes
-- Body fat percentage
-- Oxygen saturation
-- Blood pressure
-- Storing of blood glucose on iOS
-- Blood glucose on Android
-- Temperature
-- Respiratory rate
+	Body fat percentage
+	Oxygen saturation
+	Blood pressure
+	Storing of blood glucose on iOS
+	Blood glucose on Android
+	Temperature
+	Respiratory rate
 
 Long term:
 
+- Include [Core Motion Activity API](https://developer.apple.com/reference/coremotion/cmmotionactivitymanager)
 - Add registration to updates (e.g. in Google Fit:  HistoryApi#registerDataUpdateListener()).
 - Add support for Samsung Health as an alternate health record for Android.
 
