@@ -40,11 +40,11 @@
       </feature>
     </config-file>
 
-    <config-file target="*-Info.plist" parent="UIRequiredDeviceCapabilities">
+    <!-- <config-file target="*-Info.plist" parent="UIRequiredDeviceCapabilities">
       <array>
         <string>healthkit</string>
       </array>
-    </config-file>
+    </config-file> -->
 
 	<!-- Usage description of Health, mandatory since iOS 10 -->
     <preference name="HEALTH_READ_PERMISSION" default=" " />
