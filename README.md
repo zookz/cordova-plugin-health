@@ -211,7 +211,7 @@ This is [an intended behaviour of HealthKit](https://developer.apple.com/referen
 
 Gets all the data points of a certain data type within a certain time window.
 
-Warning: if the time span is big, it can generate long arrays!
+**Warning:** if the time span is big, it can generate long arrays!
 
 ```
 navigator.health.query({
@@ -236,6 +236,7 @@ navigator.health.query({
 - Activities in HealthKit may include two extra fields: calories (kcal) and distance (m)
 - When querying for nutrition, HealthKit only returns those stored as correlation. To be sure to get all stored quantities, it's better to query nutrients individually (e.g. MyFitnessPal doesn't store meals as correlations).
 - nutrition.vitamin_a is given in micrograms. Automatic conversion to international units is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
+- When querying for activities, only events whose startDate and endDate are **both** in the query range will be returned.
 
 #### Android quirks
 
@@ -246,6 +247,7 @@ navigator.health.query({
 - Some activities can be determined automatically (still, walking, running, biking, in vehicle)
 - When querying for nutrition, Google Fit always returns all the nutrition elements it has.
 - nutrition.vitamin_a is given in international units. Automatic conversion to micrograms is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
+- When querying for activities, if an event's startDate is out of the query range but its endDate is within, Google Fit will truncate the startDate to match that of the query.
 
 ### queryAggregated()
 
