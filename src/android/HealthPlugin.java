@@ -265,8 +265,7 @@ public class HealthPlugin extends CordovaPlugin {
                 Log.i(TAG, "Got authorisation from Google Fit");
                 if (!mClient.isConnected() && !mClient.isConnecting()) {
                     Log.d(TAG, "Re-trying connection with Fit");
-                    //mClient.connect();
-                    mClient.clearDefaultAccountAndReconnect();
+                    mClient.connect();
                     // the connection success / failure will be taken care of by ConnectionCallbacks in checkAuthorization()
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
@@ -410,7 +409,10 @@ public class HealthPlugin extends CordovaPlugin {
     }
 
     private void disconnect() {
-        mClient.disconnect();
+        if (mClient.isConnected()) {
+            mClient.clearDefaultAccountAndReconnect();
+            mClient.disconnect();
+        }
     }
 
     // prompts to install GooglePlayServices if not available then Google Fit if not available
@@ -588,8 +590,7 @@ public class HealthPlugin extends CordovaPlugin {
                 }
         );
         mClient = builder.build();
-        mClient.clearDefaultAccountAndReconnect();
-        //mClient.connect();
+        mClient.connect();
     }
 
     // helper function, connects to fitness APIs assuming that authorisation was granted
