@@ -290,9 +290,6 @@ public class HealthPlugin extends CordovaPlugin {
         if ("isAvailable".equals(action)) {
             isAvailable(callbackContext);
             return true;
-        } else if ("disconnect".equals(action)) {
-            disconnect();
-            return true;
         } else if ("promptInstallFit".equals(action)) {
             promptInstall(callbackContext);
             return true;
@@ -331,6 +328,9 @@ public class HealthPlugin extends CordovaPlugin {
                     }
                 }
             });
+            return true;
+        } else if ("disconnect".equals(action)) {
+            disconnect(callbackContext);
             return true;
         } else if ("query".equals(action)) {
             cordova.getThreadPool().execute(new Runnable() {
@@ -408,10 +408,20 @@ public class HealthPlugin extends CordovaPlugin {
         callbackContext.sendPluginResult(result);
     }
 
-    private void disconnect() {
-        if (mClient.isConnected()) {
+    /**
+     * Disconnects the client from the Google APIs
+     * @param callbackContext
+     */
+    private void disconnect(final CallbackContext callbackContext) {
+        PluginResult result;
+        if (mClient != null && mClient.isConnected()) {
             mClient.clearDefaultAccountAndReconnect();
             mClient.disconnect();
+                result = new PluginResult(PluginResult.Status.OK, true);
+                callbackContext.sendPluginResult(result);
+                return;
+        } else{
+            callbackContext.error("cannot disconnect, client not connected");
         }
     }
 

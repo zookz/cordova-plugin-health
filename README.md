@@ -207,6 +207,20 @@ navigator.health.isAuthorized(datatypes, successCallback, errorCallback)
 - This method will only check authorization status for writeable data. Read-only data will always be considered as not authorized.
 This is [an intended behaviour of HealthKit](https://developer.apple.com/reference/healthkit/hkhealthstore/1614154-authorizationstatus).
 
+
+### disconnect() - Android only
+
+Check if the app has authorization to read/write a set of datatypes.
+Works only on Android.
+
+```
+navigator.health.disconnect(successCallback, errorCallback)
+```
+
+- successCallback: {type: function(disconnected)}, if the argument is true, the app has been disconnected from Google Fit
+- errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
+
+
 ### query()
 
 Gets all the data points of a certain data type within a certain time window.
