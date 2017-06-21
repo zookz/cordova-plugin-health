@@ -165,7 +165,8 @@ navigator.health.promptInstallFit(successCallback, errorCallback)
 Requests read and write access to a set of data types.
 It is recommendable to always explain why the app needs access to the data before asking the user to authorize it.
 
-**Important:** this method must be called before using the query and store methods, even if the authorization has already been given at some point in the past. Failure to do so may cause your app to crash, or in the case of Android, Google Fit may not be ready.
+**Important:** this method must be called before using the query and store methods, even if the authorization has already been given at some point in the past.
+Failure to do so may cause your app to crash, or in the case of Android, Google Fit may not be ready.
 
 ```
 navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
@@ -190,6 +191,7 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 - Be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the authorization will ensure that the app is connected again.
 - In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
 
+
 ### isAuthorized()
 
 Check if the app has authorization to read/write a set of datatypes.
@@ -210,8 +212,7 @@ This is [an intended behaviour of HealthKit](https://developer.apple.com/referen
 
 ### disconnect() - Android only
 
-Check if the app has authorization to read/write a set of datatypes.
-Works only on Android.
+Removes authorization from the app. Works only on Android.
 
 ```
 navigator.health.disconnect(successCallback, errorCallback)

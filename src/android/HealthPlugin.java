@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -413,13 +414,18 @@ public class HealthPlugin extends CordovaPlugin {
      * @param callbackContext
      */
     private void disconnect(final CallbackContext callbackContext) {
-        PluginResult result;
         if (mClient != null && mClient.isConnected()) {
-            mClient.clearDefaultAccountAndReconnect();
-            mClient.disconnect();
-                result = new PluginResult(PluginResult.Status.OK, true);
-                callbackContext.sendPluginResult(result);
-                return;
+            Fitness.ConfigApi.disableFit(mClient).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(@NonNull Status status) {
+                    if(status.isSuccess()){
+                        mClient.disconnect();
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
+                    } else {
+                        callbackContext.error("cannot disconnect," + status.getStatusMessage());
+                    }
+                }
+            });
         } else{
             callbackContext.error("cannot disconnect, client not connected");
         }

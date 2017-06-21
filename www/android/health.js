@@ -8,8 +8,8 @@ Health.prototype.isAvailable = function (onSuccess, onError) {
   exec(onSuccess, onError, "health", "isAvailable", []);
 };
 
-Health.prototype.disconnect = function () {
-  exec(null, null, "health", "disconnect", []);
+Health.prototype.disconnect = function (onSuccess, onError) {
+  exec(onSuccess, onError, "health", "disconnect", []);
 };
 
 Health.prototype.promptInstallFit = function (onSuccess, onError) {
