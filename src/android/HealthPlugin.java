@@ -25,6 +25,8 @@ import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.data.HealthDataTypes;
+import com.google.android.gms.fitness.data.HealthFields;
 import com.google.android.gms.fitness.data.Value;
 import com.google.android.gms.fitness.request.DataDeleteRequest;
 import com.google.android.gms.fitness.request.DataReadRequest;
@@ -155,6 +157,11 @@ public class HealthPlugin extends CordovaPlugin {
 
     public static Map<String, DataType> customdatatypes = new HashMap<String, DataType>();
 
+    public static Map<String, DataType> healthdatatypes = new HashMap<String, DataType>();
+
+    static {
+        healthdatatypes.put("blood_glucose", HealthDataTypes.TYPE_BLOOD_GLUCOSE);
+    }
 
     public HealthPlugin() {
     }
@@ -657,6 +664,8 @@ public class HealthPlugin extends CordovaPlugin {
             dt = nutritiondatatypes.get(datatype);
         if (customdatatypes.get(datatype) != null)
             dt = customdatatypes.get(datatype);
+        if(healthdatatypes.get(datatype) != null)
+            dt = healthdatatypes.get(datatype);
         if (dt == null) {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
@@ -797,6 +806,10 @@ public class HealthPlugin extends CordovaPlugin {
                             dob.put(f.getName(), fieldvalue);
                         }
                         obj.put("value", dob);
+                    } else if (DT.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
+                        float glucose = datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).asFloat();
+                        obj.put("value", glucose);
+                        obj.put("unit", "mmol/L");
                     }
 
                     resultset.put(obj);
@@ -1257,6 +1270,8 @@ public class HealthPlugin extends CordovaPlugin {
             dt = nutritiondatatypes.get(datatype);
         if (customdatatypes.get(datatype) != null)
             dt = customdatatypes.get(datatype);
+        if (healthdatatypes.get(datatype) != null)
+            dt = healthdatatypes.get(datatype);
         if (dt == null) {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
@@ -1368,6 +1383,10 @@ public class HealthPlugin extends CordovaPlugin {
                 if (f.getName().equalsIgnoreCase("year"))
                     datapoint.getValue(f).setInt(year);
             }
+        } else if (dt.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
+            String value = args.getJSONObject(0).getString("value");
+            float glucose = Float.parseFloat(value);
+            datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).setFloat(glucose);
         }
         dataSet.add(datapoint);
 
@@ -1411,6 +1430,8 @@ public class HealthPlugin extends CordovaPlugin {
             dt = nutritiondatatypes.get(datatype);
         if (customdatatypes.get(datatype) != null)
             dt = customdatatypes.get(datatype);
+        if (healthdatatypes.get(datatype) != null)
+            dt = healthdatatypes.get(datatype);
         if (dt == null) {
             callbackContext.error("Datatype " + datatype + " not supported");
             return;
