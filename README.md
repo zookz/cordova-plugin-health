@@ -9,6 +9,8 @@ For an introduction about Google Fit versus HealthKit see [this very good articl
 
 This plugin is kept up to date and requires a recent version of cordova (6 and on) as well as recent iOS and Android SDKs.
 
+If you have any question or small issue, please use the [gitter channel](https://gitter.im/cordova-plugin-health/Lobby).
+
 ## Warning
 
 Google discourages from using Google Fit for medical apps.
