@@ -80,6 +80,9 @@ public class HealthPlugin extends CordovaPlugin {
     private static final int REQUEST_DYN_PERMS = 2;
     private static final int READ_PERMS = 1;
     private static final int READ_WRITE_PERMS = 2;
+    private static final int REQUEST_OATH_HEALTH = 55;
+
+    private LinkedList<DataType> healthDatatypesToAuth = new LinkedList<DataType>();
 
     // Scope for read/write access to activity-related data types in Google Fit.
     // These include activity type, calories consumed and expended, step counts, and others.
@@ -280,6 +283,17 @@ public class HealthPlugin extends CordovaPlugin {
                 // The user cancelled the login dialog before selecting any action.
                 authReqCallbackCtx.error("User cancelled the dialog");
             } else authReqCallbackCtx.error("Authorisation failed, result code " + resultCode);
+        } else if (requestCode == REQUEST_OATH_HEALTH) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (healthDatatypesToAuth.isEmpty()) { // check if there are still other data types to be authorised, otherwise OK
+                    authReqSuccess();
+                } else {
+                    queryHealthDataForAuth();
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                // The user cancelled the login dialog before selecting any action.
+                authReqCallbackCtx.error("User cancelled the dialog");
+            } else authReqCallbackCtx.error("Authorisation failed, result code " + resultCode);
         }
     }
 
@@ -418,6 +432,7 @@ public class HealthPlugin extends CordovaPlugin {
 
     /**
      * Disconnects the client from the Google APIs
+     *
      * @param callbackContext
      */
     private void disconnect(final CallbackContext callbackContext) {
@@ -425,7 +440,7 @@ public class HealthPlugin extends CordovaPlugin {
             Fitness.ConfigApi.disableFit(mClient).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(@NonNull Status status) {
-                    if(status.isSuccess()){
+                    if (status.isSuccess()) {
                         mClient.disconnect();
                         callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
                     } else {
@@ -433,7 +448,7 @@ public class HealthPlugin extends CordovaPlugin {
                     }
                 }
             });
-        } else{
+        } else {
             callbackContext.error("cannot disconnect, client not connected");
         }
     }
@@ -514,6 +529,8 @@ public class HealthPlugin extends CordovaPlugin {
                 locationscope = READ_PERMS;
             if (nutritiondatatypes.get(readType) != null)
                 nutritionscope = READ_PERMS;
+            if (healthdatatypes.get(readType) != null)
+                healthDatatypesToAuth.add(healthdatatypes.get(readType));
         }
 
         for (String readWriteType : readWriteTypes) {
@@ -525,6 +542,8 @@ public class HealthPlugin extends CordovaPlugin {
                 locationscope = READ_WRITE_PERMS;
             if (nutritiondatatypes.get(readWriteType) != null)
                 nutritionscope = READ_WRITE_PERMS;
+            if (healthdatatypes.get(readWriteType) != null)
+                healthDatatypesToAuth.add(healthdatatypes.get(readWriteType));
         }
 
         dynPerms.clear();
@@ -560,11 +579,15 @@ public class HealthPlugin extends CordovaPlugin {
         }
 
         builder.addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+
             @Override
             public void onConnected(Bundle bundle) {
                 mClient.unregisterConnectionCallbacks(this);
                 Log.i(TAG, "Google Fit connected");
-                authReqSuccess();
+                if (!healthDatatypesToAuth.isEmpty()) {
+                    // need to query for all health data types
+                    queryHealthDataForAuth();
+                } else authReqSuccess();
             }
 
             @Override
@@ -635,6 +658,47 @@ public class HealthPlugin extends CordovaPlugin {
         }
     }
 
+    // starts a small query for granting access to the health data types
+    private void queryHealthDataForAuth() {
+        final DataType dt = healthDatatypesToAuth.pop();
+        final long ts = new Date().getTime();
+
+        cordova.getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                DataReadRequest readRequest = new DataReadRequest.Builder()
+                        .setTimeRange(ts - 60000, ts, TimeUnit.MILLISECONDS)
+                        .read(dt)
+                        .build();
+                DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
+
+                if (dataReadResult.getStatus().isSuccess()) {
+                    // already authorised, go on
+                    onActivityResult(REQUEST_OATH_HEALTH, Activity.RESULT_OK, null);
+                } else {
+                    if (authAutoresolve) {
+                        if (dataReadResult.getStatus().hasResolution()) {
+                            try {
+                                dataReadResult.getStatus().startResolutionForResult(cordova.getActivity(), REQUEST_OATH_HEALTH);
+                            } catch (IntentSender.SendIntentException e) {
+                                authReqCallbackCtx.error("Cannot authorise health data type " + dt.getName() + ", cannot send intent: " + e.getMessage());
+                                return;
+                            }
+                        } else {
+                            authReqCallbackCtx.error("Cannot authorise health data type " + dt.getName() + ", " + dataReadResult.getStatus().getStatusMessage());
+                            return;
+                        }
+                    } else {
+                        // probably not authorized, send false
+                        Log.d(TAG, "Connection to Fit failed, probably because of authorization, giving up now");
+                        authReqCallbackCtx.sendPluginResult(new PluginResult(PluginResult.Status.OK, false));
+                        return;
+                    }
+                }
+            }
+        });
+    }
+
     // queries for datapoints
     private void query(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (!args.getJSONObject(0).has("startDate")) {
@@ -664,7 +728,7 @@ public class HealthPlugin extends CordovaPlugin {
             dt = nutritiondatatypes.get(datatype);
         if (customdatatypes.get(datatype) != null)
             dt = customdatatypes.get(datatype);
-        if(healthdatatypes.get(datatype) != null)
+        if (healthdatatypes.get(datatype) != null)
             dt = healthdatatypes.get(datatype);
         if (dt == null) {
             callbackContext.error("Datatype " + datatype + " not supported");
