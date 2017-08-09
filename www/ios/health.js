@@ -257,7 +257,16 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           var res = {};
           res.startDate = new Date(samples[i].startDate);
           res.endDate = new Date(samples[i].endDate);
-          res.value = samples[i].quantity;
+          if (opts.dataType === 'blood_glucose') {
+            res.value = {
+              glucose: samples[i].quantity
+            }
+            if (data.metadata && data.metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = data.metadata.HKMetadataKeyBloodGlucoseMealTime;
+            if (data.metadata && data.metadata.HKMetadataKeyBloodGlucoseSleepTime) res.value.sleep = data.metadata.HKMetadataKeyBloodGlucoseSleepTime;
+            if (data.metadata && data.metadata.HKMetadataKeyBloodGlucoseSource) res.value.source = data.metadata.HKMetadataKeyBloodGlucoseSource;
+          } else {
+            res.value = samples[i].quantity;
+          }
           if (data[i].unit) res.unit = samples[i].unit;
           else if (opts.unit) res.unit = opts.unit;
           res.sourceName = samples[i].sourceName;
@@ -458,7 +467,14 @@ Health.prototype.store = function (data, onSuccess, onError) {
     if ((data.dataType === 'distance') && data.cycling) {
       data.sampleType = 'HKQuantityTypeIdentifierDistanceCycling';
     }
-    data.amount = data.value;
+    if (data.dataType === 'blood_glucose') {
+      data.amount = data.value.glucose;
+      if (data.value.meal) data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
+      if (data.value.sleep) data.metadata.HKMetadataKeyBloodGlucoseSleepTime = data.value.sleep;
+      if (data.value.source) data.metadata.HKMetadataKeyBloodGlucoseSource = data.value.source;
+    } else {
+      data.amount = data.value;
+    }
     if (units[data.dataType]) {
       data.unit = units[data.dataType];
     }
