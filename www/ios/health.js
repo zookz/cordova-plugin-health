@@ -469,6 +469,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
     }
     if (data.dataType === 'blood_glucose') {
       data.amount = data.value.glucose;
+      if (!data.metadata) data.metadata = {};
       if (data.value.meal) data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
       if (data.value.sleep) data.metadata.HKMetadataKeyBloodGlucoseSleepTime = data.value.sleep;
       if (data.value.source) data.metadata.HKMetadataKeyBloodGlucoseSource = data.value.source;
