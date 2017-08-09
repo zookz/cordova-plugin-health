@@ -405,15 +405,7 @@ navigator.health.delete({
 
 Short term:
 
-- Add storing of nutrition
-- Add more datatypes
-	Body fat percentage
-	Oxygen saturation
-	Blood pressure
-	Storing of blood glucose on iOS
-	Blood glucose on Android
-	Temperature
-	Respiratory rate
+- Add more datatypes (body fat percentage, oxygen saturation, blood pressure, temperature, respiratory rate)
 
 Long term:
 
