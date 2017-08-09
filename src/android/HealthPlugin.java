@@ -871,11 +871,86 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                         obj.put("value", dob);
                     } else if (DT.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
+                        JSONObject glucob = new JSONObject();
                         float glucose = datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).asFloat();
-                        obj.put("value", glucose);
+                        if(datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL).isSet() &&
+                                datapoint.getValue(Field.FIELD_MEAL_TYPE).isSet()){
+                            int temp_to_meal = datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL).asInt();
+                            String meal = "";
+                            if(temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_AFTER_MEAL){
+                                meal = "after_";
+                            } else if(temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_BEFORE_MEAL) {
+                                meal = "before_";
+                            } else if(temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_FASTING) {
+                                meal = "fasting";
+                            } else if(temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_GENERAL) {
+                                meal = "";
+                            }
+                            if(temp_to_meal != HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_FASTING) {
+                                switch (datapoint.getValue(Field.FIELD_MEAL_TYPE).asInt()){
+                                    case Field.MEAL_TYPE_BREAKFAST:
+                                        meal += "breakfast";
+                                        break;
+                                    case Field.MEAL_TYPE_DINNER:
+                                        meal += "dinner";
+                                        break;
+                                    case Field.MEAL_TYPE_LUNCH:
+                                        meal += "lunch";
+                                        break;
+                                    case Field.MEAL_TYPE_SNACK:
+                                        meal += "snack";
+                                        break;
+                                    default:
+                                        meal = "unknown";
+                                }
+                            }
+                            glucob.put("meal", meal);
+                        }
+                        if(datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_SLEEP).isSet()) {
+                            String sleep = "";
+                            switch (datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_SLEEP).asInt()){
+                                case HealthFields.TEMPORAL_RELATION_TO_SLEEP_BEFORE_SLEEP:
+                                    sleep = "before_sleep";
+                                    break;
+                                case HealthFields.TEMPORAL_RELATION_TO_SLEEP_DURING_SLEEP:
+                                    sleep = "during_sleep";
+                                    break;
+                                case HealthFields.TEMPORAL_RELATION_TO_SLEEP_FULLY_AWAKE:
+                                    sleep = "fully_awake";
+                                    break;
+                                case HealthFields.TEMPORAL_RELATION_TO_SLEEP_ON_WAKING:
+                                    sleep = "on_waking";
+                                    break;
+                            }
+                            glucob.put("meal", sleep);
+                        }
+                        if(datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).isSet()) {
+                            String source = "";
+                            switch (datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).asInt()){
+                                case HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_CAPILLARY_BLOOD:
+                                    source = "capillary_blood";
+                                    break;
+                                case HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_INTERSTITIAL_FLUID:
+                                    source = "interstitial_fluid";
+                                    break;
+                                case HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_PLASMA:
+                                    source = "plasma";
+                                    break;
+                                case HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_SERUM:
+                                    source = "serum";
+                                    break;
+                                case HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_TEARS:
+                                    source = "tears";
+                                    break;
+                                case HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_WHOLE_BLOOD:
+                                    source = "whole_blood";
+                                    break;
+                            }
+                            glucob.put("source", source);
+                        }
+                        obj.put("value", glucob);
                         obj.put("unit", "mmol/L");
                     }
-
                     resultset.put(obj);
                 }
             }
