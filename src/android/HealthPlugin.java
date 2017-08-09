@@ -82,7 +82,8 @@ public class HealthPlugin extends CordovaPlugin {
     private static final int READ_WRITE_PERMS = 2;
     private static final int REQUEST_OATH_HEALTH = 55;
 
-    private LinkedList<DataType> healthDatatypesToAuth = new LinkedList<DataType>();
+    private LinkedList<DataType> healthDatatypesToAuthRead = new LinkedList<DataType>();
+    private LinkedList<DataType> healthDatatypesToAuthWrite = new LinkedList<DataType>();
 
     // Scope for read/write access to activity-related data types in Google Fit.
     // These include activity type, calories consumed and expended, step counts, and others.
@@ -285,10 +286,18 @@ public class HealthPlugin extends CordovaPlugin {
             } else authReqCallbackCtx.error("Authorisation failed, result code " + resultCode);
         } else if (requestCode == REQUEST_OATH_HEALTH) {
             if (resultCode == Activity.RESULT_OK) {
-                if (healthDatatypesToAuth.isEmpty()) { // check if there are still other data types to be authorised, otherwise OK
-                    authReqSuccess();
-                } else {
+                if (!healthDatatypesToAuthRead.isEmpty()) {
+                    // do the read health data first
                     queryHealthDataForAuth();
+                } else {
+                    // if we are finished with the read health data types, do the write ones
+                    if (!healthDatatypesToAuthWrite.isEmpty()) {
+                        // do the write health data
+                        storeHealthDataForAuth();
+                    } else {
+                        // done
+                        authReqSuccess();
+                    }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // The user cancelled the login dialog before selecting any action.
@@ -530,7 +539,7 @@ public class HealthPlugin extends CordovaPlugin {
             if (nutritiondatatypes.get(readType) != null)
                 nutritionscope = READ_PERMS;
             if (healthdatatypes.get(readType) != null)
-                healthDatatypesToAuth.add(healthdatatypes.get(readType));
+                healthDatatypesToAuthRead.add(healthdatatypes.get(readType));
         }
 
         for (String readWriteType : readWriteTypes) {
@@ -542,8 +551,9 @@ public class HealthPlugin extends CordovaPlugin {
                 locationscope = READ_WRITE_PERMS;
             if (nutritiondatatypes.get(readWriteType) != null)
                 nutritionscope = READ_WRITE_PERMS;
-            if (healthdatatypes.get(readWriteType) != null)
-                healthDatatypesToAuth.add(healthdatatypes.get(readWriteType));
+            if (healthdatatypes.get(readWriteType) != null) {
+                healthDatatypesToAuthWrite.add(healthdatatypes.get(readWriteType));
+            }
         }
 
         dynPerms.clear();
@@ -584,9 +594,12 @@ public class HealthPlugin extends CordovaPlugin {
             public void onConnected(Bundle bundle) {
                 mClient.unregisterConnectionCallbacks(this);
                 Log.i(TAG, "Google Fit connected");
-                if (!healthDatatypesToAuth.isEmpty()) {
+                if (!healthDatatypesToAuthRead.isEmpty()) {
                     // need to query for all health data types
                     queryHealthDataForAuth();
+                } else if (!healthDatatypesToAuthWrite.isEmpty()) {
+                    // need to authorise write health data types
+                    storeHealthDataForAuth();
                 } else authReqSuccess();
             }
 
@@ -660,7 +673,7 @@ public class HealthPlugin extends CordovaPlugin {
 
     // starts a small query for granting access to the health data types
     private void queryHealthDataForAuth() {
-        final DataType dt = healthDatatypesToAuth.pop();
+        final DataType dt = healthDatatypesToAuthRead.pop();
         final long ts = new Date().getTime();
 
         cordova.getThreadPool().execute(new Runnable() {
@@ -698,6 +711,62 @@ public class HealthPlugin extends CordovaPlugin {
             }
         });
     }
+
+    // store a bogus sample for granting access to the health data types
+    private void storeHealthDataForAuth() {
+        final DataType dt = healthDatatypesToAuthWrite.pop();
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.YEAR, -5); // five years ago
+        final long ts = c.getTimeInMillis();
+
+        cordova.getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                DataSource datasrc = new DataSource.Builder()
+                        .setDataType(dt)
+                        .setAppPackageName(cordova.getActivity())
+                        .setName("BOGUS")
+                        .setType(DataSource.TYPE_RAW)
+                        .build();
+
+                DataSet dataSet = DataSet.create(datasrc);
+                DataPoint datapoint = DataPoint.create(datasrc);
+                datapoint.setTimeInterval(ts, ts, TimeUnit.MILLISECONDS);
+                if (dt == HealthDataTypes.TYPE_BLOOD_GLUCOSE) {
+                    datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).setFloat(1);
+                }
+                dataSet.add(datapoint);
+
+                Status insertStatus = Fitness.HistoryApi.insertData(mClient, dataSet)
+                        .await(1, TimeUnit.MINUTES);
+
+                if (insertStatus.isSuccess()) {
+                    // already authorised, go on
+                    onActivityResult(REQUEST_OATH_HEALTH, Activity.RESULT_OK, null);
+                } else {
+                    if (authAutoresolve) {
+                        if (insertStatus.hasResolution()) {
+                            try {
+                                insertStatus.startResolutionForResult(cordova.getActivity(), REQUEST_OATH_HEALTH);
+                            } catch (IntentSender.SendIntentException e) {
+                                authReqCallbackCtx.error("Cannot authorise health data type " + dt.getName() + ", cannot send intent: " + e.getMessage());
+                                return;
+                            }
+                        } else {
+                            authReqCallbackCtx.error("Cannot authorise health data type " + dt.getName() + ", " + insertStatus.getStatusMessage());
+                            return;
+                        }
+                    } else {
+                        // probably not authorized, send false
+                        Log.d(TAG, "Connection to Fit failed, probably because of authorization, giving up now");
+                        authReqCallbackCtx.sendPluginResult(new PluginResult(PluginResult.Status.OK, false));
+                        return;
+                    }
+                }
+            }
+        });
+    }
+
 
     // queries for datapoints
     private void query(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
@@ -873,21 +942,22 @@ public class HealthPlugin extends CordovaPlugin {
                     } else if (DT.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
                         JSONObject glucob = new JSONObject();
                         float glucose = datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).asFloat();
-                        if(datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL).isSet() &&
-                                datapoint.getValue(Field.FIELD_MEAL_TYPE).isSet()){
+                        glucob.put("glucose", glucose);
+                        if (datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL).isSet() &&
+                                datapoint.getValue(Field.FIELD_MEAL_TYPE).isSet()) {
                             int temp_to_meal = datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL).asInt();
                             String meal = "";
-                            if(temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_AFTER_MEAL){
+                            if (temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_AFTER_MEAL) {
                                 meal = "after_";
-                            } else if(temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_BEFORE_MEAL) {
+                            } else if (temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_BEFORE_MEAL) {
                                 meal = "before_";
-                            } else if(temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_FASTING) {
+                            } else if (temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_FASTING) {
                                 meal = "fasting";
-                            } else if(temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_GENERAL) {
+                            } else if (temp_to_meal == HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_GENERAL) {
                                 meal = "";
                             }
-                            if(temp_to_meal != HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_FASTING) {
-                                switch (datapoint.getValue(Field.FIELD_MEAL_TYPE).asInt()){
+                            if (temp_to_meal != HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_FASTING) {
+                                switch (datapoint.getValue(Field.FIELD_MEAL_TYPE).asInt()) {
                                     case Field.MEAL_TYPE_BREAKFAST:
                                         meal += "breakfast";
                                         break;
@@ -906,9 +976,9 @@ public class HealthPlugin extends CordovaPlugin {
                             }
                             glucob.put("meal", meal);
                         }
-                        if(datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_SLEEP).isSet()) {
+                        if (datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_SLEEP).isSet()) {
                             String sleep = "";
-                            switch (datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_SLEEP).asInt()){
+                            switch (datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_SLEEP).asInt()) {
                                 case HealthFields.TEMPORAL_RELATION_TO_SLEEP_BEFORE_SLEEP:
                                     sleep = "before_sleep";
                                     break;
@@ -922,11 +992,11 @@ public class HealthPlugin extends CordovaPlugin {
                                     sleep = "on_waking";
                                     break;
                             }
-                            glucob.put("meal", sleep);
+                            glucob.put("sleep", sleep);
                         }
-                        if(datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).isSet()) {
+                        if (datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).isSet()) {
                             String source = "";
-                            switch (datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).asInt()){
+                            switch (datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).asInt()) {
                                 case HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_CAPILLARY_BLOOD:
                                     source = "capillary_blood";
                                     break;
@@ -1523,12 +1593,71 @@ public class HealthPlugin extends CordovaPlugin {
                     datapoint.getValue(f).setInt(year);
             }
         } else if (dt.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
-            String value = args.getJSONObject(0).getString("value");
-            float glucose = Float.parseFloat(value);
+            JSONObject glucoseobj = args.getJSONObject(0).getJSONObject("value");
+            float glucose = (float) glucoseobj.getDouble("glucose");
             datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).setFloat(glucose);
+
+            if (glucoseobj.has("meal")) {
+                String meal = glucoseobj.getString("meal");
+                int mealType = Field.MEAL_TYPE_UNKNOWN;
+                int relationToMeal = HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_GENERAL;
+                if (meal.equalsIgnoreCase("fasting")) {
+                    mealType = Field.MEAL_TYPE_UNKNOWN;
+                    relationToMeal = HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_FASTING;
+                } else {
+                    if (meal.startsWith("before_")) {
+                        relationToMeal = HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_BEFORE_MEAL;
+                        meal = meal.substring("before_".length());
+                    } else if (meal.startsWith("after_")) {
+                        relationToMeal = HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL_AFTER_MEAL;
+                        meal = meal.substring("after_".length());
+                    }
+                    if (meal.equalsIgnoreCase("dinner")) {
+                        mealType = Field.MEAL_TYPE_DINNER;
+                    } else if (meal.equalsIgnoreCase("lunch")) {
+                        mealType = Field.MEAL_TYPE_LUNCH;
+                    } else if (meal.equalsIgnoreCase("snack")) {
+                        mealType = Field.MEAL_TYPE_SNACK;
+                    } else if (meal.equalsIgnoreCase("breakfast")) {
+                        mealType = Field.MEAL_TYPE_BREAKFAST;
+                    }
+                }
+                datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_MEAL).setInt(relationToMeal);
+                datapoint.getValue(Field.FIELD_MEAL_TYPE).setInt(mealType);
+            }
+
+            if (glucoseobj.has("sleep")) {
+                String sleep = glucoseobj.getString("sleep");
+                int relationToSleep = HealthFields.TEMPORAL_RELATION_TO_SLEEP_FULLY_AWAKE;
+                if (sleep.equalsIgnoreCase("before_sleep")) {
+                    relationToSleep = HealthFields.TEMPORAL_RELATION_TO_SLEEP_BEFORE_SLEEP;
+                } else if (sleep.equalsIgnoreCase("on_waking")) {
+                    relationToSleep = HealthFields.TEMPORAL_RELATION_TO_SLEEP_ON_WAKING;
+                } else if (sleep.equalsIgnoreCase("during_sleep")) {
+                    relationToSleep = HealthFields.TEMPORAL_RELATION_TO_SLEEP_DURING_SLEEP;
+                }
+                datapoint.getValue(HealthFields.FIELD_TEMPORAL_RELATION_TO_SLEEP).setInt(relationToSleep);
+            }
+
+            if (glucoseobj.has("source")) {
+                String source = glucoseobj.getString("source");
+                int specimenSource = HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_CAPILLARY_BLOOD;
+                if (source.equalsIgnoreCase("interstitial_fluid")) {
+                    specimenSource = HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_INTERSTITIAL_FLUID;
+                } else if (source.equalsIgnoreCase("plasma")) {
+                    specimenSource = HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_PLASMA;
+                } else if (source.equalsIgnoreCase("serum")) {
+                    specimenSource = HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_SERUM;
+                } else if (source.equalsIgnoreCase("tears")) {
+                    specimenSource = HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_TEARS;
+                } else if (source.equalsIgnoreCase("whole_blood")) {
+                    specimenSource = HealthFields.BLOOD_GLUCOSE_SPECIMEN_SOURCE_WHOLE_BLOOD;
+                }
+                datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).setInt(specimenSource);
+            }
+
         }
         dataSet.add(datapoint);
-
 
         Status insertStatus = Fitness.HistoryApi.insertData(mClient, dataSet)
                 .await(1, TimeUnit.MINUTES);
