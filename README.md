@@ -386,7 +386,7 @@ navigator.health.delete({
 
 ## Differences between HealthKit and Google Fit
 
-* HealthKit includes medical data (e.g. blood glucose), whereas Google Fit is only meant for fitness data (although now supports some medical data).
+* HealthKit includes medical data (e.g. blood glucose), whereas Google Fit is mainly meant for fitness data (although [now supports some medical data too](https://developers.google.com/android/reference/com/google/android/gms/fitness/data/HealthDataTypes)).
 * HealthKit provides a data model that is not extensible, whereas Google Fit allows defining custom data types.
 * HealthKit allows to insert data with the unit of measurement of your choice, and automatically translates units when queried, whereas Google Fit uses fixed units of measurement.
 * HealthKit automatically counts steps and distance when you carry your phone with you and if your phone has the CoreMotion chip, whereas Google Fit also detects the kind of activity (sedentary, running, walking, cycling, in vehicle).
