@@ -261,9 +261,9 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             res.value = {
               glucose: samples[i].quantity
             }
-            if (data.metadata && data.metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = data.metadata.HKMetadataKeyBloodGlucoseMealTime;
-            if (data.metadata && data.metadata.HKMetadataKeyBloodGlucoseSleepTime) res.value.sleep = data.metadata.HKMetadataKeyBloodGlucoseSleepTime;
-            if (data.metadata && data.metadata.HKMetadataKeyBloodGlucoseSource) res.value.source = data.metadata.HKMetadataKeyBloodGlucoseSource;
+            if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime;
+            if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime) res.value.sleep = samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime;
+            if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSource) res.value.source = samples[i].metadata.HKMetadataKeyBloodGlucoseSource;
           } else {
             res.value = samples[i].quantity;
           }

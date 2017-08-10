@@ -352,8 +352,6 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 
     HKUnit *unit = nil;
     @try {
-        
-        ///// ADD THIS CODE
         if (unitTypeString != nil) {
             if ([unitTypeString isEqualToString:@"mmol/L"]) {
                 // @see https://stackoverflow.com/a/30196642/1214598
