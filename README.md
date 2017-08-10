@@ -123,10 +123,7 @@ Example values:
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
 | fat_percentage | 31.2                              |
-| blood_glucose  | { glucose: 5.5, meal: 'breakfast', sleep: 'fully_awake', source: 'capillary_blood' }<br />**Note**: to convert to mg/dL, multiply by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose)).
-"meal" can be: 'fasting', 'breakfast', 'dinner', 'lunch', 'snack', 'unknown', 'before_breakfast', 'before_dinner', 'before_lunch', 'before_snack', 'after_breakfast', 'after_dinner', 'after_lunch', 'after_snack'
-"sleep" can be: 'fully_awake', 'before_sleep', 'on_waking', 'during_sleep'
-"source" can be: 'capillary_blood' ,'interstitial_fluid', 'plasma', 'serum', 'tears', whole_blood' |
+| blood_glucose  | { glucose: 5.5, meal: 'breakfast', sleep: 'fully_awake', source: 'capillary_blood' }<br />**Note**: to convert to mg/dL, multiply by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose)).<br />"meal" can be: 'fasting', 'breakfast', 'dinner', 'lunch', 'snack', 'unknown', 'before_breakfast', 'before_dinner', 'before_lunch', 'before_snack', 'after_breakfast', 'after_dinner', 'after_lunch', 'after_snack'<br />"sleep" can be: 'fully_awake', 'before_sleep', 'on_waking', 'during_sleep'<br />"source" can be: 'capillary_blood' ,'interstitial_fluid', 'plasma', 'serum', 'tears', whole_blood' |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
 | nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } }<br />**Note**: the `brand_name` property is only available on iOS |
