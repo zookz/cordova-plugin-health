@@ -194,6 +194,10 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 - Be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the authorization will ensure that the app is connected again.
 - In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
 
+#### iOS quirks
+
+- The datatype `activity` also includes sleep. If you want to get authorization only for workouts, you can specify `workouts` as datatype, but be aware that this is only availabe in iOS.
+
 
 ### isAuthorized()
 
@@ -255,6 +259,7 @@ navigator.health.query({
 - When querying for nutrition, HealthKit only returns those stored as correlation. To be sure to get all stored quantities, it's better to query nutrients individually (e.g. MyFitnessPal doesn't store meals as correlations).
 - nutrition.vitamin_a is given in micrograms. Automatic conversion to international units is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 - When querying for activities, only events whose startDate and endDate are **both** in the query range will be returned.
+- If you want to query for activity but only want workouts, you can specify the `workouts` datatype, but be aware that this will only be availabe in iOS.
 
 #### Android quirks
 
