@@ -15,6 +15,7 @@ dataTypes['weight'] = 'HKQuantityTypeIdentifierBodyMass';
 dataTypes['heart_rate'] = 'HKQuantityTypeIdentifierHeartRate';
 dataTypes['fat_percentage'] = 'HKQuantityTypeIdentifierBodyFatPercentage';
 dataTypes['activity'] = 'HKWorkoutTypeIdentifier'; // and HKCategoryTypeIdentifierSleepAnalysis
+dataTypes['workouts'] = 'HKWorkoutTypeIdentifier'; 
 dataTypes['nutrition'] = 'HKCorrelationTypeIdentifierFood';
 dataTypes['nutrition.calories'] = 'HKQuantityTypeIdentifierDietaryEnergyConsumed';
 dataTypes['nutrition.fat.total'] = 'HKQuantityTypeIdentifierDietaryFatTotal';
