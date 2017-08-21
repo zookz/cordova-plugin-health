@@ -15,7 +15,7 @@ dataTypes['weight'] = 'HKQuantityTypeIdentifierBodyMass';
 dataTypes['heart_rate'] = 'HKQuantityTypeIdentifierHeartRate';
 dataTypes['fat_percentage'] = 'HKQuantityTypeIdentifierBodyFatPercentage';
 dataTypes['activity'] = 'HKWorkoutTypeIdentifier'; // and HKCategoryTypeIdentifierSleepAnalysis
-dataTypes['workouts'] = 'HKWorkoutTypeIdentifier'; 
+dataTypes['workouts'] = 'HKWorkoutTypeIdentifier';
 dataTypes['nutrition'] = 'HKCorrelationTypeIdentifierFood';
 dataTypes['nutrition.calories'] = 'HKQuantityTypeIdentifierDietaryEnergyConsumed';
 dataTypes['nutrition.fat.total'] = 'HKQuantityTypeIdentifierDietaryFatTotal';
@@ -197,7 +197,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
       };
       onSuccess(res);
     }, onError);
-  } else if (opts.dataType === 'activity') {
+  } else if (opts.dataType === 'activity' || opts.dataType === 'workouts') {
     // opts is not really used, the plugin just returns ALL workouts
     window.plugins.healthkit.findWorkouts(opts, function (data) {
       var result = [];
@@ -216,22 +216,24 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           result.push(res);
         }
       }
-      // get sleep analysis also
-      opts.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
-      window.plugins.healthkit.querySampleType(opts, function (data) {
-        for (var i = 0; i < data.length; i++) {
-          var res = {};
-          res.startDate = new Date(data[i].startDate);
-          res.endDate = new Date(data[i].endDate);
-          if (data[i].value == 0) res.value = 'sleep.awake';
-          else res.value = 'sleep';
-          res.unit = 'activityType';
-          res.sourceName = data[i].sourceName;
-          res.sourceBundleId = data[i].sourceBundleId;
-          result.push(res);
-        }
-        onSuccess(result);
-      }, onError);
+      if(opts.dataType === 'activity') {
+        // get sleep analysis also
+        opts.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
+        window.plugins.healthkit.querySampleType(opts, function (data) {
+          for (var i = 0; i < data.length; i++) {
+            var res = {};
+            res.startDate = new Date(data[i].startDate);
+            res.endDate = new Date(data[i].endDate);
+            if (data[i].value == 0) res.value = 'sleep.awake';
+            else res.value = 'sleep';
+            res.unit = 'activityType';
+            res.sourceName = data[i].sourceName;
+            res.sourceBundleId = data[i].sourceBundleId;
+            result.push(res);
+          }
+          onSuccess(result);
+        }, onError);
+      } else onSuccess(result);
     }, onError);
   } else if (opts.dataType === 'nutrition') {
     var result = [];
