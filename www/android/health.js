@@ -175,6 +175,7 @@ Health.prototype.toFitActivity = function (act) {
   if (act === 'stairs') return 'stair_climbing';
   if (act === 'wheelchair.walkpace') return 'wheelchair';
   if (act === 'wheelchair.runpace') return 'wheelchair';
+  if (act === 'sleep.inBed') return 'sleep.awake';
   // unsupported activities are mapped to 'other'
   if ((act === 'archery') ||
   (act === 'barre') ||

@@ -224,8 +224,9 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             var res = {};
             res.startDate = new Date(data[i].startDate);
             res.endDate = new Date(data[i].endDate);
-            if (data[i].value == 0) res.value = 'sleep.awake';
-            else res.value = 'sleep';
+            if (data[i].value == 0) res.value = 'sleep.inBed';
+            else if (data[i].value == 1) res.value = 'sleep';
+            else res.value = 'sleep.awake';
             res.unit = 'activityType';
             res.sourceName = data[i].sourceName;
             res.sourceBundleId = data[i].sourceBundleId;
@@ -423,9 +424,13 @@ Health.prototype.store = function (data, onSuccess, onError) {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
       data.value = 'HKCategoryValueSleepAnalysisAsleep';
       window.plugins.healthkit.saveSample(data, onSuccess, onError);
-    } else if (data.value === 'sleep.awake') {
+    } else if (data.value === 'sleep.inBed') {
       data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
       data.value = 'HKCategoryValueSleepAnalysisInBed';
+      window.plugins.healthkit.saveSample(data, onSuccess, onError);
+    } else if (data.value === 'sleep.awake') {
+      data.sampleType = 'HKCategoryTypeIdentifierSleepAnalysis';
+      data.value = 'HKCategoryValueSleepAnalysisAwake';
       window.plugins.healthkit.saveSample(data, onSuccess, onError);
     } else {
       // some other kind of workout

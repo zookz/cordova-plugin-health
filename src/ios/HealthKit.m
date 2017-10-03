@@ -262,7 +262,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     if ([inputDictionary objectForKey:HKPluginKeyUnit]) {
         if (![inputDictionary hasAllRequiredKeys:@[HKPluginKeyUnit] error:error]) return nil;
         NSString *unitString = [inputDictionary objectForKey:HKPluginKeyUnit];
-        
+
             return [HealthKit getHKQuantitySampleWithStartDate:startDate
                                                    endDate:endDate
                                           sampleTypeString:sampleTypeString
@@ -409,7 +409,8 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     NSDictionary * map = @{
       @"HKCategoryTypeIdentifierSleepAnalysis":@{
         @"HKCategoryValueSleepAnalysisInBed":@(HKCategoryValueSleepAnalysisInBed),
-        @"HKCategoryValueSleepAnalysisAsleep":@(HKCategoryValueSleepAnalysisAsleep)
+        @"HKCategoryValueSleepAnalysisAsleep":@(HKCategoryValueSleepAnalysisAsleep),
+        @"HKCategoryValueSleepAnalysisAwake":@(HKCategoryValueSleepAnalysisAwake)
       }
     };
 
