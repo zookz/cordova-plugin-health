@@ -124,7 +124,7 @@ Example values:
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
 | fat_percentage | 31.2                              |
-| blood_glucose  | { glucose: 5.5, meal: 'breakfast', sleep: 'fully_awake', source: 'capillary_blood' }<br />**Notes**: <br />to convert to mg/dL, multiply by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose))<br />`meal` can be: 'fasting', 'breakfast', 'dinner', 'lunch', 'snack', 'unknown', 'before_breakfast', 'before_dinner', 'before_lunch', 'before_snack', 'after_breakfast', 'after_dinner', 'after_lunch', 'after_snack'<br />`sleep` can be: 'fully_awake', 'before_sleep', 'on_waking', 'during_sleep'<br />`source` can be: 'capillary_blood' ,'interstitial_fluid', 'plasma', 'serum', 'tears', whole_blood' |
+| blood_glucose  | { glucose: 5.5, meal: 'breakfast', sleep: 'fully_awake', source: 'capillary_blood' }<br />**Notes**: <br />to convert to mg/dL, multiply by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose))<br />`meal` can be: 'before_meal' (iOS only), 'after_meal' (iOS only), 'fasting', 'breakfast', 'dinner', 'lunch', 'snack', 'unknown', 'before_breakfast', 'before_dinner', 'before_lunch', 'before_snack', 'after_breakfast', 'after_dinner', 'after_lunch', 'after_snack'<br />`sleep` can be: 'fully_awake', 'before_sleep', 'on_waking', 'during_sleep'<br />`source` can be: 'capillary_blood' ,'interstitial_fluid', 'plasma', 'serum', 'tears', whole_blood' |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
 | nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } }<br />**Note**: the `brand_name` property is only available on iOS |
@@ -198,7 +198,6 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 
 - The datatype `activity` also includes sleep. If you want to get authorization only for workouts, you can specify `workouts` as datatype, but be aware that this is only availabe in iOS.
 
-
 ### isAuthorized()
 
 Check if the app has authorization to read/write a set of datatypes.
@@ -260,6 +259,7 @@ navigator.health.query({
 - nutrition.vitamin_a is given in micrograms. Automatic conversion to international units is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 - When querying for activities, only events whose startDate and endDate are **both** in the query range will be returned.
 - If you want to query for activity but only want workouts, you can specify the `workouts` datatype, but be aware that this will only be availabe in iOS.
+- The blood glucose meal information is stored by the Health App as preprandial (before a meal) or postprandial (after a meal), which are mapped to 'before_meal' and 'after_meal'. These two specific values are only used in iOS and can't be used in Android apps.
 
 #### Android quirks
 
@@ -350,9 +350,10 @@ navigator.health.store({
 
 #### iOS quirks
 
-- In iOS, when storing an activity, you can also specify calories (active, in kcal) and distance (walked or run, in meters). For example: `dataType: 'activity', value: 'walking', calories: 20, distance: 520`. Be aware, though, that you need permission to write calories and distance first, or the call will fail.
+- When storing an activity, you can also specify calories (active, in kcal) and distance (walked or run, in meters). For example: `dataType: 'activity', value: 'walking', calories: 20, distance: 520`. Be aware, though, that you need permission to write calories and distance first, or the call will fail.
 - In iOS you cannot store the total calories, you need to specify either basal or active. If you use total calories, the active ones will be stored.
 - In iOS distance is assumed to be of type WalkingRunning, if you want to explicitly set it to Cycling you need to add the field `cycling: true`.
+- The blood glucose meal information can be stored as 'before_meal' and 'after_meal', but these two can't be used in Android apps.
 
 #### Android quirks
 

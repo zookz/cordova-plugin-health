@@ -265,7 +265,11 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             res.value = {
               glucose: samples[i].quantity
             }
-            if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime;
+            if (samples[i].metadata && samples[i].metadata.HKBloodGlucoseMealTime) {
+				if(samples[i].metadata.HKBloodGlucoseMealTime == 1) res.value.meal = 'before_meal'
+				else res.value.meal = 'after_meal'
+			}
+			if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime; // overwrite HKBloodGlucoseMealTime
             if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime) res.value.sleep = samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime;
             if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSource) res.value.source = samples[i].metadata.HKMetadataKeyBloodGlucoseSource;
           } else {
@@ -478,7 +482,11 @@ Health.prototype.store = function (data, onSuccess, onError) {
     if (data.dataType === 'blood_glucose') {
       data.amount = data.value.glucose;
       if (!data.metadata) data.metadata = {};
-      if (data.value.meal) data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
+      if (data.value.meal) {
+		  data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
+		  if (data.value.meal.startsWith('before_')) data.metadata.HKBloodGlucoseMealTime = 1;
+		  else if (data.value.meal.startsWith('after_')) data.metadata.HKBloodGlucoseMealTime = 0;
+	  }
       if (data.value.sleep) data.metadata.HKMetadataKeyBloodGlucoseSleepTime = data.value.sleep;
       if (data.value.source) data.metadata.HKMetadataKeyBloodGlucoseSource = data.value.source;
     } else {
