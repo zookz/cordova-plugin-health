@@ -893,8 +893,12 @@ public class HealthPlugin extends CordovaPlugin {
                             Value nutrients = datapoint.getValue(Field.FIELD_NUTRIENTS);
                             NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);
                             if (fieldInfo != null) {
-                                obj.put("value", (float) nutrients.getKeyValue(fieldInfo.field));
-                                obj.put("unit", fieldInfo.unit);
+								if (nutrients.getKeyValue(fieldInfo.field) != null) {
+									obj.put("value", (float) nutrients.getKeyValue(fieldInfo.field));
+								} else {
+									obj.put("value", 0f);
+								}
+								obj.put("unit", fieldInfo.unit);
                             }
                         }
                     } else if (DT.equals(DataType.TYPE_CALORIES_EXPENDED)) {
