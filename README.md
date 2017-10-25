@@ -72,7 +72,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | calories        | kcal  | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned | TYPE_CALORIES_EXPENDED |
 | calories.active | kcal  | HKQuantityTypeIdentifierActiveEnergyBurned    | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
 | calories.basal  | kcal  | HKQuantityTypeIdentifierBasalEnergyBurned     | TYPE_BASAL_METABOLIC_RATE * time window  |
-| activity        |       | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT  |
+| activity        | activityType | HKWorkoutTypeIdentifier + HKCategoryTypeIdentifierSleepAnalysis | TYPE_ACTIVITY_SEGMENT  |
 | height          | m     | HKQuantityTypeIdentifierHeight                | TYPE_HEIGHT                              |
 | weight          | kg    | HKQuantityTypeIdentifierBodyMass              | TYPE_WEIGHT                              |
 | heart_rate      | count/min | HKQuantityTypeIdentifierHeartRate         | TYPE_HEART_RATE_BPM                      |
