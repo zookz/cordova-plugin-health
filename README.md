@@ -120,7 +120,8 @@ Example values:
 | steps          | 34                                |
 | distance       | 101.2                             |
 | calories       | 245.3                             |
-| activity       | "walking"<br />**Note**: recognized activities and their mappings in Google Fit / HealthKit can be found [here](activities_map.md) |
+| activity       | "walking"<br />**Notes**: recognized activities and their mappings in Google Fit / HealthKit can be found [here] <br /> in iOS the query also returns calories (kcal) and distance (m)
+(activities_map.md) |
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
