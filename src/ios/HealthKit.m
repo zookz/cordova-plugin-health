@@ -808,8 +808,8 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 
                         NSEnergyFormatter *energyFormatter = [NSEnergyFormatter new];
                         energyFormatter.forFoodEnergyUse = NO;
-                        double joules = [workout.totalEnergyBurned doubleValueForUnit:[HKUnit kilocalorieUnit]];
-                        NSString *calories = [energyFormatter stringFromJoules:joules];
+                        double cals = [workout.totalEnergyBurned doubleValueForUnit:[HKUnit kilocalorieUnit]];
+                        NSString *calories = [energyFormatter stringFromValue:cals unit:[HKUnit kilocalorieUnit]];
 
                         NSMutableDictionary *entry = [
                                 @{
