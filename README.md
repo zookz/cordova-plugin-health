@@ -44,6 +44,23 @@ Phonegap Build `config.xml`:
 </config-file>
 ```
 
+If, for some reason, the Info.plist loses the HEALTH_READ_PERMISSION and HEALTH_WRITE_PERMISSION, you probably need to add the following to your project's package.json:
+
+```
+{
+  "cordova": {
+    "plugins": {
+     "cordova-plugin-health": {
+        "HEALTH_READ_PERMISSION": "App needs read access",
+        "HEALTH_WRITE_PERMISSION": "App needs write access"
+      },
+    },
+  }
+}
+```
+
+This is known to happen when using the Ionic Package cloud service. 
+
 ## iOS requirements
 
 * Make sure your app id has the 'HealthKit' entitlement when this plugin is installed (see iOS dev center).
