@@ -311,7 +311,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   if ((opts.dataType !== 'steps') && (opts.dataType !== 'distance') &&
   (opts.dataType !== 'calories') && (opts.dataType !== 'calories.active') &&
   (opts.dataType !== 'calories.basal') && (opts.dataType !== 'activity') &&
-  (!opts.dataType.startsWith('nutrition'))) {
+  (opts.dataType !== 'workouts') && (!opts.dataType.startsWith('nutrition'))) {
     // unsupported datatype
     onError('Datatype ' + opts.dataType + ' not supported in queryAggregated');
     return;
@@ -323,7 +323,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
   if (opts.bucket) {
     // ----- with buckets
     opts.aggregation = opts.bucket;
-    if (opts.dataType === 'activity') {
+    if (opts.dataType === 'activity' || opts.dataType === 'workouts') {
       // query and manually aggregate
       navigator.health.query(opts, function (data) {
         onSuccess(bucketize(data, opts.bucket, startD, endD, 'activitySummary', mergeActivitySamples));
@@ -361,7 +361,7 @@ Health.prototype.queryAggregated = function (opts, onSuccess, onError) {
     }
   } else {
     // ---- no bucketing, just sum
-    if (opts.dataType === 'activity') {
+    if (opts.dataType === 'activity' || opts.dataType === 'workouts') {
       navigator.health.query(opts, function (data) {
         // manually aggregate by activity
         onSuccess(aggregateIntoResult(data, 'activitySummary', mergeActivitySamples));
