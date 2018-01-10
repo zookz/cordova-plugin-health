@@ -36,6 +36,7 @@ dataTypes['nutrition.iron'] = 'HKQuantityTypeIdentifierDietaryIron';
 dataTypes['nutrition.water'] = 'HKQuantityTypeIdentifierDietaryWater';
 dataTypes['nutrition.caffeine'] = 'HKQuantityTypeIdentifierDietaryCaffeine';
 dataTypes['blood_glucose'] = 'HKQuantityTypeIdentifierBloodGlucose';
+dataTypes['insulin'] = 'HKQuantityTypeIdentifierInsulinDelivery';
 
 var units = [];
 units['steps'] = 'count';
@@ -67,6 +68,7 @@ units['nutrition.iron'] = 'mg';
 units['nutrition.water'] = 'ml';
 units['nutrition.caffeine'] = 'g';
 units['blood_glucose'] = 'mmol/L';
+units['insulin'] = 'IU';
 
 Health.prototype.isAvailable = function (success, error) {
   window.plugins.healthkit.available(success, error);
@@ -266,12 +268,21 @@ Health.prototype.query = function (opts, onSuccess, onError) {
               glucose: samples[i].quantity
             }
             if (samples[i].metadata && samples[i].metadata.HKBloodGlucoseMealTime) {
-				if(samples[i].metadata.HKBloodGlucoseMealTime == 1) res.value.meal = 'before_meal'
-				else res.value.meal = 'after_meal'
-			}
-			if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime; // overwrite HKBloodGlucoseMealTime
+    				  if(samples[i].metadata.HKBloodGlucoseMealTime == 1) res.value.meal = 'before_meal'
+      				else res.value.meal = 'after_meal'
+      			}
+      			if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime; // overwrite HKBloodGlucoseMealTime
             if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime) res.value.sleep = samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime;
             if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSource) res.value.source = samples[i].metadata.HKMetadataKeyBloodGlucoseSource;
+          } else if (opts.dataType === 'insulin') {
+            res.value = {
+              insulin: samples[i].quantity
+            }
+            if (samples[i].metadata && samples[i].metadata.HKInsulinDeliveryReason) {
+              if(samples[i].metadata.HKInsulinDeliveryReason == 1) res.value.reason = 'basal'
+              else res.value.reason = 'bolus'
+            }
+            if (samples[i].metadata && samples[i].metadata.HKMetadataKeyInsulinDeliveryReason) res.value.reason = samples[i].metadata.HKMetadataKeyInsulinDeliveryReason; // overwrite HKInsulinDeliveryReason
           } else {
             res.value = samples[i].quantity;
           }
@@ -483,12 +494,20 @@ Health.prototype.store = function (data, onSuccess, onError) {
       data.amount = data.value.glucose;
       if (!data.metadata) data.metadata = {};
       if (data.value.meal) {
-		  data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
-		  if (data.value.meal.startsWith('before_')) data.metadata.HKBloodGlucoseMealTime = 1;
-		  else if (data.value.meal.startsWith('after_')) data.metadata.HKBloodGlucoseMealTime = 0;
-	  }
+  		  data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
+  		  if (data.value.meal.startsWith('before_')) data.metadata.HKBloodGlucoseMealTime = 1;
+  		  else if (data.value.meal.startsWith('after_')) data.metadata.HKBloodGlucoseMealTime = 0;
+  	  }
       if (data.value.sleep) data.metadata.HKMetadataKeyBloodGlucoseSleepTime = data.value.sleep;
       if (data.value.source) data.metadata.HKMetadataKeyBloodGlucoseSource = data.value.source;
+    } else if (data.dataType === 'insulin') {
+      data.amount = data.value.insulin;
+      if (!data.metadata) data.metadata = {};
+      if (data.value.reason) {
+        data.metadata.HKMetadataKeyInsulinDeliveryReason = data.value.reason;
+        if (data.value.reason.toLowerCase() === 'basal') data.metadata.HKInsulinDeliveryReason = 1;
+        else if (data.value.reason.toLowerCase() === 'bolus') data.metadata.HKInsulinDeliveryReason = 2;
+      }
     } else {
       data.amount = data.value;
     }
