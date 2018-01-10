@@ -142,6 +142,7 @@ Example values:
 | calories       | 245.3                             |
 | activity       | "walking"<br />**Notes**: recognized activities and their mappings in Google Fit / HealthKit can be found [here] <br /> in iOS the query also returns calories (kcal) and distance (m)
 (activities_map.md) |
+| activitydistcal | type only supported for google fit <br /> it returns distance (m) and calories (kcal) per activity (use activity for the same result on iOS) |
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
@@ -215,6 +216,7 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 - It will try to get authorization from the Google fitness APIs. It is necessary that the app's package name and the signing key are registered in the Google API console (see [here](https://developers.google.com/fit/android/get-api-key)).
 - Be aware that if the activity is destroyed (e.g. after a rotation) or is put in background, the connection to Google Fit may be lost without any callback. Going through the authorization will ensure that the app is connected again.
 - In Android 6 and over, this function will also ask for some dynamic permissions if needed (e.g. in the case of "distance", it will need access to ACCESS_FINE_LOCATION).
+- If using activitydistcal then you need to request permission for distance.
 
 #### iOS quirks
 
@@ -326,6 +328,7 @@ The following table shows what types are supported and examples of the returned 
 | calories.active | { startDate: Date, endDate: Date, value: 3547.4, unit: 'kcal' } |
 | calories.basal  | { startDate: Date, endDate: Date, value: 13146.1, unit: 'kcal' } |
 | activity        | { startDate: Date, endDate: Date, value: { still: { duration: 520000, calories: 30, distance: 0 }, walking: { duration: 223000, calories: 20, distance: 15 }}, unit: 'activitySummary' }<br />**Note:** duration is expressed in milliseconds, distance in meters and calories in kcal |
+| activitydistcal | as activity but includes calories and distance on android |
 | nutrition       | { startDate: Date, endDate: Date, value: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 }, unit: 'nutrition' }<br />**Note:** units of measurement for nutrients are fixed according to the table at the beginning of this README |
 | nutrition.x     | { startDate: Date, endDate: Date, value: 23, unit: 'mg'} |
 
@@ -338,11 +341,13 @@ The following table shows what types are supported and examples of the returned 
 #### iOS quirks
 
 - Activities in HealthKit may include two extra fields: calories (kcal) and distance (m)
+- activitydistcal is not supported on iOS
 - When querying for nutrition, HealthKit only returns those stored as correlation. To be sure to get all stored quantities, it's better to query nutrients individually (e.g. MyFitnessPal doesn't store meals as correlations).
 - nutrition.vitamin_a is given in micrograms. Automatic conversion to international units is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
 #### Android quirks
-
+- activity - android does not include distance or calories, use activitydistcal for this
+- activitydistcal includes the two extra fields: calories (kcal) and distance (m).
 - To query for steps as filtered by the Google Fit app, the flag `filtered: true` must be added into the query object.
 - nutrition.vitamin_a is given in international units. Automatic conversion to micrograms is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
