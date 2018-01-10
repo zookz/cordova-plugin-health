@@ -36,6 +36,7 @@ dataTypes['nutrition.iron'] = 'HKQuantityTypeIdentifierDietaryIron';
 dataTypes['nutrition.water'] = 'HKQuantityTypeIdentifierDietaryWater';
 dataTypes['nutrition.caffeine'] = 'HKQuantityTypeIdentifierDietaryCaffeine';
 dataTypes['blood_glucose'] = 'HKQuantityTypeIdentifierBloodGlucose';
+dataTypes['insulin'] = 'HKQuantityTypeIdentifierInsulinDelivery';
 
 var units = [];
 units['steps'] = 'count';
@@ -266,12 +267,14 @@ Health.prototype.query = function (opts, onSuccess, onError) {
               glucose: samples[i].quantity
             }
             if (samples[i].metadata && samples[i].metadata.HKBloodGlucoseMealTime) {
-				if(samples[i].metadata.HKBloodGlucoseMealTime == 1) res.value.meal = 'before_meal'
-				else res.value.meal = 'after_meal'
-			}
-			if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime; // overwrite HKBloodGlucoseMealTime
+    				  if(samples[i].metadata.HKBloodGlucoseMealTime == 1) res.value.meal = 'before_meal'
+      				else res.value.meal = 'after_meal'
+      			}
+      			if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime) res.value.meal = samples[i].metadata.HKMetadataKeyBloodGlucoseMealTime; // overwrite HKBloodGlucoseMealTime
             if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime) res.value.sleep = samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime;
             if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSource) res.value.source = samples[i].metadata.HKMetadataKeyBloodGlucoseSource;
+          } else if (opts.dataType === 'insulin') {
+res.value = JSON.stringify(samples[i]);
           } else {
             res.value = samples[i].quantity;
           }
