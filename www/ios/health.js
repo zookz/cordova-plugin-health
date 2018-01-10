@@ -496,7 +496,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
       if (data.value.meal) {
   		  data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
   		  if (data.value.meal.startsWith('before_')) data.metadata.HKBloodGlucoseMealTime = 1;
-  		  else if (data.value.meal.startsWith('after_')) data.metadata.HKBloodGlucoseMealTime = 0;
+  		  else if (data.value.meal.startsWith('after_')) data.metadata.HKBloodGlucoseMealTime = 2;
   	  }
       if (data.value.sleep) data.metadata.HKMetadataKeyBloodGlucoseSleepTime = data.value.sleep;
       if (data.value.source) data.metadata.HKMetadataKeyBloodGlucoseSource = data.value.source;
