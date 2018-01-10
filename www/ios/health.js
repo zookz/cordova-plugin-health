@@ -275,7 +275,14 @@ Health.prototype.query = function (opts, onSuccess, onError) {
             if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime) res.value.sleep = samples[i].metadata.HKMetadataKeyBloodGlucoseSleepTime;
             if (samples[i].metadata && samples[i].metadata.HKMetadataKeyBloodGlucoseSource) res.value.source = samples[i].metadata.HKMetadataKeyBloodGlucoseSource;
           } else if (opts.dataType === 'insulin') {
-res.value = JSON.stringify(samples[i]);
+            res.value = {
+              insulin: samples[i].quantity
+            }
+            if (samples[i].metadata && samples[i].metadata.HKInsulinDeliveryReason) {
+              if(samples[i].metadata.HKInsulinDeliveryReason == 1) res.value.reason = 'basal'
+              else res.value.reason = 'bolus'
+            }
+            if (samples[i].metadata && samples[i].metadata.HKMetadataKeyInsulinDeliveryReason) res.value.reason = samples[i].metadata.HKMetadataKeyInsulinDeliveryReason; // overwrite HKInsulinDeliveryReason
           } else {
             res.value = samples[i].quantity;
           }
@@ -487,12 +494,20 @@ Health.prototype.store = function (data, onSuccess, onError) {
       data.amount = data.value.glucose;
       if (!data.metadata) data.metadata = {};
       if (data.value.meal) {
-		  data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
-		  if (data.value.meal.startsWith('before_')) data.metadata.HKBloodGlucoseMealTime = 1;
-		  else if (data.value.meal.startsWith('after_')) data.metadata.HKBloodGlucoseMealTime = 0;
-	  }
+  		  data.metadata.HKMetadataKeyBloodGlucoseMealTime = data.value.meal;
+  		  if (data.value.meal.startsWith('before_')) data.metadata.HKBloodGlucoseMealTime = 1;
+  		  else if (data.value.meal.startsWith('after_')) data.metadata.HKBloodGlucoseMealTime = 0;
+  	  }
       if (data.value.sleep) data.metadata.HKMetadataKeyBloodGlucoseSleepTime = data.value.sleep;
       if (data.value.source) data.metadata.HKMetadataKeyBloodGlucoseSource = data.value.source;
+    } else if (data.dataType === 'insulin') {
+      data.amount = data.value.insulin;
+      if (!data.metadata) data.metadata = {};
+      if (data.value.reason) {
+        data.metadata.HKMetadataKeyInsulinDeliveryReason = data.value.reason;
+        if (data.value.reason.toLowerCase() === 'basal') data.metadata.HKInsulinDeliveryReason = 1;
+        else if (data.value.reason.toLowerCase() === 'bolus') data.metadata.HKInsulinDeliveryReason = 2;
+      }
     } else {
       data.amount = data.value;
     }
