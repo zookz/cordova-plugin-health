@@ -557,7 +557,7 @@ public class HealthPlugin extends CordovaPlugin {
         }
 
         dynPerms.clear();
-        if (locationscope == READ_PERMS || locationscope == READ_WRITE_PERMS)
+        if (locationscope == READ_PERMS || locationscope == READ_WRITE_PERMS || activityscope == READ_PERMS || activityscope == READ_WRITE_PERMS) //activity requires access to location to report distace
             dynPerms.add(Manifest.permission.ACCESS_FINE_LOCATION);
         if (bodyscope == READ_PERMS || bodyscope == READ_WRITE_PERMS)
             dynPerms.add(Manifest.permission.BODY_SENSORS);
@@ -577,10 +577,10 @@ public class HealthPlugin extends CordovaPlugin {
         } else if (activityscope == READ_WRITE_PERMS) {
             builder.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE));
         }
-        if (locationscope == READ_PERMS) {
-            builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ));
-        } else if (locationscope == READ_WRITE_PERMS) {
+        if (locationscope == READ_WRITE_PERMS) { //specifially request read write permission for location.
             builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ_WRITE));
+        } else if (locationscope == READ_PERMS || activityscope == READ_PERMS || activityscope == READ_WRITE_PERMS) { // if read permission request for location or any read/write permissions for activities were requested then give read location
+            builder.addScope(new Scope(Scopes.FITNESS_LOCATION_READ));
         }
         if (nutritionscope == READ_PERMS) {
             builder.addScope(new Scope(Scopes.FITNESS_NUTRITION_READ));
@@ -929,6 +929,54 @@ public class HealthPlugin extends CordovaPlugin {
                         String activity = datapoint.getValue(Field.FIELD_ACTIVITY).asActivity();
                         obj.put("value", activity);
                         obj.put("unit", "activityType");
+
+                        //extra queries to get calorie and distance records related to the activity times
+                        DataReadRequest readActivityRequest = new DataReadRequest.Builder()
+                                .setTimeRange(datapoint.getStartTime(TimeUnit.MILLISECONDS), datapoint.getEndTime(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
+                                .read(DataType.TYPE_DISTANCE_DELTA)
+                                .read(DataType.TYPE_CALORIES_EXPENDED)
+                                .build();
+
+                        DataReadResult dataReadActivityResult = Fitness.HistoryApi.readData(mClient, readActivityRequest).await();
+
+                        if (dataReadActivityResult.getStatus().isSuccess()) {
+                            JSONArray distanceDataPoints = new JSONArray();
+                            JSONArray calorieDataPoints = new JSONArray();
+                            
+                            List<DataSet> dataActivitySets = dataReadActivityResult.getDataSets();
+                            for (DataSet dataActivitySet : dataActivitySets) {
+                                for (DataPoint dataActivityPoint : dataActivitySet.getDataPoints()) {
+
+                                    JSONObject activityObj = new JSONObject();
+                                    
+                                    activityObj.put("startDate", dataActivityPoint.getStartTime(TimeUnit.MILLISECONDS));
+                                    activityObj.put("endDate", dataActivityPoint.getEndTime(TimeUnit.MILLISECONDS));
+                                    DataSource dataActivitySource = dataActivityPoint.getOriginalDataSource();
+                                    if (dataSource != null) {
+                                        String sourceName = dataActivitySource.getName();
+                                        if (sourceName != null) activityObj.put("sourceName", sourceName);
+                                        String sourceBundleId = dataSource.getAppPackageName();
+                                        if (sourceBundleId != null) activityObj.put("sourceBundleId", sourceBundleId);
+                                    }
+
+                                    if (dataActivitySet.getDataType().equals(DataType.TYPE_DISTANCE_DELTA))
+                                    {
+                                        float distance = dataActivityPoint.getValue(Field.FIELD_DISTANCE).asFloat();
+                                        activityObj.put("value", distance);
+                                        activityObj.put("unit", "m");
+                                        distanceDataPoints.put(activityObj);
+                                    } else {
+                                        // calories
+                                        float calories = dataActivityPoint.getValue(Field.FIELD_CALORIES).asFloat();
+                                        activityObj.put("value", calories);
+                                        activityObj.put("unit", "kcal");
+                                        calorieDataPoints.put(activityObj);
+                                    }
+                                }
+                            }
+                            obj.put("distance", distanceDataPoints);
+                            obj.put("calories", calorieDataPoints);
+                        }                                  
                     } else if (DT.equals(customdatatypes.get("gender"))) {
                         for (Field f : customdatatypes.get("gender").getFields()) {
                             //there should be only one field named gender
@@ -1319,6 +1367,57 @@ public class HealthPlugin extends CordovaPlugin {
                             NutrientFieldInfo fieldInfo = nutrientFields.get(datatype);
                             if (fieldInfo != null) {
                                 retBucket.put("unit", fieldInfo.unit);
+                            }
+                        }
+                    }
+
+                    // query per bucket time to get distance and calories per activity
+                    if (datatype.equalsIgnoreCase("activity")) {
+
+                        DataReadRequest readActivityDistCalRequest = new DataReadRequest.Builder()
+                                        .aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA)
+                                        .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
+                                        .bucketByActivityType(1, TimeUnit.SECONDS)
+                                        .setTimeRange(bucket.getStartTime(TimeUnit.MILLISECONDS), bucket.getEndTime(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
+                                        .build();
+
+                        DataReadResult dataActivityDistCalReadResult = Fitness.HistoryApi.readData(mClient, readActivityDistCalRequest).await();
+
+                        
+
+                        if (dataActivityDistCalReadResult.getStatus().isSuccess()) {
+                            for (Bucket activityBucket : dataActivityDistCalReadResult.getBuckets()) {
+                                //each bucket is an activity
+                                float distance = 0;
+                                float calories = 0;
+                                String activity = activityBucket.getActivity();
+
+                                DataSet distanceDataSet = activityBucket.getDataSet(DataType.AGGREGATE_DISTANCE_DELTA);
+                                for (DataPoint datapoint : distanceDataSet.getDataPoints()) {
+                                    distance += datapoint.getValue(Field.FIELD_DISTANCE).asFloat();
+                                }
+                                
+                                DataSet caloriesDataSet = activityBucket.getDataSet(DataType.AGGREGATE_CALORIES_EXPENDED);
+                                for (DataPoint datapoint : caloriesDataSet.getDataPoints()) {
+                                    calories += datapoint.getValue(Field.FIELD_CALORIES).asFloat();
+                                }
+                                
+                                JSONObject actobj = retBucket.getJSONObject("value");
+                                JSONObject summary;
+                                if (actobj.has(activity)) {
+                                    summary = actobj.getJSONObject(activity);
+                                    double existingdistance = summary.getDouble("distance");
+                                    summary.put("distance", distance + existingdistance);
+                                    double existingcalories = summary.getDouble("calories");
+                                    summary.put("calories", calories + existingcalories);
+                                } else {
+                                    summary = new JSONObject();
+                                    summary.put("duration", 0); // sum onto this whilst aggregating over bucket below.
+                                    summary.put("distance", distance);
+                                    summary.put("calories", calories);
+                                }
+                                actobj.put(activity, summary);
+                                retBucket.put("value", actobj);                                
                             }
                         }
                     }
