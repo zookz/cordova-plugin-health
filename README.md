@@ -141,8 +141,7 @@ Example values:
 | steps          | 34                                |
 | distance       | 101.2                             |
 | calories       | 245.3                             |
-| activity       | "walking"<br />**Notes**: recognized activities and their mappings in Google Fit / HealthKit can be found [here] <br /> the query also returns calories (kcal) and distance (m)
-(activities_map.md) |
+| activity       | "walking"<br />**Notes**: recognized activities and their mappings in Google Fit / HealthKit can be found [here](activities_map.md) <br /> the query also returns calories (kcal) and distance (m) |
 | height         | 185.9                             |
 | weight         | 83.3                              |
 | heart_rate     | 66                                |
@@ -448,6 +447,6 @@ Any help is more than welcome!
 I don't know Objective C and I am not interested in learning it now, so I would particularly appreciate someone who could give me a hand with the iOS part.
 Also, I would love to know from you if the plugin is currently used in any app actually available online.
 Just send me an email to my_username at gmail.com.
-For donations, I have a PayPal account at the same email address.
+For donations, you can use my [monzo.me](https://monzo.me/dariosalvi) account.
 
 Thanks!
