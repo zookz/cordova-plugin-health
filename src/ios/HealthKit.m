@@ -1504,6 +1504,11 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 
     // NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
     NSPredicate *predicate = nil;
+    
+    BOOL filtered = (args[@"filtered"] != nil && [args[@"filtered"] boolValue]);
+    if (filtered) {
+        predicate = [NSPredicate predicateWithFormat:@"metadata.%K != YES", HKMetadataKeyWasUserEntered];
+    }
 
     NSSet *requestTypes = [NSSet setWithObjects:type, nil];
     [[HealthKit sharedHealthStore] requestAuthorizationToShareTypes:nil readTypes:requestTypes completion:^(BOOL success, NSError *error) {
