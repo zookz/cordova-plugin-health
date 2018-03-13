@@ -89,6 +89,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 |-----------------|-------|-----------------------------------------------|------------------------------------------|
 | steps           | count | HKQuantityTypeIdentifierStepCount             | TYPE_STEP_COUNT_DELTA                    |
 | distance        | m     | HKQuantityTypeIdentifierDistanceWalkingRunning + HKQuantityTypeIdentifierDistanceCycling | TYPE_DISTANCE_DELTA |
+| appleExerciseTime | min | HKQuantityTypeIdentifierAppleExerciseTime     | NA                                       |
 | calories        | kcal  | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned | TYPE_CALORIES_EXPENDED |
 | calories.active | kcal  | HKQuantityTypeIdentifierActiveEnergyBurned    | TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window) |
 | calories.basal  | kcal  | HKQuantityTypeIdentifierBasalEnergyBurned     | TYPE_BASAL_METABOLIC_RATE * time window  |
@@ -140,6 +141,7 @@ Example values:
 |----------------|-----------------------------------|
 | steps          | 34                                |
 | distance       | 101.2                             |
+| appleExerciseTime | 24                             |
 | calories       | 245.3                             |
 | activity       | "walking"<br />**Notes**: recognized activities and their mappings in Google Fit / HealthKit can be found [here](activities_map.md) <br /> the query also returns calories (kcal) and distance (m) |
 | height         | 185.9                             |
