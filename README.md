@@ -337,6 +337,7 @@ The following table shows what types are supported and examples of the returned 
 - The start and end dates returned are the date of the first and the last available samples. If no samples are found, start and end may not be set.
 - When bucketing, buckets will include the whole hour / day / month / week / year where start and end times fall into. For example, if your start time is 2016-10-21 10:53:34, the first daily bucket will start at 2016-10-21 00:00:00.
 - Weeks start on Monday.
+- You can query for "filtered steps" adding the flag `filtered: true` to the query object. This returns the steps as filtered out by Google Fit, or the non-manual ones from HealthKit.
 
 #### iOS quirks
 
@@ -346,7 +347,6 @@ The following table shows what types are supported and examples of the returned 
 
 #### Android quirks
 - Activities will include two extra fields: calories (kcal) and distance (m) and requires the user to grant access to location
-- To query for steps as filtered by the Google Fit app, the flag `filtered: true` must be added into the query object.
 - nutrition.vitamin_a is given in international units. Automatic conversion to micrograms is not trivial and depends on the actual substance (see [here](https://dietarysupplementdatabase.usda.nih.gov/ingredient_calculator/help.php#q9)).
 
 ### store()
