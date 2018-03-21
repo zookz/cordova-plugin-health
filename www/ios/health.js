@@ -38,6 +38,8 @@ dataTypes['nutrition.caffeine'] = 'HKQuantityTypeIdentifierDietaryCaffeine';
 dataTypes['blood_glucose'] = 'HKQuantityTypeIdentifierBloodGlucose';
 dataTypes['insulin'] = 'HKQuantityTypeIdentifierInsulinDelivery';
 dataTypes['appleExerciseTime'] = 'HKQuantityTypeIdentifierAppleExerciseTime';
+dataTypes['blood_pressure'] = 'HKCorrelationTypeIdentifierBloodPressure';
+
 
 var units = [];
 units['steps'] = 'count';
@@ -71,6 +73,8 @@ units['nutrition.caffeine'] = 'g';
 units['blood_glucose'] = 'mmol/L';
 units['insulin'] = 'IU';
 units['appleExerciseTime'] = 'min';
+dataTypes['blood_pressure'] = 'mmHg';
+
 
 Health.prototype.isAvailable = function (success, error) {
   window.plugins.healthkit.available(success, error);
@@ -250,6 +254,19 @@ Health.prototype.query = function (opts, onSuccess, onError) {
     }, function (data) {
       for (var i = 0; i < data.length; i++) {
         result.push(prepareNutrition(data[i]));
+      }
+      onSuccess(result);
+    }, onError);
+  } else if (opts.dataType === 'blood_pressure') {
+    var result = [];
+    window.plugins.healthkit.queryCorrelationType({
+      startDate: opts.startDate,
+      endDate: opts.endDate,
+      correlationType: 'HKCorrelationTypeIdentifierBloodPressure',
+      units: ['mmHg']
+    }, function (data) {
+      for (var i = 0; i < data.length; i++) {
+        result.push(prepareBloodPressure(data[i]));
       }
       onSuccess(result);
     }, onError);
@@ -605,6 +622,21 @@ var prepareNutrition = function (data) {
       }
     }
   }
+  return res;
+};
+
+var prepareBloodPressure = function (data) {
+  var res = {
+    startDate: new Date(data.startDate),
+    endDate: new Date(data.endDate),
+    value: {},
+    unit: 'mmHg'
+  };
+  if (data.sourceName) res.sourceName = data.sourceName;
+  if (data.sourceBundleId) res.sourceBundleId = data.sourceBundleId;
+  res.value.systolic = null;
+  res.value.diastolic = null;
+  // TODO: put the correct values, depending on how they are formatted by Telerik's plugin
   return res;
 };
 
