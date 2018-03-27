@@ -165,7 +165,6 @@ public class HealthPlugin extends CordovaPlugin {
 
     static {
         healthdatatypes.put("blood_glucose", HealthDataTypes.TYPE_BLOOD_GLUCOSE);
-		healthdatatypes.put("blood_pressure", HealthDataTypes.TYPE_BLOOD_GLUCOSE);
     }
 
     public HealthPlugin() {
@@ -717,7 +716,7 @@ public class HealthPlugin extends CordovaPlugin {
     private void storeHealthDataForAuth() {
         final DataType dt = healthDatatypesToAuthWrite.pop();
         Calendar c = Calendar.getInstance();
-        c.add(Calendar.YEAR, -5); // five years ago
+        c.add(Calendar.YEAR, -10); // ten years ago
         final long ts = c.getTimeInMillis();
 
         cordova.getThreadPool().execute(new Runnable() {
@@ -735,6 +734,9 @@ public class HealthPlugin extends CordovaPlugin {
                 datapoint.setTimeInterval(ts, ts, TimeUnit.MILLISECONDS);
                 if (dt == HealthDataTypes.TYPE_BLOOD_GLUCOSE) {
                     datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).setFloat(1);
+                } else if (dt == HealthDataTypes.TYPE_BLOOD_PRESSURE) {
+                    datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC).setFloat(70);
+                    datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).setFloat(100);
                 }
                 dataSet.add(datapoint);
 
@@ -1073,16 +1075,7 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                         obj.put("value", glucob);
                         obj.put("unit", "mmol/L");
-                    } else if (DT.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
-                        JSONObject bpobj = new JSONObject();
-                        float systolic = datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).asFloat();
-						bpobj.put("systolic", systolic);
-						float diastolic = datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC).asFloat();
-						bpobj.put("diastolic", diastolic);
-						// TODO: we can also add FIELD_BODY_POSITION and FIELD_BLOOD_PRESSURE_MEASUREMENT_LOCATION
-						obj.put("value", bpobj);
-                        obj.put("unit", "mmHg");
-					}
+                    }
                     resultset.put(obj);
                 }
             }
@@ -1771,7 +1764,16 @@ public class HealthPlugin extends CordovaPlugin {
                 }
                 datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).setInt(specimenSource);
             }
-
+        } else if (dt == HealthDataTypes.TYPE_BLOOD_PRESSURE) {
+            JSONObject bpobj = args.getJSONObject(0).getJSONObject("value");
+            if (bpobj.has("systolic")) {
+                float systolic = (float) bpobj.getDouble("systolic");
+                datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).setFloat(systolic);
+            }
+            if (bpobj.has("diastolic")) {
+                float diastolic = (float) bpobj.getDouble("diastolic");
+                datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC).setFloat(diastolic);
+            }
         }
         dataSet.add(datapoint);
 
