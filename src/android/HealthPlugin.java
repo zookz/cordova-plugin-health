@@ -165,6 +165,7 @@ public class HealthPlugin extends CordovaPlugin {
 
     static {
         healthdatatypes.put("blood_glucose", HealthDataTypes.TYPE_BLOOD_GLUCOSE);
+        healthdatatypes.put("blood_pressure", HealthDataTypes.TYPE_BLOOD_PRESSURE);
     }
 
     public HealthPlugin() {
@@ -716,7 +717,7 @@ public class HealthPlugin extends CordovaPlugin {
     private void storeHealthDataForAuth() {
         final DataType dt = healthDatatypesToAuthWrite.pop();
         Calendar c = Calendar.getInstance();
-        c.add(Calendar.YEAR, -5); // five years ago
+        c.add(Calendar.YEAR, -10); // ten years ago
         final long ts = c.getTimeInMillis();
 
         cordova.getThreadPool().execute(new Runnable() {
@@ -725,7 +726,6 @@ public class HealthPlugin extends CordovaPlugin {
                 DataSource datasrc = new DataSource.Builder()
                         .setDataType(dt)
                         .setAppPackageName(cordova.getActivity())
-                        .setName("BOGUS")
                         .setType(DataSource.TYPE_RAW)
                         .build();
 
@@ -734,6 +734,9 @@ public class HealthPlugin extends CordovaPlugin {
                 datapoint.setTimeInterval(ts, ts, TimeUnit.MILLISECONDS);
                 if (dt == HealthDataTypes.TYPE_BLOOD_GLUCOSE) {
                     datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).setFloat(1);
+                } else if (dt == HealthDataTypes.TYPE_BLOOD_PRESSURE) {
+                    datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC).setFloat(70);
+                    datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).setFloat(100);
                 }
                 dataSet.add(datapoint);
 
@@ -942,13 +945,13 @@ public class HealthPlugin extends CordovaPlugin {
                         if (dataReadActivityResult.getStatus().isSuccess()) {
                             JSONArray distanceDataPoints = new JSONArray();
                             JSONArray calorieDataPoints = new JSONArray();
-                            
+
                             List<DataSet> dataActivitySets = dataReadActivityResult.getDataSets();
                             for (DataSet dataActivitySet : dataActivitySets) {
                                 for (DataPoint dataActivityPoint : dataActivitySet.getDataPoints()) {
 
                                     JSONObject activityObj = new JSONObject();
-                                    
+
                                     activityObj.put("startDate", dataActivityPoint.getStartTime(TimeUnit.MILLISECONDS));
                                     activityObj.put("endDate", dataActivityPoint.getEndTime(TimeUnit.MILLISECONDS));
                                     DataSource dataActivitySource = dataActivityPoint.getOriginalDataSource();
@@ -976,7 +979,7 @@ public class HealthPlugin extends CordovaPlugin {
                             }
                             obj.put("distance", distanceDataPoints);
                             obj.put("calories", calorieDataPoints);
-                        }                                  
+                        }
                     } else if (DT.equals(customdatatypes.get("gender"))) {
                         for (Field f : customdatatypes.get("gender").getFields()) {
                             //there should be only one field named gender
@@ -1072,6 +1075,18 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                         obj.put("value", glucob);
                         obj.put("unit", "mmol/L");
+                    } else if (DT.equals(HealthDataTypes.TYPE_BLOOD_PRESSURE)) {
+                        JSONObject bpobj = new JSONObject();
+                        if (datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).isSet()){
+                            float systolic = datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).asFloat();
+                            bpobj.put("systolic", systolic);
+                        }
+                        if (datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC).isSet()){
+                            float diastolic = datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC).asFloat();
+                            bpobj.put("diastolic", diastolic);
+                        }
+                        obj.put("value", bpobj);
+                        obj.put("unit", "mmHg");
                     }
                     resultset.put(obj);
                 }
@@ -1317,7 +1332,7 @@ public class HealthPlugin extends CordovaPlugin {
                     retBucket.put("unit", "activitySummary");
                     // query per bucket time to get distance and calories per activity
                     JSONObject actobj = getAggregatedActivityDistanceCalories (st, et);
-                    retBucket.put("value", actobj);                                
+                    retBucket.put("value", actobj);
                 } else if (datatype.equalsIgnoreCase("nutrition.water")) {
                     retBucket.put("unit", "ml");
                 } else if (datatype.equalsIgnoreCase("nutrition")) {
@@ -1361,7 +1376,7 @@ public class HealthPlugin extends CordovaPlugin {
                             retBucket.put("unit", "activitySummary");
                             // query per bucket time to get distance and calories per activity
                             JSONObject actobj = getAggregatedActivityDistanceCalories (bucket.getStartTime(TimeUnit.MILLISECONDS), bucket.getEndTime(TimeUnit.MILLISECONDS));
-                            retBucket.put("value", actobj);   
+                            retBucket.put("value", actobj);
                         } else if (datatype.equalsIgnoreCase("nutrition.water")) {
                             retBucket.put("unit", "ml");
                         } else if (datatype.equalsIgnoreCase("nutrition")) {
@@ -1458,7 +1473,7 @@ public class HealthPlugin extends CordovaPlugin {
 
     private JSONObject getAggregatedActivityDistanceCalories (long st, long et)  throws JSONException {
         JSONObject actobj = new JSONObject();
-        
+
         DataReadRequest readActivityDistCalRequest = new DataReadRequest.Builder()
                         .aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA)
                         .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
@@ -1479,12 +1494,12 @@ public class HealthPlugin extends CordovaPlugin {
                 for (DataPoint datapoint : distanceDataSet.getDataPoints()) {
                     distance += datapoint.getValue(Field.FIELD_DISTANCE).asFloat();
                 }
-                
+
                 DataSet caloriesDataSet = activityBucket.getDataSet(DataType.AGGREGATE_CALORIES_EXPENDED);
                 for (DataPoint datapoint : caloriesDataSet.getDataPoints()) {
                     calories += datapoint.getValue(Field.FIELD_CALORIES).asFloat();
                 }
-                
+
                 JSONObject summary;
                 if (actobj.has(activity)) {
                     summary = actobj.getJSONObject(activity);
@@ -1501,7 +1516,7 @@ public class HealthPlugin extends CordovaPlugin {
 
                 actobj.put(activity, summary);
             }
-        }        
+        }
         return actobj;
     }
 
@@ -1761,7 +1776,16 @@ public class HealthPlugin extends CordovaPlugin {
                 }
                 datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_SPECIMEN_SOURCE).setInt(specimenSource);
             }
-
+        } else if (dt == HealthDataTypes.TYPE_BLOOD_PRESSURE) {
+            JSONObject bpobj = args.getJSONObject(0).getJSONObject("value");
+            if (bpobj.has("systolic")) {
+                float systolic = (float) bpobj.getDouble("systolic");
+                datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).setFloat(systolic);
+            }
+            if (bpobj.has("diastolic")) {
+                float diastolic = (float) bpobj.getDouble("diastolic");
+                datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC).setFloat(diastolic);
+            }
         }
         dataSet.add(datapoint);
 

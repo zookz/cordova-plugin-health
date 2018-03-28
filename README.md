@@ -62,7 +62,7 @@ If, for some reason, the Info.plist loses the HEALTH_READ_PERMISSION and HEALTH_
 }
 ```
 
-This is known to happen when using the Ionic Package cloud service. 
+This is known to happen when using the Ionic Package cloud service.
 
 ## iOS requirements
 
@@ -78,12 +78,11 @@ This is known to happen when using the Ionic Package cloud service.
 * If you haven't configured the APIs correctly, particularly the OAuth requirements, you are likely to get 'User cancelled the dialog' as an error message, particularly this can happen if you mismatch the signing certificate and SHA-1 fingerprint.
 * You can use the Google Fitness API even if the user doesn't have Google Fit installed, but there has to be some other fitness app putting data into the Fitness API otherwise your queries will always be empty. See the [the original documentation](https://developers.google.com/fit/overview).
 * If you are planning to use [health data types](https://developers.google.com/android/reference/com/google/android/gms/fitness/data/HealthDataTypes) in Google Fit, be aware that you are always able to read them, but if you want write access [you need to ask permission to Google](https://developers.google.com/fit/android/data-types#restricted_data_types)
-* This plugin is set to use the latest version of the Google Play Services API (`<framework src="com.google.android.gms:play-services-fitness:+" />`). This is done to likely guarantee the compatibility with other plugins using Google Play Services, but bear in mind that a) the plugin was tested until version 9.8.0 of the APIs and b) other plugins may be using a different version of the API. If you run into an issue, check the generated gradle file (build.gradle) under `dependencies` between `// SUB-PROJECT DEPENDENCIES START` and `// SUB-PROJECT DEPENDENCIES END` and make sure that all versions of the `com.google.android.gms:play-services-xxxx` are the same.
+* This plugin is set to use the latest version of the Google Play Services API (`<framework src="com.google.android.gms:play-services-fitness:+" />`). This is done to likely guarantee the compatibility with other plugins using Google Play Services, but bear in mind that other plugins may be using a different version of the API. If you run into an issue, check the generated gradle file (build.gradle) under `dependencies` between `// SUB-PROJECT DEPENDENCIES START` and `// SUB-PROJECT DEPENDENCIES END` and make sure that all versions of the `com.google.android.gms:play-services-xxxx` are the same.
 
 ## Supported data types
 
 As HealthKit does not allow adding custom data types, only a subset of data types supported by HealthKit has been chosen.
-Google Fit is limited to fitness data and, for health, custom data types are defined with the suffix of the package name of your project.
 
 | Data type       | Unit  |    HealthKit equivalent                       |  Google Fit equivalent                   |
 |-----------------|-------|-----------------------------------------------|------------------------------------------|
@@ -100,6 +99,7 @@ Google Fit is limited to fitness data and, for health, custom data types are def
 | fat_percentage  | %     | HKQuantityTypeIdentifierBodyFatPercentage     | TYPE_BODY_FAT_PERCENTAGE                 |
 | blood_glucose   | mmol/L | HKQuantityTypeIdentifierBloodGlucose         | TYPE_BLOOD_GLUCOSE                       |
 | insulin         | IU    | HKQuantityTypeIdentifierInsulinDelivery       | NA                                       |
+| blood_pressure  | mmHg  | HKCorrelationTypeIdentifierBloodPressure      | TYPE_BLOOD_PRESSURE                      |
 | gender          |       | HKCharacteristicTypeIdentifierBiologicalSex   | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth   |       | HKCharacteristicTypeIdentifierDateOfBirth     | custom (YOUR_PACKAGE_NAME.date_of_birth) |
 | nutrition       |       | HKCorrelationTypeIdentifierFood               | TYPE_NUTRITION                           |
@@ -150,6 +150,7 @@ Example values:
 | fat_percentage | 31.2                              |
 | blood_glucose  | { glucose: 5.5, meal: 'breakfast', sleep: 'fully_awake', source: 'capillary_blood' }<br />**Notes**: <br />to convert to mg/dL, multiply by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose))<br />`meal` can be: 'before_meal' (iOS only), 'after_meal' (iOS only), 'fasting', 'breakfast', 'dinner', 'lunch', 'snack', 'unknown', 'before_breakfast', 'before_dinner', 'before_lunch', 'before_snack', 'after_breakfast', 'after_dinner', 'after_lunch', 'after_snack'<br />`sleep` can be: 'fully_awake', 'before_sleep', 'on_waking', 'during_sleep'<br />`source` can be: 'capillary_blood' ,'interstitial_fluid', 'plasma', 'serum', 'tears', whole_blood' |
 | insulin        | { insulin: 2.3, reason: 'bolus' }<br />**Notes**: Insulin is currently only available on iOS<br />`reason` can be 'bolus' or 'basal' |
+| blood_pressure | { systolic: 110, diastolic: 70 }  |
 | gender         | "male"                            |
 | date_of_birth  | { day: 3, month: 12, year: 1978 } |
 | nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } }<br />**Note**: the `brand_name` property is only available on iOS |
@@ -434,7 +435,7 @@ navigator.health.delete({
 
 Short term:
 
-- Add more datatypes (body fat percentage, oxygen saturation, blood pressure, temperature, respiratory rate)
+- Add more datatypes (body fat percentage, oxygen saturation, temperature, respiratory rate)
 
 Long term:
 
