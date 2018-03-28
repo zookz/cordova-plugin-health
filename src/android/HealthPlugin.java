@@ -726,7 +726,6 @@ public class HealthPlugin extends CordovaPlugin {
                 DataSource datasrc = new DataSource.Builder()
                         .setDataType(dt)
                         .setAppPackageName(cordova.getActivity())
-                        .setName("BOGUS")
                         .setType(DataSource.TYPE_RAW)
                         .build();
 
@@ -1076,7 +1075,7 @@ public class HealthPlugin extends CordovaPlugin {
                         }
                         obj.put("value", glucob);
                         obj.put("unit", "mmol/L");
-                    } else if (DT.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
+                    } else if (DT.equals(HealthDataTypes.TYPE_BLOOD_PRESSURE)) {
                         JSONObject bpobj = new JSONObject();
                         if (datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).isSet()){
                             float systolic = datapoint.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).asFloat();
