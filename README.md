@@ -264,19 +264,21 @@ Gets all the data points of a certain data type within a certain time window.
 navigator.health.query({
   startDate: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // three days ago
   endDate: new Date(), // now
-  dataType: 'height'
+  dataType: 'height',
+  limit: 1000
 }, successCallback, errorCallback)
 ```
 
 - startDate: {type: Date}, start date from which to get data
 - endDate: {type: Date}, end data to which to get the data
 - dataType: {type: String}, the data type to be queried (see above)
+- limit: {type: integer}, optional, sets a maximum number of returned values
 - successCallback: {type: function(data) }, called if all OK, data contains the result of the query in the form of an array of: { startDate: Date, endDate: Date, value: xxx, unit: 'xxx', sourceName: 'aaaa', sourceBundleId: 'bbbb' }
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
 
 #### iOS quirks
 
-- The amount of datapoints is limited to 1000 by default. You can override this by adding a `limit: xxx` to your query object.
+- Limit is set to 1000 by default.
 - Datapoints are ordered in an descending fashion (from newer to older). You can revert this behaviour by adding `ascending: true` to your query object.
 - HealthKit does not calculate active and basal calories - these must be inputted from an app
 - HealthKit does not detect specific activities - these must be inputted from an app
