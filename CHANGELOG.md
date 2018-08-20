@@ -18,5 +18,5 @@ Log of changes
 ### v1.1.0
 
 * support for latest Google Fit auth mechanism for health data
-* added support for 'limit' in Android query()
+* added support for 'limit' in query() on Android too
 * Android and iOS return the same object when queried for activity
