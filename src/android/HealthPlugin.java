@@ -829,50 +829,26 @@ public class HealthPlugin extends CordovaPlugin {
                                 .read(DataType.TYPE_DISTANCE_DELTA)
                                 .read(DataType.TYPE_CALORIES_EXPENDED);
 
-                        if (limit != null) {
-                            readActivityRequestBuilder.setLimit(limit);
-                        }
-
                         DataReadResult dataReadActivityResult = Fitness.HistoryApi.readData(mClient, readActivityRequestBuilder.build()).await();
 
                         if (dataReadActivityResult.getStatus().isSuccess()) {
-                            JSONArray distanceDataPoints = new JSONArray();
-                            JSONArray calorieDataPoints = new JSONArray();
+                            float totaldistance = 0;
+                            float totalcalories = 0;
 
                             List<DataSet> dataActivitySets = dataReadActivityResult.getDataSets();
                             for (DataSet dataActivitySet : dataActivitySets) {
                                 for (DataPoint dataActivityPoint : dataActivitySet.getDataPoints()) {
-
-                                    JSONObject activityObj = new JSONObject();
-
-                                    activityObj.put("startDate", dataActivityPoint.getStartTime(TimeUnit.MILLISECONDS));
-                                    activityObj.put("endDate", dataActivityPoint.getEndTime(TimeUnit.MILLISECONDS));
-                                    DataSource dataActivitySource = dataActivityPoint.getOriginalDataSource();
-                                    if (dataSource != null) {
-                                        String sourceName = dataActivitySource.getName();
-                                        if (sourceName != null)
-                                            activityObj.put("sourceName", sourceName);
-                                        String sourceBundleId = dataSource.getAppPackageName();
-                                        if (sourceBundleId != null)
-                                            activityObj.put("sourceBundleId", sourceBundleId);
-                                    }
-
                                     if (dataActivitySet.getDataType().equals(DataType.TYPE_DISTANCE_DELTA)) {
                                         float distance = dataActivityPoint.getValue(Field.FIELD_DISTANCE).asFloat();
-                                        activityObj.put("value", distance);
-                                        activityObj.put("unit", "m");
-                                        distanceDataPoints.put(activityObj);
+                                        totaldistance += distance;
                                     } else {
-                                        // calories
                                         float calories = dataActivityPoint.getValue(Field.FIELD_CALORIES).asFloat();
-                                        activityObj.put("value", calories);
-                                        activityObj.put("unit", "kcal");
-                                        calorieDataPoints.put(activityObj);
+                                        totalcalories += calories;
                                     }
                                 }
                             }
-                            obj.put("distance", distanceDataPoints);
-                            obj.put("calories", calorieDataPoints);
+                            obj.put("distance", totaldistance);
+                            obj.put("calories", totalcalories);
                         }
                     } else if (DT.equals(customdatatypes.get("gender"))) {
                         for (Field f : customdatatypes.get("gender").getFields()) {
