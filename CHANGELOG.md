@@ -20,3 +20,7 @@ Log of changes
 * support for latest Google Fit auth mechanism for health data
 * added support for 'limit' in query() on Android too
 * Android and iOS return the same object when queried for activity
+
+### v1.1.1
+
+* do not ask for read permission when storing workouts on iOS
