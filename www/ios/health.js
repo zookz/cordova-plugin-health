@@ -462,6 +462,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
     } else {
       // some other kind of workout
       data.activityType = data.value;
+	  data.requestReadPermission = false // do not ask for read permission too
       if (data.calories) {
         data.energy = data.calories;
         data.energyUnit = 'kcal';
