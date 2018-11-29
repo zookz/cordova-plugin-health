@@ -6,6 +6,7 @@ var Health = function () {
 
 var dataTypes = [];
 dataTypes['steps'] = 'HKQuantityTypeIdentifierStepCount';
+dataTypes['stairs'] = 'HKQuantityTypeIdentifierFlightsClimbed';
 dataTypes['distance'] = 'HKQuantityTypeIdentifierDistanceWalkingRunning'; // and HKQuantityTypeIdentifierDistanceCycling
 dataTypes['calories'] = 'HKQuantityTypeIdentifierActiveEnergyBurned'; // and HKQuantityTypeIdentifierBasalEnergyBurned
 dataTypes['calories.active'] = 'HKQuantityTypeIdentifierActiveEnergyBurned';
