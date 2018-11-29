@@ -87,6 +87,7 @@ As HealthKit does not allow adding custom data types, only a subset of data type
 | Data type       | Unit  |    HealthKit equivalent                       |  Google Fit equivalent                   |
 |-----------------|-------|-----------------------------------------------|------------------------------------------|
 | steps           | count | HKQuantityTypeIdentifierStepCount             | TYPE_STEP_COUNT_DELTA                    |
+| stairs           | count | HKQuantityTypeIdentifierFlightsClimbed             | NA                    |
 | distance        | m     | HKQuantityTypeIdentifierDistanceWalkingRunning + HKQuantityTypeIdentifierDistanceCycling | TYPE_DISTANCE_DELTA |
 | appleExerciseTime | min | HKQuantityTypeIdentifierAppleExerciseTime     | NA                                       |
 | calories        | kcal  | HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned | TYPE_CALORIES_EXPENDED |
