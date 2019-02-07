@@ -97,6 +97,7 @@ As HealthKit does not allow adding custom data types, only a subset of data type
 | height          | m     | HKQuantityTypeIdentifierHeight                | TYPE_HEIGHT                              |
 | weight          | kg    | HKQuantityTypeIdentifierBodyMass              | TYPE_WEIGHT                              |
 | heart_rate      | count/min | HKQuantityTypeIdentifierHeartRate         | TYPE_HEART_RATE_BPM                      |
+| heart_rate.variability      | ms | HKQuantityTypeIdentifierHeartRateVariabilitySDNN         | NA                                       |
 | fat_percentage  | %     | HKQuantityTypeIdentifierBodyFatPercentage     | TYPE_BODY_FAT_PERCENTAGE                 |
 | blood_glucose   | mmol/L | HKQuantityTypeIdentifierBloodGlucose         | TYPE_BLOOD_GLUCOSE                       |
 | insulin         | IU    | HKQuantityTypeIdentifierInsulinDelivery       | NA                                       |
