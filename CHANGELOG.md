@@ -24,3 +24,4 @@ Log of changes
 ### v1.1.1
 
 * do not ask for read permission when storing workouts on iOS
+* added heart rate variability (iOS only)
