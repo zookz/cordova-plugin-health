@@ -445,7 +445,7 @@ Health.prototype.store = function (data, onSuccess, onError) {
     onError('Gender is not writeable');
   } else if (data.dataType === 'date_of_birth') {
     onError('Date of birth is not writeable');
-  } else if (data.dataType === 'activity') {
+  } else if (data.dataType === 'activity' || opts.dataType === 'workouts') {
     // sleep activity, needs a different call than workout
     if ((data.value === 'sleep') ||
     (data.value === 'sleep.light') ||
