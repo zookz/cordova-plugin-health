@@ -26,3 +26,7 @@ Log of changes
 * do not ask for read permission when storing workouts on iOS
 * added heart rate variability (iOS only)
 * added stairs (iOS only)
+
+### v1.1.2
+
+* minor bugfix
