@@ -79,7 +79,7 @@
   <!-- android -->
   <platform name="android">
     <framework src="com.google.android.gms:play-services-fitness:$GMS_VERSION" />
-    <preference name="GMS_VERSION" default="11.0.1"/>
+    <preference name="GMS_VERSION" default="16.0.1"/>
 
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
