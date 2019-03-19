@@ -21,7 +21,7 @@ See the [official terms](https://developers.google.com/fit/terms).
 In Cordova:
 
 ```
-cordova plugin add cordova-plugin-health --variable HEALTH_READ_PERMISSION='App needs read access' --variable HEALTH_WRITE_PERMISSION='App needs write access' --variable GMS_VERSION='11.0.1'
+cordova plugin add cordova-plugin-health --variable HEALTH_READ_PERMISSION='App needs read access' --variable HEALTH_WRITE_PERMISSION='App needs write access'
 ```
 
 `HEALTH_READ_PERMISSION` and `HEALTH_WRITE_PERMISSION` are shown when the app tries to grant access to data in HealthKit.
@@ -35,7 +35,7 @@ Phonegap Build `config.xml`:
 <plugin name="cordova-plugin-health" source="npm">
   <variable name="HEALTH_READ_PERMISSION" value="App needs read access"/>
   <variable name="HEALTH_WRITE_PERMISSION" value="App needs write access"/>
-  <variable name="GMS_VERSION" value="11.0.1"/>
+  <variable name="GMS_VERSION" value="16.0.1"/>
 </plugin>
 
 <!-- Only if iOS -->
