@@ -26,6 +26,8 @@ cordova plugin add cordova-plugin-health --variable HEALTH_READ_PERMISSION='App 
 
 `HEALTH_READ_PERMISSION` and `HEALTH_WRITE_PERMISSION` are shown when the app tries to grant access to data in HealthKit.
 
+`GMS_VERSION` allow you to override the google services version.
+
 Phonegap Build `config.xml`:
 
 ```
@@ -33,6 +35,7 @@ Phonegap Build `config.xml`:
 <plugin name="cordova-plugin-health" source="npm">
   <variable name="HEALTH_READ_PERMISSION" value="App needs read access"/>
   <variable name="HEALTH_WRITE_PERMISSION" value="App needs write access"/>
+  <variable name="GMS_VERSION" value="16.0.1"/>
 </plugin>
 
 <!-- Only if iOS -->
@@ -78,7 +81,7 @@ This is known to happen when using the Ionic Package cloud service.
 * If you haven't configured the APIs correctly, particularly the OAuth requirements, you are likely to get 'User cancelled the dialog' as an error message, particularly this can happen if you mismatch the signing certificate and SHA-1 fingerprint.
 * You can use the Google Fitness API even if the user doesn't have Google Fit installed, but there has to be some other fitness app putting data into the Fitness API otherwise your queries will always be empty. See the [the original documentation](https://developers.google.com/fit/overview).
 * If you are planning to use [health data types](https://developers.google.com/android/reference/com/google/android/gms/fitness/data/HealthDataTypes) in Google Fit, be aware that you are always able to read them, but if you want write access [you need to ask permission to Google](https://developers.google.com/fit/android/data-types#restricted_data_types)
-* This plugin is set to use the latest version of the Google Play Services API (`<framework src="com.google.android.gms:play-services-fitness:+" />`). This is done to likely guarantee the compatibility with other plugins using Google Play Services, but bear in mind that other plugins may be using a different version of the API. If you run into an issue, check the generated gradle file (build.gradle) under `dependencies` between `// SUB-PROJECT DEPENDENCIES START` and `// SUB-PROJECT DEPENDENCIES END` and make sure that all versions of the `com.google.android.gms:play-services-xxxx` are the same.
+* You can change which google services version this plugin uses by setting the `GMS_VERSION` variable in `config.xml`. By default it will use the version `16.0.1`. From version 15 [you don't have to use the same google services version](https://developers.google.com/android/guides/versioning) accross all your cordova plugins. You can track google services releases [here](https://developers.google.com/android/guides/releases). 
 
 ## Supported data types
 
