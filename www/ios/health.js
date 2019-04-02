@@ -303,7 +303,7 @@ Health.prototype.query = function (opts, onSuccess, onError) {
           } else {
             res.value = samples[i].quantity;
           }
-          if (data[i].unit) res.unit = samples[i].unit;
+          if (samples[i].unit) res.unit = samples[i].unit;
           else if (opts.unit) res.unit = opts.unit;
           res.sourceName = samples[i].sourceName;
           res.sourceBundleId = samples[i].sourceBundleId;
