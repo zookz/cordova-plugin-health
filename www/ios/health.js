@@ -611,7 +611,7 @@ var convertToGrams = function (fromUnit, q) {
 // refactors the result of a quantity type query into returned type
 var prepareResult = function (data, unit) {
   var res = {
-    id = data.UUID,
+    id: data.UUID,
     startDate: new Date(data.startDate),
     endDate: new Date(data.endDate),
     value: data.quantity,
@@ -625,7 +625,7 @@ var prepareResult = function (data, unit) {
 // refactors the result of a correlation query into returned type
 var prepareCorrelation = function (data, dataType) {
   var res = {
-    id = data.UUID,
+    id: data.UUID,
     startDate: new Date(data.startDate),
     endDate: new Date(data.endDate),
     value: {}
