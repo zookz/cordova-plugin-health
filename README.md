@@ -228,7 +228,7 @@ navigator.health.requestAuthorization(datatypes, successCallback, errorCallback)
 
 #### iOS quirks
 
-- Once the suer has allowed (or not allowed) the app, this function will not promt the user again, but will call the callback immediately. See [this](https://developer.apple.com/documentation/healthkit/hkhealthstore/1614152-requestauthorization) for further explanation.
+- Once the user has allowed (or not allowed) the app, this function will not prompt the user again, but will call the callback immediately. See [this](https://developer.apple.com/documentation/healthkit/hkhealthstore/1614152-requestauthorization) for further explanation.
 - The datatype `activity` also includes sleep. If you want to get authorization only for workouts, you can specify `workouts` as datatype, but be aware that this is only availabe in iOS.
 
 ### isAuthorized()
