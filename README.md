@@ -107,6 +107,7 @@ As HealthKit does not allow adding custom data types, only a subset of data type
 | blood_pressure  | mmHg  | HKCorrelationTypeIdentifierBloodPressure      | TYPE_BLOOD_PRESSURE                      |
 | gender          |       | HKCharacteristicTypeIdentifierBiologicalSex   | custom (YOUR_PACKAGE_NAME.gender)        |
 | date_of_birth   |       | HKCharacteristicTypeIdentifierDateOfBirth     | custom (YOUR_PACKAGE_NAME.date_of_birth) |
+| mindfulness     | sec   | HKCategoryTypeIdentifierMindfulSession        | NA                                       |
 | nutrition       |       | HKCorrelationTypeIdentifierFood               | TYPE_NUTRITION                           |
 | nutrition.calories | kcal | HKQuantityTypeIdentifierDietaryEnergyConsumed | TYPE_NUTRITION, NUTRIENT_CALORIES      |
 | nutrition.fat.total | g | HKQuantityTypeIdentifierDietaryFatTotal       | TYPE_NUTRITION, NUTRIENT_TOTAL_FAT       |
