@@ -5,6 +5,7 @@ var Health = function () {
 };
 
 var dataTypes = [];
+dataTypes['mindfulness'] = 'HKCategoryTypeIdentifierMindfulSession';
 dataTypes['steps'] = 'HKQuantityTypeIdentifierStepCount';
 dataTypes['stairs'] = 'HKQuantityTypeIdentifierFlightsClimbed';
 dataTypes['distance'] = 'HKQuantityTypeIdentifierDistanceWalkingRunning'; // and HKQuantityTypeIdentifierDistanceCycling

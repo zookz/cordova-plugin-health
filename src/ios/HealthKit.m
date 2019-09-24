@@ -397,9 +397,9 @@ static NSString *const HKPluginKeyUUID = @"UUID";
       return nil;
     }
     NSNumber* value = [self getCategoryValueByName:categoryString type:type];
-    if (value == nil) {
-      *error = [NSError errorWithDomain:HKPluginError code:0 userInfo:@{NSLocalizedDescriptionKey:[NSString stringWithFormat:@"%@,%@,%@",@"category value is not compatible with category",type.identifier,categoryString]}];
-      return nil;
+    if (value == nil && ![type.identifier isEqualToString:@"HKCategoryTypeIdentifierMindfulSession"]) {
+        *error = [NSError errorWithDomain:HKPluginError code:0 userInfo:@{NSLocalizedDescriptionKey:[NSString stringWithFormat:@"%@,%@,%@",@"category value is not compatible with category",type.identifier,categoryString]}];
+        return nil;
     }
 
     return [HKCategorySample categorySampleWithType:type value:[value integerValue] startDate:startDate endDate:endDate];
