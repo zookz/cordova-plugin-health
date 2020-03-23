@@ -36,3 +36,7 @@ Log of changes
 
 * some bugfixes
 * Google services version locked to specific version but changeable
+
+### v1.1.4
+
+* added mindfulness, heart_rate.resting, resp_rate, vo2max, temperature, iOS only for now
