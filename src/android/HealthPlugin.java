@@ -1112,7 +1112,6 @@ public class HealthPlugin extends CordovaPlugin {
 
         DataReadRequest.Builder builder = new DataReadRequest.Builder();
         builder.setTimeRange(st, et, TimeUnit.MILLISECONDS);
-        int allms = (int) (et - st);
 
         if (datatype.equalsIgnoreCase("steps")) {
             if (args.getJSONObject(0).has("filtered") && args.getJSONObject(0).getBoolean("filtered")) {
@@ -1157,7 +1156,12 @@ public class HealthPlugin extends CordovaPlugin {
             if (datatype.equalsIgnoreCase("activity")) {
                 builder.bucketByActivityType(1, TimeUnit.MILLISECONDS);
             } else {
-                builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+                long allms = et - st;
+                if (allms <= Integer.MAX_VALUE) {
+                    builder.bucketByTime((int)allms, TimeUnit.MILLISECONDS);
+                } else {
+                    builder.bucketByTime((int)(allms/1000), TimeUnit.SECONDS);
+                }
             }
         }
 
