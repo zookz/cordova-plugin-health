@@ -7,7 +7,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -426,7 +425,7 @@ public class HealthPlugin extends CordovaPlugin {
         if (mClient != null && mClient.isConnected()) {
             Fitness.ConfigApi.disableFit(mClient).setResultCallback(new ResultCallback<Status>() {
                 @Override
-                public void onResult(@NonNull Status status) {
+                public void onResult(Status status) {
                     if (status.isSuccess()) {
                         mClient.disconnect();
                         callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
