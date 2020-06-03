@@ -40,3 +40,8 @@ Log of changes
 ### v1.1.4
 
 * added mindfulness, heart_rate.resting, resp_rate, vo2max, temperature, iOS only for now
+
+### v1.1.5
+
+* allows longer durations of buckets in Android
+* remove Java annotations
