@@ -7,7 +7,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -426,7 +425,7 @@ public class HealthPlugin extends CordovaPlugin {
         if (mClient != null && mClient.isConnected()) {
             Fitness.ConfigApi.disableFit(mClient).setResultCallback(new ResultCallback<Status>() {
                 @Override
-                public void onResult(@NonNull Status status) {
+                public void onResult(Status status) {
                     if (status.isSuccess()) {
                         mClient.disconnect();
                         callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
@@ -1112,7 +1111,6 @@ public class HealthPlugin extends CordovaPlugin {
 
         DataReadRequest.Builder builder = new DataReadRequest.Builder();
         builder.setTimeRange(st, et, TimeUnit.MILLISECONDS);
-        int allms = (int) (et - st);
 
         if (datatype.equalsIgnoreCase("steps")) {
             if (args.getJSONObject(0).has("filtered") && args.getJSONObject(0).getBoolean("filtered")) {
@@ -1157,7 +1155,12 @@ public class HealthPlugin extends CordovaPlugin {
             if (datatype.equalsIgnoreCase("activity")) {
                 builder.bucketByActivityType(1, TimeUnit.MILLISECONDS);
             } else {
-                builder.bucketByTime(allms, TimeUnit.MILLISECONDS);
+                long allms = et - st;
+                if (allms <= Integer.MAX_VALUE) {
+                    builder.bucketByTime((int)allms, TimeUnit.MILLISECONDS);
+                } else {
+                    builder.bucketByTime((int)(allms/1000), TimeUnit.SECONDS);
+                }
             }
         }
 
