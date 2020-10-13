@@ -1528,6 +1528,9 @@ public class HealthPlugin extends CordovaPlugin {
         } else if (dt.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
             String value = args.getJSONObject(0).getString("value");
             datapoint.getValue(Field.FIELD_ACTIVITY).setActivity(value);
+        } else if (dt.equals(DataType.TYPE_HYDRATION)) {
+            float nuv = (float) args.getJSONObject(0).getDouble("value");
+            datapoint.getValue(Field.FIELD_VOLUME).setFloat(nuv);
         } else if (dt.equals(DataType.TYPE_NUTRITION)) {
             if (datatype.startsWith("nutrition.")) {
                 //it's a single nutrient
