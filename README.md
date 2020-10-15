@@ -26,7 +26,7 @@ cordova plugin add cordova-plugin-health --variable HEALTH_READ_PERMISSION='App 
 
 `HEALTH_READ_PERMISSION` and `HEALTH_WRITE_PERMISSION` are shown when the app tries to grant access to data in HealthKit.
 
-`GMS_VERSION` allow you to override the google services version.
+`FIT_API_VERSION` and `PLAY_AUTH_VERSION` allow you to override the google services version.
 
 Phonegap Build `config.xml`:
 
@@ -35,7 +35,7 @@ Phonegap Build `config.xml`:
 <plugin name="cordova-plugin-health" source="npm">
   <variable name="HEALTH_READ_PERMISSION" value="App needs read access"/>
   <variable name="HEALTH_WRITE_PERMISSION" value="App needs write access"/>
-  <variable name="GMS_VERSION" value="16.0.1"/>
+  <variable name="FIT_API_VERSION" value="16.0.1"/>
 </plugin>
 
 <!-- Only if iOS -->
@@ -81,7 +81,8 @@ This is known to happen when using the Ionic Package cloud service.
 * If you haven't configured the APIs correctly, particularly the OAuth requirements, you are likely to get 'User cancelled the dialog' as an error message, particularly this can happen if you mismatch the signing certificate and SHA-1 fingerprint.
 * You can use the Google Fitness API even if the user doesn't have Google Fit installed, but there has to be some other fitness app putting data into the Fitness API otherwise your queries will always be empty. See the [the original documentation](https://developers.google.com/fit/overview).
 * If you are planning to use [health data types](https://developers.google.com/android/reference/com/google/android/gms/fitness/data/HealthDataTypes) in Google Fit, be aware that you are always able to read them, but if you want write access [you need to ask permission to Google](https://developers.google.com/fit/android/data-types#restricted_data_types)
-* You can change which google services version this plugin uses by setting the `GMS_VERSION` variable in `config.xml`. By default it will use the version `16.0.1`. From version 15 [you don't have to use the same google services version](https://developers.google.com/android/guides/versioning) accross all your cordova plugins. You can track google services releases [here](https://developers.google.com/android/guides/releases).
+* You can change which Google Play Services Fitness API version this plugin uses by setting the `FIT_API_VERSION` variable in `config.xml` and the version of the Auth API using `PLAY_AUTH_VERSION`. By default it will use version `19.0.0` for play-services-fitness and version `18.1.0` for play-services-auth. From version 15 of the Play Services [you don't have to use the same version](https://developers.google.com/android/guides/versioning) accross all your cordova plugins. You can track google services releases [here](https://developers.google.com/android/guides/releases).
+* This plugin supports AndroidX out of the box, you can configure your project to support it if you need to. You will need to [ctivate AndroidX](https://cordova.apache.org/announcements/2020/06/29/cordova-android-9.0.0.html) in the Android platform.
 
 ## Supported data types
 
@@ -109,8 +110,8 @@ As HealthKit does not allow adding custom data types, only a subset of data type
 | blood_glucose   | mmol/L | HKQuantityTypeIdentifierBloodGlucose         | TYPE_BLOOD_GLUCOSE                       |
 | insulin         | IU    | HKQuantityTypeIdentifierInsulinDelivery       | NA                                       |
 | blood_pressure  | mmHg  | HKCorrelationTypeIdentifierBloodPressure      | TYPE_BLOOD_PRESSURE                      |
-| gender          |       | HKCharacteristicTypeIdentifierBiologicalSex   | custom (YOUR_PACKAGE_NAME.gender)        |
-| date_of_birth   |       | HKCharacteristicTypeIdentifierDateOfBirth     | custom (YOUR_PACKAGE_NAME.date_of_birth) |
+| gender          |       | HKCharacteristicTypeIdentifierBiologicalSex   | NA        |
+| date_of_birth   |       | HKCharacteristicTypeIdentifierDateOfBirth     | NA        |
 | mindfulness     | sec   | HKCategoryTypeIdentifierMindfulSession        | NA                                       |
 | nutrition       |       | HKCorrelationTypeIdentifierFood               | TYPE_NUTRITION                           |
 | nutrition.calories | kcal | HKQuantityTypeIdentifierDietaryEnergyConsumed | TYPE_NUTRITION, NUTRIENT_CALORIES      |
@@ -140,11 +141,11 @@ Returned objects contain a set of fixed fields:
 
 - startDate: {type: Date} a date indicating when the data point starts
 - endDate: {type: Date} a date indicating when the data point ends
-- sourceBundleId: {type: String} the identifier of the app that produced the data
-- sourceName: {type: String} the name of the app that produced the data (as it appears to the user)
 - unit: {type: String} the unit of measurement
 - value: the actual value
-- id: (only on iOS) the unique identifier of that measurement
+- sourceBundleId: {type: String} the identifier of the app that produced the data
+- sourceName: {type: String} (only on iOS) the name of the app that produced the data (as it appears to the user)
+- id: {type: String} (only on iOS) the unique identifier of that measurement
 
 Example values:
 
@@ -380,7 +381,6 @@ navigator.health.store({
 	endDate: new Date(),
 	dataType: 'steps',
 	value: 180,
-	sourceName: 'my_app',
 	sourceBundleId: 'com.example.my_app'
 }, successCallback, errorCallback)
 ```
@@ -389,7 +389,6 @@ navigator.health.store({
 - endDate: {type: Date}, end date to which he new data ends
 - dataType: {type: a String}, the data type
 - value: {type: a number or an Object}, the value, depending on the actual data type. In the case of activity, the value must be set as the activity name.
-- sourceName: {type: String}, the source that produced this data. In iOS this is ignored and set automatically to the name of your app.
 - sourceBundleId: {type: String}, the complete package of the source that produced this data. In Android, if not specified, it's assigned to the package of the App. In iOS this is ignored and set automatically to the bundle id of the app.
 - successCallback: {type: function}, called if all OK
 - errorCallback: {type: function(err)}, called if something went wrong, err contains a textual description of the problem
