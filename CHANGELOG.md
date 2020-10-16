@@ -45,3 +45,10 @@ Log of changes
 
 * allows longer durations of buckets in Android
 * remove Java annotations
+
+### v2.0.0
+
+* BREAKS API: the date of birth and gender have been removed from GoogleFit custom datatypes, you need to store these using your app's persistent mechanism
+* BREAKS API: sourceName has been removed from GoogleFit
+* bumped Google Fit API version to 19.0.0
+* fixed bug with water consumption unit in Android
