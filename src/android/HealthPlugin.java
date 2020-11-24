@@ -384,6 +384,7 @@ public class HealthPlugin extends CordovaPlugin {
             builder.addDataType(datatypes.get(readType), FitnessOptions.ACCESS_READ);
         }
         for (String readWriteType : authReadWriteTypes) {
+			builder.addDataType(datatypes.get(readWriteType), FitnessOptions.ACCESS_READ);
             builder.addDataType(datatypes.get(readWriteType), FitnessOptions.ACCESS_WRITE);
         }
         FitnessOptions options = builder.build();
