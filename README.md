@@ -35,7 +35,8 @@ Phonegap Build `config.xml`:
 <plugin name="cordova-plugin-health" source="npm">
   <variable name="HEALTH_READ_PERMISSION" value="App needs read access"/>
   <variable name="HEALTH_WRITE_PERMISSION" value="App needs write access"/>
-  <variable name="FIT_API_VERSION" value="16.0.1"/>
+  <variable name="PLAY_AUTH_VERSION" value="18.1.0"/>
+  <variable name="FIT_API_VERSION" value="19.0.0"/>
 </plugin>
 
 <!-- Only if iOS -->
