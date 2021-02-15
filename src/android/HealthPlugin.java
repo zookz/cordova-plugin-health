@@ -133,7 +133,7 @@ public class HealthPlugin extends CordovaPlugin {
     public HealthPlugin() {
     }
 
-    // general initalisation
+    // general initialization
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
@@ -384,7 +384,9 @@ public class HealthPlugin extends CordovaPlugin {
             builder.addDataType(datatypes.get(readType), FitnessOptions.ACCESS_READ);
         }
         for (String readWriteType : authReadWriteTypes) {
-			builder.addDataType(datatypes.get(readWriteType), FitnessOptions.ACCESS_READ);
+            // read must be explicitly added if we want to read other apps data too
+            // see: https://developers.google.com/fit/improvements#what_do_you_need_to_do
+            builder.addDataType(datatypes.get(readWriteType), FitnessOptions.ACCESS_READ);
             builder.addDataType(datatypes.get(readWriteType), FitnessOptions.ACCESS_WRITE);
         }
         FitnessOptions options = builder.build();
