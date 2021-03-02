@@ -299,6 +299,7 @@ navigator.health.query({
 #### iOS quirks
 
 - Limit is set to 1000 by default.
+- Limit is not currently supported in workouts.
 - Datapoints are ordered in an descending fashion (from newer to older). You can revert this behaviour by adding `ascending: true` to your query object.
 - HealthKit does not calculate active and basal calories - these must be inputted from an app
 - HealthKit does not detect specific activities - these must be inputted from an app
