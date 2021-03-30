@@ -13,8 +13,7 @@ If you have any question or small issue, please use the [gitter channel](https:/
 
 ## Warning
 
-Google discourages from using Google Fit for medical apps.
-See the [official terms](https://developers.google.com/fit/terms).
+Google is rolling out a new, stricter, policy for using their Fitness API. Read about it [here](https://developers.google.com/fit/policy).
 
 ## Installation
 
