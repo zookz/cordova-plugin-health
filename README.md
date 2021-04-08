@@ -77,13 +77,13 @@ This is known to happen when using the Ionic Package cloud service.
 ## Android requirements
 
 * You need to have the Google Services API downloaded in your SDK.
-* Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-api-key) and [this](https://github.com/2dvisio/cordova-plugin-googlefit#sdk-requirements-for-compiling-the-plugin).
+* Be sure to give your app access to the Google Fitness API, see [this](https://developers.google.com/fit/android/get-api-key).
 * If you are wondering what key your compiled app is using, you can type `keytool -list -printcert -jarfile yourapp.apk`.
-* If you haven't configured the APIs correctly, particularly the OAuth requirements, you are likely to get 'User cancelled the dialog' as an error message, particularly this can happen if you mismatch the signing certificate and SHA-1 fingerprint.
+* If you haven't configured the APIs correctly, particularly the OAuth requirements, you are likely to get 'User cancelled the dialog' as an error message. This often happens if you mismatch the signing certificate and SHA-1 fingerprint.
 * You can use the Google Fitness API even if the user doesn't have Google Fit installed, but there has to be some other fitness app putting data into the Fitness API otherwise your queries will always be empty. See the [the original documentation](https://developers.google.com/fit/overview).
-* If you are planning to use [health data types](https://developers.google.com/android/reference/com/google/android/gms/fitness/data/HealthDataTypes) in Google Fit, be aware that you are always able to read them, but if you want write access [you need to ask permission to Google](https://developers.google.com/fit/android/data-types#restricted_data_types)
-* You can change which Google Play Services Fitness API version this plugin uses by setting the `FIT_API_VERSION` variable in `config.xml` and the version of the Auth API using `PLAY_AUTH_VERSION`. By default it will use version `19.0.0` for play-services-fitness and version `18.1.0` for play-services-auth. From version 15 of the Play Services [you don't have to use the same version](https://developers.google.com/android/guides/versioning) accross all your cordova plugins. You can track google services releases [here](https://developers.google.com/android/guides/releases).
-* This plugin supports AndroidX out of the box, you can configure your project to support it if you need to. You will need to [ctivate AndroidX](https://cordova.apache.org/announcements/2020/06/29/cordova-android-9.0.0.html) in the Android platform.
+* Google has launched a [verification process](https://support.google.com/cloud/answer/9110914) for the app. This is needed for all the data types in Google Fit. Check [their guidelines](https://developers.google.com/terms/api-services-user-data-policy).
+* You can change which Google Play Services Fitness API version this plugin uses by setting the `FIT_API_VERSION` variable in `config.xml` and the version of the Auth API using `PLAY_AUTH_VERSION`. By default it will use version `20.0.0` for play-services-fitness and version `19.0.0` for play-services-auth (see [release notes](https://developers.google.com/android/guides/releases#october_19_2020)). From version 15 of the Play Services [you don't have to use the same version](https://developers.google.com/android/guides/versioning) accross all your cordova plugins. You can track google services releases [here](https://developers.google.com/android/guides/releases).
+* This plugin uses AndroidX. You will need to [activate AndroidX](https://cordova.apache.org/announcements/2020/06/29/cordova-android-9.0.0.html) in the Android platform and make sure all other plugins you use are AndroidX compatible.
 
 ## Supported data types
 
@@ -154,7 +154,7 @@ Example values:
 |----------------|-----------------------------------|
 | steps          | 34                                |
 | distance       | 101.2                             |
-| appleExerciseTime | 24                             |
+| appleExerciseTime | 24 <br/>**Notes**: only available on iOS|
 | calories       | 245.3                             |
 | activity       | "walking"<br />**Notes**: recognized activities and their mappings in Google Fit / HealthKit can be found [here](activities_map.md) <br /> the query also returns calories (kcal) and distance (m) |
 | height         | 185.9                             |
@@ -167,12 +167,12 @@ Example values:
 | temperature    | 36.2                              |
 | fat_percentage | 31.2                              |
 | blood_glucose  | { glucose: 5.5, meal: 'breakfast', sleep: 'fully_awake', source: 'capillary_blood' }<br />**Notes**: <br />to convert to mg/dL, multiply by `18.01559` ([The molar mass of glucose is 180.1559](http://www.convertunits.com/molarmass/Glucose))<br />`meal` can be: 'before_meal' (iOS only), 'after_meal' (iOS only), 'fasting', 'breakfast', 'dinner', 'lunch', 'snack', 'unknown', 'before_breakfast', 'before_dinner', 'before_lunch', 'before_snack', 'after_breakfast', 'after_dinner', 'after_lunch', 'after_snack'<br />`sleep` can be: 'fully_awake', 'before_sleep', 'on_waking', 'during_sleep'<br />`source` can be: 'capillary_blood' ,'interstitial_fluid', 'plasma', 'serum', 'tears', whole_blood' |
-| insulin        | { insulin: 2.3, reason: 'bolus' }<br />**Notes**: Insulin is currently only available on iOS<br />`reason` can be 'bolus' or 'basal' |
+| insulin        | { insulin: 2.3, reason: 'bolus' }<br />**Notes**: only available on iOS<br />`reason` can be 'bolus' or 'basal' |
 | blood_pressure | { systolic: 110, diastolic: 70 }  |
-| gender         | "male"                            |
-| date_of_birth  | { day: 3, month: 12, year: 1978 } |
-| mindfulness     | 1800 |
-| nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } }<br />**Note**: the `brand_name` property is only available on iOS |
+| gender         | "male" <br/>**Notes**: only available on iOS |
+| date_of_birth  | { day: 3, month: 12, year: 1978 } <br/>**Notes**: currently only available on iOS |
+| mindfulness     | 1800 <br/>**Notes**: only available on iOS |
+| nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } } <br/>**Note**: the `brand_name` property is only available on iOS |
 | nutrition.X    | 12.4                              |
 
 ## Methods
