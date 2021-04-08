@@ -14,6 +14,7 @@ If you have any question or small issue, please use the [gitter channel](https:/
 ## Warning
 
 Google is rolling out a new, stricter, policy for using their Fitness API. Read about it [here](https://developers.google.com/fit/policy).
+The API has also introduced [new ways for retrieving heart rate and sleep](https://developers.google.com/fit/android/releases#october_19_2020), but these have not been implemented yet in this plugin (help is appreciated!).
 
 ## Installation
 
