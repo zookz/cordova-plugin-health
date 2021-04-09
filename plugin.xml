@@ -91,6 +91,10 @@
       <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
       <!-- Use the following if API target is < 29 -->
       <uses-permission android:name="android.gms.permission.ACTIVITY_RECOGNITION"/>
+      <!-- Use the following if API target is > 30 -->
+      <queries>
+        <package android:name="com.google.android.apps.fitness" />
+      </queries>
     </config-file>
 
     <config-file target="res/xml/config.xml" parent="/*">
