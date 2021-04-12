@@ -31,7 +31,6 @@ Log of changes
 
 * minor bugfix
 
-
 ### v1.1.3
 
 * some bugfixes
@@ -52,3 +51,10 @@ Log of changes
 * BREAKS API: sourceName has been removed from GoogleFit
 * bumped Google Fit API version to 19.0.0
 * fixed bug with water consumption unit in Android
+
+### v2.0.1
+
+* added read scope to write scope in Android
+* added packages queries for Android
+* updated README
+
