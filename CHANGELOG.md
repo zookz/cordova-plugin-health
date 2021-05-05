@@ -58,3 +58,6 @@ Log of changes
 * added packages queries for Android
 * updated README
 
+### v2.0.2
+
+* increased Google APIs to Play: 19.0.0 and Fit: 20.0.0
