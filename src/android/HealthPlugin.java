@@ -85,6 +85,7 @@ public class HealthPlugin extends CordovaPlugin {
     datatypes.put("distance", DataType.TYPE_DISTANCE_DELTA);
     datatypes.put("blood_glucose", HealthDataTypes.TYPE_BLOOD_GLUCOSE);
     datatypes.put("blood_pressure", HealthDataTypes.TYPE_BLOOD_PRESSURE);
+    datatypes.put("sleep", DataType.TYPE_SLEEP_SEGMENT);
   }
 
   // Helper class used for storing nutrients information (name and unit of measurement)
@@ -744,7 +745,11 @@ public class HealthPlugin extends CordovaPlugin {
           }
           obj.put("value", bpobj);
           obj.put("unit", "mmHg");
-        }
+        }  else if (dt.equals(DataType.TYPE_SLEEP_SEGMENT)) {
+          int sleepSegmentType = datapoint.getValue(Field.FIELD_SLEEP_SEGMENT_TYPE).asInt();
+          obj.put("value", sleepSegmentType);
+          obj.put("unit", "sleep_segment_type");
+        } 
         resultset.put(obj);
       }
     }
