@@ -174,6 +174,7 @@ Example values:
 | mindfulness     | 1800 <br/>**Notes**: only available on iOS |
 | nutrition      | { item: "cheese", meal_type: "lunch", brand_name: "McDonald's", nutrients: { nutrition.fat.saturated: 11.5, nutrition.calories: 233.1 } } <br/>**Note**: the `brand_name` property is only available on iOS |
 | nutrition.X    | 12.4                              |
+| sleep       | 'sleep.light' <br />**Notes**: can be sleep, sleep.awake, sleep.outOfBed, sleep.deep, sleep.light, sleep.rem <br/> recognized sleep stages and their mappings in Google Fit / HealthKit can be found [here](activities_map.md) |
 
 ## Methods
 
