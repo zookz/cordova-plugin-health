@@ -99,8 +99,9 @@ This means that, for example, if you try to save "aerobics" in an iOS applicatio
 |	sleep.light	|	SLEEP_LIGHT	|	HKCategoryValueSleepAnalysisAsleep	|
 |	sleep.deep	|	SLEEP_DEEP	|	HKCategoryValueSleepAnalysisAsleep	|
 |	sleep.rem	|	SLEEP_REM	|	HKCategoryValueSleepAnalysisAsleep	|
-|	sleep.inBed	|	SLEEP_AWAKE	|	HKCategoryValueSleepAnalysisInBed	|
-|	sleep.awake	|	SLEEP_AWAKE	|	HKCategoryValueSleepAnalysisAwake	|
+|	sleep.inBed	|	AWAKE	|	HKCategoryValueSleepAnalysisInBed	|
+|	sleep.awake	|	AWAKE	|	HKCategoryValueSleepAnalysisAwake	|
+|	sleep.outOfBed	|	OUT_OF_BED	|	NA	|
 |	snowboarding	|	SNOWBOARDING	|	HKWorkoutActivityTypeSnowboarding	|
 |	snowmobile	|	SNOWMOBILE	|	HKWorkoutActivityTypeSnowSports	|
 |	snowshoeing	|	SNOWSHOEING	|	HKWorkoutActivityTypeSnowSports	|
