@@ -20,11 +20,15 @@
 
     case HKWorkoutActivityTypeCycling:  return @"biking";
 
+    case HKWorkoutActivityTypeHandCycling:  return @"biking.hand";
+
     case HKWorkoutActivityTypeBowling:  return @"bowling";
 
     case HKWorkoutActivityTypeBoxing: return @"boxing";
 
     case HKWorkoutActivityTypeCricket:  return @"cricket";
+
+    case HKWorkoutActivityTypeCooldown: return @"cooldown";
 
     case HKWorkoutActivityTypeCoreTraining:  return @"core_training";
 
@@ -34,13 +38,19 @@
 
     case HKWorkoutActivityTypeDance:  return @"dancing";
 
-    case HKWorkoutActivityTypeDanceInspiredTraining:  return @"dancing";
+    case HKWorkoutActivityTypeCardioDance:  return @"dancing";
+
+    case HKWorkoutActivityTypeSocialDance: return @"dancing.social";
+
+    case HKWorkoutActivityTypeDiscSports: return @"disc_sports";
 
     case HKWorkoutActivityTypeElliptical:  return @"elliptical";
 
     case HKWorkoutActivityTypeFencing:  return @"fencing";
 
     case HKWorkoutActivityTypeFishing:  return @"fishing";
+
+    case HKWorkoutActivityTypeFitnessGaming: return @"fitness_gaming";
 
     case HKWorkoutActivityTypeFlexibility:  return @"flexibility";
 
@@ -78,13 +88,15 @@
 
     case HKWorkoutActivityTypeMindAndBody:  return @"meditation";
 
-    case HKWorkoutActivityTypeMixedMetabolicCardioTraining:  return @"mixed_metabolic_cardio";
+    case HKWorkoutActivityTypeMixedCardio:  return @"mixed_metabolic_cardio";
 
     case HKWorkoutActivityTypeOther:  return @"other";
 
     case HKWorkoutActivityTypePaddleSports:  return @"paddle_sports";
 
     case HKWorkoutActivityTypePlay:  return @"play";
+
+    case HKWorkoutActivityTypePickleball: return @"pickleball";
 
     case HKWorkoutActivityTypePilates:  return @"pilates";
 
@@ -174,9 +186,9 @@
 
   } else if ([which isEqualToString:@"barre"]) { return HKWorkoutActivityTypeBarre;
 
-  }else if ([which isEqualToString:@"biking"]) { return HKWorkoutActivityTypeCycling;
+  } else if ([which isEqualToString:@"biking"]) { return HKWorkoutActivityTypeCycling;
 
-  } else if ([which isEqualToString:@"biking.hand"]) { return HKWorkoutActivityTypeCycling;
+  } else if ([which isEqualToString:@"biking.hand"]) { return HKWorkoutActivityTypeHandCycling;
 
   } else if ([which isEqualToString:@"biking.mountain"]) { return HKWorkoutActivityTypeCycling;
 
@@ -194,19 +206,40 @@
 
   } else if ([which isEqualToString:@"cricket"]) { return HKWorkoutActivityTypeCricket;
 
+  } else if ([which isEqualToString:@"cooldown"]) { if (@available(iOS 14.0, *)) {
+      return HKWorkoutActivityTypeCooldown;
+    }
+
   } else if ([which isEqualToString:@"core_training"]) { return HKWorkoutActivityTypeCoreTraining;
 
-  }else if ([which isEqualToString:@"crossfit"]) { return HKWorkoutActivityTypeCrossTraining;
+  } else if ([which isEqualToString:@"crossfit"]) { return HKWorkoutActivityTypeCrossTraining;
 
   } else if ([which isEqualToString:@"curling"]) { return HKWorkoutActivityTypeCurling;
 
-  } else if ([which isEqualToString:@"dancing"]) { return HKWorkoutActivityTypeDance;
+  } else if ([which isEqualToString:@"dancing"]) {
+    if (@available(iOS 14.0, *)) {
+      return HKWorkoutActivityTypeCardioDance;
+    }
+    return HKWorkoutActivityTypeDance;
 
+  } else if ([which isEqualToString:@"dancing.social"]) {
+    if (@available(iOS 14.0, *)) {
+      return HKWorkoutActivityTypeSocialDance;
+    }
+    return HKWorkoutActivityTypeDance;
+
+  } else if ([which isEqualToString:@"disc_sports"]) { if (@available(iOS 13.0, *)) {
+      return HKWorkoutActivityTypeDiscSports;
+    }
   } else if ([which isEqualToString:@"diving"]) { return HKWorkoutActivityTypeWaterSports;
 
   } else if ([which isEqualToString:@"elliptical"]) { return HKWorkoutActivityTypeElliptical;
 
   } else if ([which isEqualToString:@"fencing"]) { return HKWorkoutActivityTypeFencing;
+
+  } else if ([which isEqualToString:@"fitness_gaming"]) { if (@available(iOS 13.0, *)) {
+      return HKWorkoutActivityTypeFitnessGaming;
+  }
 
   } else if ([which isEqualToString:@"fishing"]) { return HKWorkoutActivityTypeFishing;
 
@@ -254,13 +287,17 @@
 
   } else if ([which isEqualToString:@"martial_arts.mixed"]) { return HKWorkoutActivityTypeMartialArts;
 
-  } else if ([which isEqualToString:@"mixed_metabolic_cardio"]) { return HKWorkoutActivityTypeMixedMetabolicCardioTraining;
+  } else if ([which isEqualToString:@"mixed_metabolic_cardio"]) { return HKWorkoutActivityTypeMixedCardio;
 
   } else if ([which isEqualToString:@"other"]) { return HKWorkoutActivityTypeOther;
 
   } else if ([which isEqualToString:@"paddle_sports"]) { return HKWorkoutActivityTypePaddleSports;
 
   } else if ([which isEqualToString:@"play"]) { return HKWorkoutActivityTypePlay;
+
+  } else if ([which isEqualToString:@"pickleball"]) { if (@available(iOS 14.0, *)) {
+      return HKWorkoutActivityTypePickleball;
+  }
 
   } else if ([which isEqualToString:@"pilates"]) { return HKWorkoutActivityTypePilates;
 
@@ -387,10 +424,10 @@
   } else if ([which isEqualToString:@"wrestling"]) { return HKWorkoutActivityTypeWrestling;
 
   } else if ([which isEqualToString:@"yoga"]) { return HKWorkoutActivityTypeYoga;
-
-  } else {
-    return HKWorkoutActivityTypeOther;
   }
+
+  // When no match is available, return other as the result
+  return HKWorkoutActivityTypeOther;
 }
 
 @end
