@@ -1,3 +1,5 @@
+# Activities mapping
+
 "NA" is automatically converted "other".
 This means that, for example, if you try to save "aerobics" in an iOS application, you will get back "other" when querying.
 
@@ -11,7 +13,7 @@ This means that, for example, if you try to save "aerobics" in an iOS applicatio
 |	basketball	|	BASKETBALL	|	HKWorkoutActivityTypeBasketball	|
 |	biathlon	|	BIATHLON	|	NA	|
 |	biking	|	BIKING	|	HKWorkoutActivityTypeCycling	|
-|	biking.hand	|	BIKING_HAND	|	HKWorkoutActivityTypeCycling	|
+|	biking.hand	|	BIKING_HAND	|	HKWorkoutActivityTypeHandCycling	|
 |	biking.mountain	|	BIKING_MOUNTAIN	|	HKWorkoutActivityTypeCycling	|
 |	biking.road	|	BIKING_ROAD	|	HKWorkoutActivityTypeCycling	|
 |	biking.spinning	|	BIKING_SPINNING	|	HKWorkoutActivityTypeCycling	|
@@ -22,16 +24,20 @@ This means that, for example, if you try to save "aerobics" in an iOS applicatio
 |	calisthenics	|	CALISTHENICS	|	NA	|
 |	circuit_training	|	CIRCUIT_TRAINING	|	NA	|
 |	cricket	|	CRICKET	|	HKWorkoutActivityTypeCricket	|
+| cooldown | NA | HKWorkoutActivityTypeCooldown |
 |	core_training	|	STRENGTH_TRAINING	|	HKWorkoutActivityTypeCoreTraining	|
 |	crossfit	|	CROSSFIT	|	HKWorkoutActivityTypeCrossTraining	|
 |	curling	|	CURLING	|	HKWorkoutActivityTypeCurling	|
-|	dancing	|	DANCING	|	HKWorkoutActivityTypeDance	|
+|	dancing	|	DANCING	|	HKWorkoutActivityTypeCardioDance	|
+| dancing.social | NA |
+| disc_sports | NA | HKWorkoutActivityTypeDiscSports |
 |	diving	|	DIVING	|	HKWorkoutActivityTypeWaterSports	|
-|	elevator	|	ELEVATOR	|	NA	|
+|	elevator	|	ELEVATOR	|	NA | HKWorkoutActivityTypeSocialDance |
 |	elliptical	|	ELLIPTICAL	|	HKWorkoutActivityTypeElliptical	|
 |	ergometer	|	ERGOMETER	|	NA	|
 |	escalator	|	ESCALATOR	|	NA	|
 |	fencing	|	FENCING	|	HKWorkoutActivityTypeFencing	|
+| fitness_gaming | NA | HKWorkoutActivityTypeFitnessGaming |
 |	fishing	|	NA	|	HKWorkoutActivityTypeFishing	|
 | flexibility | GYMNASTICS | HKWorkoutActivityTypeFlexibility |
 |	football.american	|	FOOTBALL_AMERICAN	|	KWorkoutActivityTypeAmericanFootball	|
@@ -63,13 +69,14 @@ This means that, for example, if you try to save "aerobics" in an iOS applicatio
 |	meditation	|	MEDITATION	|	HKWorkoutActivityTypeMindAndBody	|
 |	martial_arts.mixed	|	MIXED_MARTIAL_ARTS	|	HKWorkoutActivityTypeMartialArts	|
 |	on_foot	|	ON_FOOT	|	NA	|
-|	mixed_metabolic_cardio	|	NA	|	HKWorkoutActivityTypeMixedMetabolicCardioTraining	|
+|	mixed_metabolic_cardio	|	NA	|	HKWorkoutActivityTypeMixedCardio	|
 |	other	|	OTHER	|	HKWorkoutActivityTypeOther	|
 |	p90x	|	P90X	|	NA	|
 |	paddle_sports	|	NA	|	HKWorkoutActivityTypePaddleSports	|
 |	paragliding	|	PARAGLIDING	|	NA	|
 |	pilates	|	PILATES	|	HKWorkoutActivityTypePilates	|
 |	play	|	NA	|	HKWorkoutActivityTypePlay	|
+| pickleball | NA | HKWorkoutActivityTypePickleball |
 |	polo	|	POLO	|	NA	|
 |	preparation_and_recovery	|	NA	|	HKWorkoutActivityTypePreparationAndRecovery	|
 |	racquetball	|	RACQUETBALL	|	HKWorkoutActivityTypeRacquetball	|
