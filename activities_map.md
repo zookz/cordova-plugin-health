@@ -29,10 +29,10 @@ This means that, for example, if you try to save "aerobics" in an iOS applicatio
 |	crossfit	|	CROSSFIT	|	HKWorkoutActivityTypeCrossTraining	|
 |	curling	|	CURLING	|	HKWorkoutActivityTypeCurling	|
 |	dancing	|	DANCING	|	HKWorkoutActivityTypeCardioDance	|
-| dancing.social | NA |
+| dancing.social | NA | HKWorkoutActivityTypeSocialDance |
 | disc_sports | NA | HKWorkoutActivityTypeDiscSports |
 |	diving	|	DIVING	|	HKWorkoutActivityTypeWaterSports	|
-|	elevator	|	ELEVATOR	|	NA | HKWorkoutActivityTypeSocialDance |
+|	elevator	|	ELEVATOR	|	NA	|
 |	elliptical	|	ELLIPTICAL	|	HKWorkoutActivityTypeElliptical	|
 |	ergometer	|	ERGOMETER	|	NA	|
 |	escalator	|	ESCALATOR	|	NA	|
@@ -126,6 +126,7 @@ This means that, for example, if you try to save "aerobics" in an iOS applicatio
 |	swimming.pool	|	SWIMMING_OPEN_WATER	|	HKWorkoutActivityTypeSwimming	|
 |	swimming.open_water	|	SWIMMING_POOL	|	HKWorkoutActivityTypeSwimming	|
 |	table_tennis	|	TABLE_TENNIS	|	HKWorkoutActivityTypeTableTennis	|
+| tai_chi | NA | HKWorkoutActivityTypeTaiChi |
 |	team_sports	|	TEAM_SPORTS	|	NA	|
 |	tennis	|	TENNIS	|	HKWorkoutActivityTypeTennis	|
 |	tilting	|	TILTING	|	NA	|

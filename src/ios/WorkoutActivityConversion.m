@@ -142,6 +142,8 @@
 
     case HKWorkoutActivityTypeTableTennis:  return @"table_tennis";
 
+    case HKWorkoutActivityTypeTaiChi: return @"tai_chi";
+
     case HKWorkoutActivityTypeTennis:  return @"tennis";
 
     case HKWorkoutActivityTypeTrackAndField:  return @"track_and_field";
@@ -380,6 +382,8 @@
   } else if ([which isEqualToString:@"swimming.open_water"]) { return HKWorkoutActivityTypeSwimming;
 
   } else if ([which isEqualToString:@"table_tennis"]) { return HKWorkoutActivityTypeTableTennis;
+
+  } else if ([which isEqualToString:@"tai_chi"]) { return HKWorkoutActivityTypeTaiChi;
 
   } else if ([which isEqualToString:@"tennis"]) { return HKWorkoutActivityTypeTennis;
 
