@@ -727,7 +727,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                                                                                             quantity:nrOfDistanceUnits
                                                                                             startDate:startDate
                                                                                                 endDate:endDate];
-                        } else {      
+                        } else {
                             sampleActivity = [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:
                                             HKQuantityTypeIdentifierDistanceWalkingRunning]
                                                                                             quantity:nrOfDistanceUnits
@@ -817,10 +817,9 @@ static NSString *const HKPluginKeyUUID = @"UUID";
                         double miles = [workout.totalDistance doubleValueForUnit:[HKUnit meterUnit]];
                         NSString *milesString = [NSString stringWithFormat:@"%ld", (long) miles];
 
-                        NSEnergyFormatter *energyFormatter = [NSEnergyFormatter new];
-                        energyFormatter.forFoodEnergyUse = NO;
+                        // Parse totalEnergyBurned in kilocalories
                         double cals = [workout.totalEnergyBurned doubleValueForUnit:[HKUnit kilocalorieUnit]];
-                        NSString *calories = [energyFormatter stringFromValue:cals unit:[HKUnit kilocalorieUnit]];
+                        NSString *calories = [[NSNumber numberWithDouble:cals] stringValue];
 
                         NSMutableDictionary *entry = [
                                 @{
@@ -1515,7 +1514,7 @@ static NSString *const HKPluginKeyUUID = @"UUID";
 
     // NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
     NSPredicate *predicate = nil;
-    
+
     BOOL filtered = (args[@"filtered"] != nil && [args[@"filtered"] boolValue]);
     if (filtered) {
         predicate = [NSPredicate predicateWithFormat:@"metadata.%K != YES", HKMetadataKeyWasUserEntered];

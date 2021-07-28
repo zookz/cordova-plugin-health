@@ -231,8 +231,8 @@ Health.prototype.query = function (opts, onSuccess, onError) {
         if ((res.startDate >= opts.startDate) && (res.endDate <= opts.endDate)) {
           res.value = data[i].activityType;
           res.unit = 'activityType';
-          if (data[i].energy) res.calories = parseInt(data[i].energy.slice(0, -2)); // remove the ending J
-          if (data[i].distance)  res.distance = parseInt(data[i].distance);
+          if (data[i].energy) res.calories = parseInt(data[i].energy);
+          if (data[i].distance) res.distance = parseInt(data[i].distance);
           res.sourceName = data[i].sourceName;
           res.sourceBundleId = data[i].sourceBundleId;
           result.push(res);
