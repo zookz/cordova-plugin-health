@@ -22,6 +22,7 @@ import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.data.HealthDataTypes;
 import com.google.android.gms.fitness.data.HealthFields;
+import com.google.android.gms.fitness.data.SleepStages;
 import com.google.android.gms.fitness.data.Value;
 import com.google.android.gms.fitness.request.DataDeleteRequest;
 import com.google.android.gms.fitness.request.DataReadRequest;
@@ -85,6 +86,7 @@ public class HealthPlugin extends CordovaPlugin {
     datatypes.put("distance", DataType.TYPE_DISTANCE_DELTA);
     datatypes.put("blood_glucose", HealthDataTypes.TYPE_BLOOD_GLUCOSE);
     datatypes.put("blood_pressure", HealthDataTypes.TYPE_BLOOD_PRESSURE);
+    datatypes.put("sleep", DataType.TYPE_SLEEP_SEGMENT);
   }
 
   // Helper class used for storing nutrients information (name and unit of measurement)
@@ -744,6 +746,30 @@ public class HealthPlugin extends CordovaPlugin {
           }
           obj.put("value", bpobj);
           obj.put("unit", "mmHg");
+        }  else if (dt.equals(DataType.TYPE_SLEEP_SEGMENT)) {
+          String sleepSegmentType = "";
+          switch (datapoint.getValue(Field.FIELD_SLEEP_SEGMENT_TYPE).asInt()) {
+            case SleepStages.AWAKE:
+              sleepSegmentType = "sleep.awake";
+              break;
+            case SleepStages.SLEEP:
+              sleepSegmentType = "sleep";
+              break;
+            case SleepStages.OUT_OF_BED:
+              sleepSegmentType = "sleep.outOfBed";
+              break;
+            case SleepStages.SLEEP_LIGHT:
+              sleepSegmentType = "sleep.light";
+              break;
+            case SleepStages.SLEEP_DEEP:
+              sleepSegmentType = "sleep.deep";
+              break;
+            case SleepStages.SLEEP_REM:
+              sleepSegmentType = "sleep.rem";
+              break;
+          }
+          obj.put("value", sleepSegmentType);
+          obj.put("unit", "sleepSegmentType");
         }
         resultset.put(obj);
       }
