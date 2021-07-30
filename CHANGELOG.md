@@ -61,3 +61,11 @@ Log of changes
 ### v2.0.2
 
 * increased Google APIs to Play: 19.0.0 and Fit: 20.0.0
+
+
+### v2.0.3
+
+* added separate sleep data from Google Fit
+* updated activity types in iOS (removed depecrated ones and added new ones)
+* fixed energy in activity when > 1000 Kcal
+
