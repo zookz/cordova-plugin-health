@@ -84,6 +84,7 @@ public class HealthPlugin extends CordovaPlugin {
     datatypes.put("heart_rate", DataType.TYPE_HEART_RATE_BPM);
     datatypes.put("fat_percentage", DataType.TYPE_BODY_FAT_PERCENTAGE);
     datatypes.put("distance", DataType.TYPE_DISTANCE_DELTA);
+    datatypes.put("oxygen_saturation", HealthDataTypes.TYPE_OXYGEN_SATURATION);
     datatypes.put("blood_glucose", HealthDataTypes.TYPE_BLOOD_GLUCOSE);
     datatypes.put("blood_pressure", HealthDataTypes.TYPE_BLOOD_PRESSURE);
     datatypes.put("sleep", DataType.TYPE_SLEEP_SEGMENT);
@@ -653,7 +654,11 @@ public class HealthPlugin extends CordovaPlugin {
           }
           obj.put("distance", totaldistance);
           obj.put("calories", totalcalories);
-        } else if (dt.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
+        }  else if (dt.equals(HealthDataTypes.TYPE_OXYGEN_SATURATION)) {
+          float oxysat = datapoint.getValue(HealthFields.FIELD_OXYGEN_SATURATION).asActivity();
+          obj.put("value", oxysat);
+          obj.put("unit", "%");
+        }  else if (dt.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
           JSONObject glucob = new JSONObject();
           float glucose = datapoint.getValue(HealthFields.FIELD_BLOOD_GLUCOSE_LEVEL).asFloat();
           glucob.put("glucose", glucose);
