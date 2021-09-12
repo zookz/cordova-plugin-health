@@ -655,7 +655,7 @@ public class HealthPlugin extends CordovaPlugin {
           obj.put("distance", totaldistance);
           obj.put("calories", totalcalories);
         }  else if (dt.equals(HealthDataTypes.TYPE_OXYGEN_SATURATION)) {
-          float oxysat = datapoint.getValue(HealthFields.FIELD_OXYGEN_SATURATION).asActivity();
+          float oxysat = datapoint.getValue(HealthFields.FIELD_OXYGEN_SATURATION).asFloat();
           obj.put("value", oxysat);
           obj.put("unit", "%");
         }  else if (dt.equals(HealthDataTypes.TYPE_BLOOD_GLUCOSE)) {
