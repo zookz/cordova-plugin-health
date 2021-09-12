@@ -44,6 +44,7 @@ dataTypes['insulin'] = 'HKQuantityTypeIdentifierInsulinDelivery';
 dataTypes['appleExerciseTime'] = 'HKQuantityTypeIdentifierAppleExerciseTime';
 dataTypes['blood_pressure'] = 'HKCorrelationTypeIdentifierBloodPressure'; // when requesting auth it's HKQuantityTypeIdentifierBloodPressureSystolic and HKQuantityTypeIdentifierBloodPressureDiastolic
 dataTypes['resp_rate'] = 'HKQuantityTypeIdentifierRespiratoryRate';
+dataTypes['oxygen_saturation'] = 'HKQuantityTypeIdentifierOxygenSaturation';
 dataTypes['vo2max'] = 'HKQuantityTypeIdentifierVO2Max';
 dataTypes['temperature'] = 'HKQuantityTypeIdentifierBodyTemperature';
 
@@ -84,6 +85,7 @@ units['insulin'] = 'IU';
 units['appleExerciseTime'] = 'min';
 units['blood_pressure'] = 'mmHg';
 units['resp_rate'] = 'count/min';
+units['oxygen_saturation'] = '%';
 units['vo2max'] = 'ml/(kg*min)';
 units['temperature'] = 'degC';
 

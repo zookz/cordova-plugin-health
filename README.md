@@ -105,6 +105,7 @@ As HealthKit does not allow adding custom data types, only a subset of data type
 | heart_rate.resting | count/min | HKQuantityTypeIdentifierRestingHearRate | TBD                      |
 | heart_rate.variability      | ms | HKQuantityTypeIdentifierHeartRateVariabilitySDNN         | NA                   |
 | resp_rate       | count/min | HKQuantityTypeIdentifierRespiratoryRate   | TBD                      |
+| oxygen_saturation | %       | HKQuantityTypeIdentifierOxygenSaturation  | TYPE_OXYGEN_SATURATION                   |
 | vo2max          | ml/(kg * min) | HKQuantityTypeIdentifierVO2Max   | TBD                      |
 | temperature     | Celsius | HKQuantityTypeIdentifierBodyTemperature       | TBD                      |
 | fat_percentage  | %     | HKQuantityTypeIdentifierBodyFatPercentage     | TYPE_BODY_FAT_PERCENTAGE                 |
