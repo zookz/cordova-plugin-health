@@ -171,30 +171,44 @@ Health.prototype.delete = function (data, onSuccess, onError) {
 };
 
 Health.prototype.toFitActivity = function (act) {
-  if (act === 'core_training') return 'strength_training';
-  if (act === 'flexibility') return 'gymnastics';
-  if (act === 'stairs') return 'stair_climbing';
-  if (act === 'wheelchair.walkpace') return 'wheelchair';
-  if (act === 'wheelchair.runpace') return 'wheelchair';
-  if (act === 'sleep.inBed') return 'sleep.awake';
-  // unsupported activities are mapped to 'other'
-  if ((act === 'archery') ||
-  (act === 'barre') ||
-  (act === 'bowling') ||
-  (act === 'fishing') ||
-  (act === 'functional_strength') ||
-  (act === 'hunting') ||
-  (act === 'lacrosse') ||
-  (act === 'mixed_metabolic_cardio') ||
-  (act === 'paddle_sports') ||
-  (act === 'play') ||
-  (act === 'preparation_and_recovery') ||
-  (act === 'snow_sports') ||
-  (act === 'softball') ||
-  (act === 'water_fitness') ||
-  (act === 'water_sports') ||
-  (act === 'wrestling')) return 'other';
-  else return act;
+	const acts = {
+		supported:{
+			core_training: 'strength_training',
+			flexibility: 'gymnastics',
+			stairs: 'stair_climbing',
+			'wheelchair.walkpace': 'wheelchair',
+			'wheelchair.runpace': 'wheelchair',
+			'sleep.inBed': 'sleep.awake'
+		},
+		unsupported:{
+			archery: 1,
+			barre: 1,
+			bowling: 1,
+			fishing: 1,
+			functional_strength: 1,
+			hunting: 1,
+			lacrosse: 1,
+			mixed_metabolic_cardio: 1,
+			paddle_sports: 1,
+			play: 1,
+			preparation_and_recovery: 1,
+			snow_sports: 1,
+			softball: 1,
+			water_fitness: 1,
+			water_sports: 1,
+			wrestling: 1
+		}
+	};
+	var activity = acts.supported[act];
+	if(!activity){
+		activity = acts.unsupported[act];
+		if(activity){
+			activity = 'other'
+		}else{
+			activity = act
+		}
+	}
+	return activity
 };
 
 cordova.addConstructor(function () {
